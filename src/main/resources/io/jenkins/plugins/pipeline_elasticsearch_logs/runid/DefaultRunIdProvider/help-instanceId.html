@@ -1,0 +1,16 @@
+<div>
+  A unique string to identify your Jenkins instance.<br/>
+  Leave empty to use the internal Jenkins instance ID (recommended). <br/>
+  When you change this after you executed first builds, the logs of builds executed before the change will no longer by found.<br/>
+  <br/>
+  The instance ID is stored in Elasticsearch entries as <code>runId.instance</code>. Here you find a full example:<br/>
+<pre>
+"runId": {
+  "instance": "jenkins1",
+  "project":  "TestPipeline",
+  "build":    7,
+  "uid:       "OGQyY2Q1YjMtOGE2Zi00NDYzLTkwYm_5"
+}
+</pre> 
+  
+</div>

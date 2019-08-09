@@ -1,0 +1,19 @@
+<div>
+<p>A <b>Run ID provider</b> provides the JSON object which identifies a single run. In Elasticsearch each entry has this object assigned as <code>runId</code>.</p>
+	
+<p>The <b>Default</b> provider generates an object containing the project name, build number, Jenkins instance ID and a UID identifying the run uniquely.</p>
+
+<p>Example:
+<pre>
+"runId": {
+  "instance": "jenkins1",
+  "project":  "TestPipeline",
+  "build":    7,
+  "uid:       "OGQyY2Q1YjMtOGE2Zi00NDYzLTkwYm_5"
+}
+</pre> 
+</p>
+
+<p>The <b>JSON</b> provider generates the object based on a JSON template. This template can either be defined directly or a JSON file can be referenced.</p>
+
+</div>

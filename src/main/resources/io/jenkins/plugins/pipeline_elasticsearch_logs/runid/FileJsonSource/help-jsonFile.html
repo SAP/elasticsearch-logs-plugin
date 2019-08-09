@@ -1,0 +1,31 @@
+<div>
+	<p>The <b>JSON</b> Run ID provider generates the Run ID for each run based on the JSON template defined in the file with the absolute path defined here.</p>
+
+	<p>You can use <code>$variable</code> or <code>${variable}</code> for string values. Those values will be replaced by the corresponding environment variable if it exists. It is also possible to use pipeline/job parameters.</p>
+
+	<p>Most common variables are:
+		<ul>
+			<li>JOB_NAME <i>(Jenkins native)</i></li>
+			<li>BUILD_NUMBER <i>(Jenkins native)</i></li>
+			<li>JENKINS_INSTANCE_ID<sup>1</sup> <i>(injected by the plugin)</i></li>
+			<li>RUN_UID<sup>2</sup> <i>(injected by the plugin)</i></li>
+		</ul>
+	</p>
+	<sup>1) the base64 encoded Jenkins </sup><a href="https://wiki.jenkins.io/display/JENKINS/Instance+Identity" target="_blank"><sup>Instance Identity</sup></a><br/>
+	<sup>2) the </sup><a href="https://plugins.jenkins.io/unique-id" target="_blank"><sup>Unique Id Plugin</sup></a><sup> is used to generate this ID</sup>
+
+	<p>An example JSON string could look like this:
+<pre>
+{
+    "jenkins-instance": "${JENKINS_INSTANCE_ID}",
+    "buildinfo": {
+        "project": "${JOB_NAME}",
+        "buildnumber": "${BUILD_NUMBER}"
+    },
+    "branch": "$JOB_PARAMETER_BRANCH_NAME",
+    "uid": "${RUN_UID}"
+}
+</pre> 
+    </p>	
+
+</div>
