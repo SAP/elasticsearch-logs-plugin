@@ -16,7 +16,7 @@ This is an [implementation of JEP-210](https://github.com/jenkinsci/jep/blob/mas
 
 ### Download and Installation
 
-In your Jenkins go to **Manage Jenkins � Manage Plugins � Available** check **Pipeline Logging via Elastic Search** and press **Install without restart**
+In your Jenkins go to **Manage Jenkins > Manage Plugins > Available** check **Pipeline Logging via Elastic Search** and press **Install without restart**
 
 ### Configuration
 
