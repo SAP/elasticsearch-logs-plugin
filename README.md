@@ -20,7 +20,7 @@ In your Jenkins go to **Manage Jenkins > Manage Plugins > Available** check **Pi
 
 ### Configuration
 
-tbd.
+Go to **Manage Jenkins > System Configuration > Logging to Elasticsearch for Pipelines** and select **Enable**.
 
 ### Limitations
 
@@ -30,11 +30,11 @@ The initial scope of this plugin was to use it it in a [JenkinsFileRunner](https
 
 ### Known Issues
 
-tbd.
+None
 
 ### How to obtain support
 
-open an issue in [Github](https://github.com/sap/pipeline-elasticsearch-logs-plugin/issues)
+Open an issue in [Github](https://github.com/sap/pipeline-elasticsearch-logs-plugin/issues)
 
 ### Contributing
 
@@ -42,15 +42,11 @@ Please open a Pull Request in our [Github](https://github.com/sap/pipeline-elast
 
 ### To-Do (upcoming changes)
 
-- Provide a JenkinsFileRunner mode option 
-  - enabled will send additional events when nodes are started or updated to allow dynamic display of pipeline status outside of Jenkins
-  - disabled will store the annotations next to events
 - Implement a reader from Elastic Search
 - Improve http connection handling
-- Implement a GraphListener to send start and end events
 
 ### License
 
-Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
+Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.   
 This file is licensed under the "Apache Software License, v. 2" except as noted otherwise in the LICENSE file.
 
