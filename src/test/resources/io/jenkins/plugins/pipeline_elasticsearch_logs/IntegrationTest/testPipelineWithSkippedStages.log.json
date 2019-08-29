@@ -1,0 +1,1206 @@
+[
+    {
+    "eventType": "buildStart",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "Started by user SYSTEM",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "Running in Durability level: MAX_SURVIVABILITY",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] Start of Pipeline",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::flowStart",
+    "flowNodeId": "2",
+    "displayName": "Start of Pipeline",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] node",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::nodeStart",
+    "step": "node",
+    "flowNodeId": "3",
+    "predecessors": ["2"],
+    "displayName": "Allocate node : Start",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "nodeMessage",
+    "step": "node",
+    "flowNodeId": "3",
+    "message": "/Running on Jenkins in .*/",
+    "displayName": "Allocate node : Start",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] {",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::nodeStart",
+    "step": "node",
+    "flowNodeId": "4",
+    "predecessors": ["3"],
+    "displayName": "Allocate node : Body : Start",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] stage",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::nodeStart",
+    "step": "stage",
+    "flowNodeId": "5",
+    "predecessors": ["4"],
+    "displayName": "Stage : Start",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] { (S1)",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::nodeStart",
+    "step": "stage",
+    "flowNodeId": "6",
+    "predecessors": ["5"],
+    "displayName": "S1",
+    "stageId": "6",
+    "stageName": "S1",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] withCredentials",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::nodeStart",
+    "step": "withCredentials",
+    "flowNodeId": "7",
+    "predecessors": ["6"],
+    "displayName": "Bind credentials to variables : Start",
+    "stageId": "6",
+    "stageName": "S1",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] // withCredentials",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] }",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::nodeEnd",
+    "step": "withCredentials",
+    "flowNodeId": "8",
+    "startId": "7",
+    "predecessors": ["7"],
+    "displayName": "Bind credentials to variables : End",
+    "result": "FAILURE",
+    "errorMessage": "doesNotExist",
+    "stageId": "6",
+    "stageName": "S1",
+    "duration": "/.*/",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] // stage",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::nodeEnd",
+    "step": "stage",
+    "flowNodeId": "9",
+    "startId": "6",
+    "predecessors": ["8"],
+    "displayName": "Stage : Body : End",
+    "result": "FAILURE",
+    "errorMessage": "doesNotExist",
+    "duration": "/.*/",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] stage",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::nodeEnd",
+    "step": "stage",
+    "flowNodeId": "10",
+    "startId": "5",
+    "predecessors": ["9"],
+    "displayName": "Stage : End",
+    "result": "FAILURE",
+    "errorMessage": "doesNotExist",
+    "duration": "/.*/",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::nodeStart",
+    "step": "stage",
+    "flowNodeId": "11",
+    "predecessors": ["10"],
+    "displayName": "Stage : Start",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] { (S2)",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::nodeStart",
+    "step": "stage",
+    "flowNodeId": "12",
+    "predecessors": ["11"],
+    "displayName": "S2",
+    "stageId": "12",
+    "stageName": "S2",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "Stage \"S2\" skipped due to earlier failure(s)",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] }",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] // stage",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::nodeEnd",
+    "step": "stage",
+    "flowNodeId": "13",
+    "startId": "12",
+    "predecessors": ["12"],
+    "displayName": "Stage : Body : End",
+    "result": "FAILURE",
+    "errorMessage": "doesNotExist",
+    "duration": "/.*/",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] stage",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::nodeEnd",
+    "step": "stage",
+    "flowNodeId": "14",
+    "startId": "11",
+    "predecessors": ["13"],
+    "displayName": "Stage : End",
+    "result": "FAILURE",
+    "errorMessage": "doesNotExist",
+    "duration": "/.*/",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::nodeStart",
+    "step": "stage",
+    "flowNodeId": "15",
+    "predecessors": ["14"],
+    "displayName": "Stage : Start",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] { (S3)",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::nodeStart",
+    "step": "stage",
+    "flowNodeId": "16",
+    "predecessors": ["15"],
+    "displayName": "S3",
+    "stageId": "16",
+    "stageName": "S3",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "Stage \"S3\" skipped due to earlier failure(s)",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] }",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] // stage",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::nodeEnd",
+    "step": "stage",
+    "flowNodeId": "17",
+    "startId": "16",
+    "predecessors": ["16"],
+    "displayName": "Stage : Body : End",
+    "result": "FAILURE",
+    "errorMessage": "doesNotExist",
+    "duration": "/.*/",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] }",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::nodeEnd",
+    "step": "stage",
+    "flowNodeId": "18",
+    "startId": "15",
+    "predecessors": ["17"],
+    "displayName": "Stage : End",
+    "result": "FAILURE",
+    "errorMessage": "doesNotExist",
+    "duration": "/.*/",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] // node",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::nodeEnd",
+    "step": "node",
+    "flowNodeId": "19",
+    "startId": "4",
+    "predecessors": ["18"],
+    "displayName": "Allocate node : Body : End",
+    "result": "FAILURE",
+    "errorMessage": "doesNotExist",
+    "duration": "/.*/",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] End of Pipeline",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::nodeEnd",
+    "step": "node",
+    "flowNodeId": "20",
+    "startId": "3",
+    "predecessors": ["19"],
+    "displayName": "Allocate node : End",
+    "result": "FAILURE",
+    "errorMessage": "doesNotExist",
+    "duration": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "flowGraph::flowEnd",
+    "flowNodeId": "21",
+    "startId": "2",
+    "predecessors": ["20"],
+    "displayName": "End of Pipeline",
+    "result": "FAILURE",
+    "errorMessage": "doesNotExist",
+    "duration": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "org.jenkinsci.plugins.credentialsbinding.impl.CredentialNotFoundException: doesNotExist",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "Finished: FAILURE",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildEnd",
+    "result": "FAILURE",
+    "duration": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  }
+]
