@@ -57,7 +57,7 @@ public class ElasticSearchRunConfiguration implements Serializable
   private final boolean saveAnnotations;
 
   private final String uid;
-  private Supplier<ElasticSearchWriter> writerFactory;
+  private transient Supplier<ElasticSearchWriter> writerFactory;
 
   private final String runIdJsonString;
 
