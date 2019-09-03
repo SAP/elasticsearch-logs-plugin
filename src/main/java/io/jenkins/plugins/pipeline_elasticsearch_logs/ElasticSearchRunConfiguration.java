@@ -1,5 +1,9 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
+import net.sf.json.JSONObject;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Serializable;
@@ -14,13 +18,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
-
-import net.sf.json.JSONObject;
 
 /**
  * A serializable representation of the plugin configuration with credentials resolved.
@@ -51,17 +51,18 @@ public class ElasticSearchRunConfiguration implements Serializable
   private final byte[] keyStoreBytes;
 
   private final URI uri;
-  
+
   private transient KeyStore trustKeyStore;
-  
+
   private final boolean saveAnnotations;
-  
+
   private final String uid;
+  private Supplier<ElasticSearchWriter> writerFactory;
 
   private final String runIdJsonString;
 
   public ElasticSearchRunConfiguration(URI uri, String username, String password,
-        byte[] keyStoreBytes, boolean saveAnnotations, String uid, JSONObject runId)
+        byte[] keyStoreBytes, boolean saveAnnotations, String uid, JSONObject runId, Supplier<ElasticSearchWriter> writerFactory)
   {
     super();
     this.uri = uri;
@@ -69,6 +70,7 @@ public class ElasticSearchRunConfiguration implements Serializable
     this.password = password;
     this.runIdJsonString = runId.toString();
     this.uid = uid;
+    this.writerFactory = writerFactory;
     if (keyStoreBytes != null)
     {
       this.keyStoreBytes = keyStoreBytes.clone();
@@ -116,7 +118,7 @@ public class ElasticSearchRunConfiguration implements Serializable
     }
     return trustKeyStore;
   }
-  
+
   public Map<String, Object> createData()
   {
     Map<String, Object> data = new LinkedHashMap<>();
@@ -128,4 +130,15 @@ public class ElasticSearchRunConfiguration implements Serializable
     return data;
   }
 
+  public ElasticSearchWriter createWriter() {
+    if (writerFactory != null) {
+      return writerFactory.get();
+    } else {
+      ElasticSearchWriter writer = new ElasticSearchWriter(getUri(), getUsername(), getPassword());
+      if (getTrustKeyStore() != null) {
+        writer.setTrustKeyStore(getTrustKeyStore());
+      }
+      return writer;
+    }
+  }
 }

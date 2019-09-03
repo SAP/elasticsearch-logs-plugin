@@ -1,10 +1,11 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import hudson.Extension;
+import hudson.ExtensionList;
+import hudson.console.AnnotatedLargeText;
+import hudson.model.BuildListener;
+import hudson.model.Queue;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner;
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionOwner.Executable;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
@@ -14,12 +15,10 @@ import org.jenkinsci.plugins.workflow.log.LogStorage;
 import org.jenkinsci.plugins.workflow.log.LogStorageFactory;
 import org.kohsuke.stapler.framework.io.ByteBuffer;
 
-import hudson.Extension;
-import hudson.ExtensionList;
-import hudson.console.AnnotatedLargeText;
-import hudson.model.BuildListener;
-import hudson.model.Queue;
-import hudson.model.TaskListener;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Extension
 public class ElasticSearchLogStorageFactory implements LogStorageFactory
@@ -55,7 +54,7 @@ public class ElasticSearchLogStorageFactory implements LogStorageFactory
       return new BrokenLogStorage(x);
     }
   }
-  
+
   static ElasticSearchLogStorageFactory get()
   {
     return ExtensionList.lookupSingleton(ElasticSearchLogStorageFactory.class);
@@ -64,17 +63,16 @@ public class ElasticSearchLogStorageFactory implements LogStorageFactory
   private static class ElasticSearchLogStorage implements LogStorage
   {
     private ElasticSearchRunConfiguration config;
-    
+
     ElasticSearchLogStorage(ElasticSearchRunConfiguration config)
     {
       this.config = config;
     }
-    
+
     @Override
     public BuildListener overallListener() throws IOException, InterruptedException
     {
-      ElasticSearchSender sender = new ElasticSearchSender(null, config);
-      return sender;
+      return new ElasticSearchSender(null, config);
     }
 
     @Override

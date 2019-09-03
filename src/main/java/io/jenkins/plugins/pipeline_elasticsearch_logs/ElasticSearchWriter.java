@@ -1,7 +1,22 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
-import static com.google.common.collect.Ranges.closedOpen;
+import com.google.common.collect.Range;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -17,24 +32,7 @@ import java.security.cert.CertificateException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
-
-import com.google.common.collect.Range;
+import static com.google.common.collect.Ranges.closedOpen;
 
 /**
  * Post data to Elastic Search.
@@ -66,16 +64,6 @@ public class ElasticSearchWriter
     this.uri = uri;
     this.password = password;
     this.username = username;
-  }
-
-  public static ElasticSearchWriter createElasticSearchWriter(ElasticSearchRunConfiguration config) throws IOException
-  {
-    ElasticSearchWriter writer = new ElasticSearchWriter(config.getUri(), config.getUsername(), config.getPassword());
-    if (config.getTrustKeyStore() != null)
-    {
-      writer.setTrustKeyStore(config.getTrustKeyStore());
-    }
-    return writer;
   }
 
   public void setTrustKeyStore(KeyStore trustKeyStore)
@@ -136,7 +124,7 @@ public class ElasticSearchWriter
     }
     return clientBuilder;
   }
-  
+
   @Restricted(NoExternalUse.class)
   String testConnection() throws URISyntaxException, IOException
   {
@@ -147,7 +135,7 @@ public class ElasticSearchWriter
     {
       getRequest.addHeader("Authorization", "Basic " + auth);
     }
-    
+
     try (CloseableHttpClient httpClient = getClientBuilder().build())
     {
       try (CloseableHttpResponse response = httpClient.execute(getRequest))
@@ -163,20 +151,19 @@ public class ElasticSearchWriter
         throw new IOException(e);
       }
     }
-    
+
     return "";
   }
 
   /**
    * Posts the given string to elastic search.
-   * 
+   *
    * @param data
    *          The data to post
    * @throws IOException
    */
   public void push(String data) throws IOException
   {
-
     HttpPost post = getHttpPost(data);
 
     try (CloseableHttpClient httpClient = getClientBuilder().build())

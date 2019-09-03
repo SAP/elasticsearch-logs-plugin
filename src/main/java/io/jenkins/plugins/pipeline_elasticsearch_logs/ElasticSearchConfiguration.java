@@ -1,28 +1,5 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.util.Collections;
-import java.util.List;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
-import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.Symbol;
-import org.jenkinsci.plugins.uniqueid.IdStore;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.QueryParameter;
-
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardCertificateCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
@@ -30,7 +7,6 @@ import com.cloudbees.plugins.credentials.common.StandardUsernameListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.cloudbees.plugins.credentials.matchers.IdMatcher;
-
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
@@ -43,6 +19,28 @@ import hudson.util.Secret;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.DefaultRunIdProvider;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.RunIdProvider;
 import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.Symbol;
+import org.jenkinsci.plugins.uniqueid.IdStore;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Supplier;
 
 public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticSearchConfiguration>
 {
@@ -60,7 +58,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
   private String credentialsId;
 
   private Boolean saveAnnotations = true;
-  
+
   private RunIdProvider runIdProvider;
 
   private String url;
@@ -71,7 +69,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     this.url = url;
     new URI(url);
   }
-  
+
   public RunIdProvider getRunIdProvider()
   {
     return runIdProvider;
@@ -93,7 +91,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     {
       runIdProvider = new DefaultRunIdProvider("");
     }
-    
+
     if (url == null)
     {
       String protocol = "http";
@@ -213,7 +211,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     String scheme = uri.getScheme();
     return "https".equals(scheme);
   }
-  
+
   private byte[] getKeyStoreBytes()
   {
     KeyStore keyStore = getCustomKeyStore();
@@ -262,7 +260,14 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
       throw new IOException(e);
     }
 
-    return new ElasticSearchRunConfiguration(uri, username, password, getKeyStoreBytes(), isSaveAnnotations(), getUniqueRunId(run), getRunIdProvider().getRunId(run));
+    return new ElasticSearchRunConfiguration(uri, username, password, getKeyStoreBytes(), isSaveAnnotations(),
+            getUniqueRunId(run), getRunIdProvider().getRunId(run), getWriterFactory());
+  }
+
+  // Can be overwritten in tests
+  @CheckForNull
+  protected Supplier<ElasticSearchWriter> getWriterFactory() {
+    return null;
   }
 
   public static String getUniqueRunId(Run<?, ?> run)
@@ -276,7 +281,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
      return runId;
   }
-  
+
   @Extension
   @Symbol("elasticsearch")
   public static class DescriptorImpl extends Descriptor<ElasticSearchConfiguration>
@@ -316,7 +321,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         {
           return FormValidation.error("Only http/https are allowed protocols");
         }
-        
+
       }
       catch (MalformedURLException e)
       {
@@ -327,7 +332,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
     public FormValidation doValidateConnection(@QueryParameter(fixEmpty = true) String url, @QueryParameter(fixEmpty = true) String credentialsId, @QueryParameter(fixEmpty = true) String certificateId)
     {
-     
+
       String username = null;
       String password = null;
       if (credentialsId != null)
@@ -349,7 +354,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
           trustStore = certificateCredentials.getKeyStore();
         }
       }
-      
+
       try
       {
         ElasticSearchWriter writer = new ElasticSearchWriter(new URI(url), username, password);

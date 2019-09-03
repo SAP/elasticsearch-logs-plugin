@@ -1,26 +1,20 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
+import hudson.model.Result;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import org.jenkinsci.plugins.workflow.actions.ErrorAction;
+import org.jenkinsci.plugins.workflow.actions.TimingAction;
+import org.jenkinsci.plugins.workflow.actions.WarningAction;
+import org.jenkinsci.plugins.workflow.flow.GraphListener;
+import org.jenkinsci.plugins.workflow.graph.*;
+import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.jenkinsci.plugins.workflow.actions.ErrorAction;
-import org.jenkinsci.plugins.workflow.actions.TimingAction;
-import org.jenkinsci.plugins.workflow.actions.WarningAction;
-import org.jenkinsci.plugins.workflow.flow.GraphListener;
-import org.jenkinsci.plugins.workflow.graph.AtomNode;
-import org.jenkinsci.plugins.workflow.graph.BlockEndNode;
-import org.jenkinsci.plugins.workflow.graph.BlockStartNode;
-import org.jenkinsci.plugins.workflow.graph.FlowEndNode;
-import org.jenkinsci.plugins.workflow.graph.FlowNode;
-import org.jenkinsci.plugins.workflow.graph.FlowStartNode;
-import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
-
-import hudson.model.Result;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 public class ElasticSearchGraphListener implements GraphListener.Synchronous
 {
@@ -55,7 +49,7 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous
 
   public ElasticSearchGraphListener(ElasticSearchRunConfiguration config) throws IOException
   {
-    writer = ElasticSearchWriter.createElasticSearchWriter(config);
+    writer = config.createWriter();
     this.config = config;
   }
 
@@ -76,7 +70,7 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous
           sendNodeEnd((BlockEndNode<?>)parent);
         }
       }
-      
+
       if (node instanceof AtomNode || node instanceof BlockStartNode)
       {
         sendNodeStart(node);
@@ -114,10 +108,10 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous
     {
       return FLOW_GRAPH_NODE_END;
     }
-    
+
     return "unknown";
   }
-  
+
   private void sendAtomNodeEnd(FlowNode node, FlowNode successor) throws IOException
   {
     Map<String, Object> data = createData(node);
@@ -159,10 +153,10 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous
     data.put(EVENT_TYPE, getEventType(node));
     writer.push(JSONObject.fromObject(data).toString());
   }
-  
+
   private long getDuration(FlowNode startNode, FlowNode endNode)
   {
-      return TimingAction.getStartTime(endNode) -  TimingAction.getStartTime(startNode); 
+      return TimingAction.getStartTime(endNode) -  TimingAction.getStartTime(startNode);
   }
 
   private Map<String, Object> createData(FlowNode node) throws IOException
@@ -183,7 +177,7 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous
 
     return data;
   }
-  
+
   private String getErrorMessage(FlowNode node)
   {
     String errorMessage = null;
@@ -194,14 +188,14 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous
     }
     return errorMessage;
   }
-  
+
   private String getStatus(FlowNode node)
   {
     if (node instanceof FlowEndNode)
     {
       return ((FlowEndNode) node).getResult().toString();
     }
-    
+
     ErrorAction error = node.getError();
     WarningAction warning = node.getPersistentAction(WarningAction.class);
     if (error != null)
@@ -222,5 +216,5 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous
 
     return Result.SUCCESS.toString();
   }
-  
+
 }
