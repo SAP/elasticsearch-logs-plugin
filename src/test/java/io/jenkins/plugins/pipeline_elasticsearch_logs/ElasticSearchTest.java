@@ -43,10 +43,7 @@ public class ElasticSearchTest {
         if (Functions.isWindows()) {
             project.getBuildersList().add(new BatchFile("echo 'yes'"));
             FreeStyleBuild build = jenkinsRule.buildAndAssertSuccess(project);
-            assertEquals("Legacy code started this job.  No cause information is available", build.getLog(1000).get(0));
-            assertEquals("", build.getLog(1000).get(3));
-            assertEquals("'yes'", build.getLog(1000).get(5));
-            assertEquals("Finished: SUCCESS", build.getLog(1000).get(8));
+
             assertLogLine(0, "buildStart");
             assertLogLine(1, "buildMessage", "Legacy code started this job.  No cause information is available");
             assertLogLine(4, "buildMessage", "");
