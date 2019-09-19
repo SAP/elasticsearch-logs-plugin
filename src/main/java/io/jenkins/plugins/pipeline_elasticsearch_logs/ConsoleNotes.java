@@ -27,6 +27,8 @@
 
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
+import static java.lang.String.format;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
@@ -38,6 +40,7 @@ import com.google.common.collect.ImmutableMap;
 
 import hudson.console.ConsoleNote;
 import net.sf.json.JSONArray;
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
 /**
@@ -100,17 +103,18 @@ class ConsoleNotes {
         }
     }
 
-    static void write(Writer w, JSONObject json) throws IOException {
-        String message = json.getString(MESSAGE_KEY);
-        JSONArray annotations = json.optJSONArray(ANNOTATIONS_KEY);
-        if (annotations == null) {
+    static void write(Writer w, Map<String, Object> source) throws IOException {
+        if(source == null) throw new NullPointerException("source is null");
+        String message = (String)source.get(MESSAGE_KEY);
+        Object annotations = source.get(ANNOTATIONS_KEY);
+        if (annotations == null || !(annotations instanceof ArrayList)) {
             w.write(message);
         } else {
             int pos = 0;
-            for (Object o : annotations) {
-                JSONObject annotation = (JSONObject) o;
-                int position = annotation.getInt(POSITION_KEY);
-                String note = annotation.getString(NOTE_KEY);
+            for (Object o : (ArrayList<Object>) annotations) {
+                Map<String, Object> annotation = (Map<String, Object>) o;
+                int position = (Integer) annotation.get(POSITION_KEY);
+                String note = (String) annotation.get(NOTE_KEY);
                 w.write(message, pos, position - pos);
                 w.write(ConsoleNote.PREAMBLE_STR);
                 w.write(note);
@@ -119,9 +123,9 @@ class ConsoleNotes {
             }
             w.write(message, pos, message.length() - pos);
         }
-        w.write('\n');
+        w.write('\n');    
     }
 
     private ConsoleNotes() {}
-
+    
 }

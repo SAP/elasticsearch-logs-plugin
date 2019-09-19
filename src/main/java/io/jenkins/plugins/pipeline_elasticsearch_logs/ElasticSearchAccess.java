@@ -23,6 +23,8 @@ import javax.annotation.Nonnull;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -31,6 +33,10 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicHeader;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
@@ -40,9 +46,9 @@ import com.google.common.collect.Range;
  * Post data to Elastic Search.
  *
  */
-public class ElasticSearchWriter
+public class ElasticSearchAccess
 {
-  private static final Logger LOGGER = Logger.getLogger(ElasticSearchWriter.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(ElasticSearchAccess.class.getName());
 
   private static final Range<Integer> SUCCESS_CODES = closedOpen(200, 300);
 
@@ -61,16 +67,16 @@ public class ElasticSearchWriter
   @CheckForNull
   private transient HttpClientBuilder clientBuilder;
 
-  public ElasticSearchWriter(URI uri, String username, String password)
+  public ElasticSearchAccess(URI uri, String username, String password)
   {
     this.uri = uri;
     this.password = password;
     this.username = username;
   }
 
-  public static ElasticSearchWriter createElasticSearchWriter(ElasticSearchRunConfiguration config) throws IOException
+  public static ElasticSearchAccess createElasticSearchAccess(ElasticSearchRunConfiguration config) throws IOException
   {
-    ElasticSearchWriter writer = new ElasticSearchWriter(config.getUri(), config.getUsername(), config.getPassword());
+    ElasticSearchAccess writer = new ElasticSearchAccess(config.getUri(), config.getUsername(), config.getPassword());
     if (config.getTrustKeyStore() != null)
     {
       writer.setTrustKeyStore(config.getTrustKeyStore());
@@ -107,6 +113,12 @@ public class ElasticSearchWriter
       postRequest.addHeader("Authorization", "Basic " + auth);
     }
     return postRequest;
+  }  
+
+  public RestHighLevelClient createNewRestClient() {
+      RestClientBuilder builder = RestClient.builder(new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme()));
+      if(getAuth() != null) builder.setDefaultHeaders(new Header[] {new BasicHeader("Authorization", "Basic " + getAuth())});
+      return new RestHighLevelClient(builder);
   }
 
   @Nonnull
@@ -114,7 +126,6 @@ public class ElasticSearchWriter
   {
     if (clientBuilder == null)
     {
-
       clientBuilder = HttpClientBuilder.create();
       RequestConfig.Builder requestBuilder = RequestConfig.custom();
       requestBuilder.setConnectTimeout(2000);
@@ -233,4 +244,5 @@ public class ElasticSearchWriter
       }
     }
   }
+
 }

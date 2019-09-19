@@ -50,12 +50,12 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous
 
   private static final Logger LOGGER = Logger.getLogger(ElasticSearchGraphListener.class.getName());
 
-  private final ElasticSearchWriter writer;
+  private final ElasticSearchAccess writer;
   private final ElasticSearchRunConfiguration config;
 
   public ElasticSearchGraphListener(ElasticSearchRunConfiguration config) throws IOException
   {
-    writer = ElasticSearchWriter.createElasticSearchWriter(config);
+    writer = ElasticSearchAccess.createElasticSearchAccess(config);
     this.config = config;
   }
 
