@@ -91,24 +91,20 @@ public class ElasticSearchLogStorageFactory implements LogStorageFactory
     {
       if(!config.isReadLogsFromElasticsearch()) {
         AnnotatedLargeText<Executable> logFromFile = tryReadLogFile(build, complete);
-        if(logFromFile != null && logFromFile.length() > 0) {
-          return logFromFile;
-        } else {
-          return new AnnotatedLargeText<Executable>(new ByteBuffer(), StandardCharsets.UTF_8, true, build);
-        }
+        return (logFromFile != null) ? logFromFile : new AnnotatedLargeText<Executable>(new ByteBuffer(), StandardCharsets.UTF_8, true, build);
       }
 
       try {
         AnnotatedLargeText<Executable> logFromElasticsearch = new ElasticSearchLogReader(config).overallLog(build, complete);
         if(logFromElasticsearch.length() <= 0) {
           AnnotatedLargeText<Executable> logFromFile = tryReadLogFile(build, complete);
-          if(logFromFile != null && logFromFile.length() > 0) return logFromFile;
+          if(logFromFile != null) return logFromFile;
         }
         return logFromElasticsearch;
       }
       catch (IOException e) {
         AnnotatedLargeText<Executable> logFromFile = tryReadLogFile(build, complete);
-        if(logFromFile != null && logFromFile.length() > 0) {
+        if(logFromFile != null) {
           return logFromFile;
         } else {
           LOGGER.log(Level.SEVERE, "Could not get overallLog", e);
@@ -122,23 +118,19 @@ public class ElasticSearchLogStorageFactory implements LogStorageFactory
     {
       if(!config.isReadLogsFromElasticsearch()) {
         AnnotatedLargeText<FlowNode> stepLogFromLog = tryReadStepFromLogFile(node, complete);
-        if(stepLogFromLog != null && stepLogFromLog.length() > 0) {
-          return stepLogFromLog;
-        } else {
-          return new AnnotatedLargeText<>(new ByteBuffer(), StandardCharsets.UTF_8, true, node);
-        }
+        return (stepLogFromLog != null) ? stepLogFromLog : new AnnotatedLargeText<>(new ByteBuffer(), StandardCharsets.UTF_8, true, node);
       }
 
       try {
         AnnotatedLargeText<FlowNode> stepLog = new ElasticSearchLogReader(config).stepLog(node, complete);
         if(stepLog.length() <= 0) {
           AnnotatedLargeText<FlowNode> stepLogFromLog = tryReadStepFromLogFile(node, complete);
-          if(stepLogFromLog != null && stepLogFromLog.length() > 0) return stepLogFromLog;
+          if(stepLogFromLog != null) return stepLogFromLog;
         }
         return stepLog; 
       } catch (Exception e) {
         AnnotatedLargeText<FlowNode> stepLogFromLog = tryReadStepFromLogFile(node, complete);
-        if(stepLogFromLog != null && stepLogFromLog.length() > 0) {
+        if(stepLogFromLog != null) {
           return stepLogFromLog;
         } else {
           LOGGER.log(Level.SEVERE, "Could not get stepLog", e);
