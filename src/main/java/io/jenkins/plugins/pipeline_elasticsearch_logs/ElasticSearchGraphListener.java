@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.jenkinsci.plugins.pipeline.StageStatus;
 import org.jenkinsci.plugins.workflow.actions.ErrorAction;
 import org.jenkinsci.plugins.workflow.actions.TimingAction;
 import org.jenkinsci.plugins.workflow.actions.WarningAction;
@@ -62,9 +63,12 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous
   @Override
   public void onNewHead(FlowNode node)
   {
-
     try
     {
+      //We cannot send StepEndNodes directly since information is missing, like an ErrorAction (see example below).
+      //There might be more cases which need to be considered like this. Almost all parents change compared to their initial state when passed this method.
+      //1st time direct:          StepEndNode[8 - 'Bind credentials to variables : End', enclosing: 6, startNode: 7, error: null, actions: TimingAction]
+      //2nd time as parent of #9: StepEndNode[8 - 'Bind credentials to variables : End', enclosing: 6, startNode: 7, error: CredentialNotFoundException, actions: TimingAction,ErrorAction]
       for (FlowNode parent : node.getParents())
       {
         if (parent instanceof AtomNode)
@@ -91,7 +95,7 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous
       LOGGER.log(Level.SEVERE, "Failed to push data to Elastic Search", e);
     }
   }
-
+  
   private String getEventType(FlowNode node)
   {
     if (node instanceof AtomNode)
@@ -201,6 +205,10 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous
     {
       return ((FlowEndNode) node).getResult().toString();
     }
+    
+    // Identify skipped stages, similar to BlueOcean (https://github.com/jenkinsci/blueocean-plugin/blob/07bbd5082d314c215c4b750f337f20b88b19b3fa/blueocean-pipeline-api-impl/src/main/java/io/jenkins/blueocean/rest/impl/pipeline/PipelineNodeUtil.java#L95)
+    if(StageStatus.isSkippedStage(node)) return Result.NOT_BUILT.toString();
+    if(node instanceof BlockEndNode && StageStatus.isSkippedStage(((BlockEndNode<?>)node).getStartNode())) return Result.NOT_BUILT.toString();
     
     ErrorAction error = node.getError();
     WarningAction warning = node.getPersistentAction(WarningAction.class);
