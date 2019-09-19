@@ -89,54 +89,63 @@ public class ElasticSearchLogStorageFactory implements LogStorageFactory
     @Override
     public AnnotatedLargeText<Executable> overallLog(Executable build, boolean complete)
     {
-      if(!config.isReadLogsFromElasticsearch()) {
-        AnnotatedLargeText<Executable> logFromFile = tryReadLogFile(build, complete);
-        return (logFromFile != null) ? logFromFile : new AnnotatedLargeText<Executable>(new ByteBuffer(), StandardCharsets.UTF_8, true, build);
+      AnnotatedLargeText<Executable> esLog = null;
+      if(config.isReadLogsFromElasticsearch()) esLog = readOverallLogFromElasticsearch(build, complete);
+      if(esLog != null && esLog.length() > 0) {
+        return esLog;
       }
-
-      try {
-        AnnotatedLargeText<Executable> logFromElasticsearch = new ElasticSearchLogReader(config).overallLog(build, complete);
-        if(logFromElasticsearch.length() <= 0) {
-          AnnotatedLargeText<Executable> logFromFile = tryReadLogFile(build, complete);
-          if(logFromFile != null) return logFromFile;
-        }
-        return logFromElasticsearch;
+      
+      AnnotatedLargeText<Executable> fileLog = null;
+      fileLog = tryReadLogFile(build, complete);
+      if(fileLog != null) {
+        return fileLog;
       }
-      catch (IOException e) {
-        AnnotatedLargeText<Executable> logFromFile = tryReadLogFile(build, complete);
-        if(logFromFile != null) {
-          return logFromFile;
-        } else {
-          LOGGER.log(Level.SEVERE, "Could not get overallLog", e);
-          return new BrokenLogStorage(new RuntimeException("Could not get log")).overallLog(build, complete);
-        }
+      
+      if(esLog == null) {
+        return new BrokenLogStorage(new RuntimeException("Could not get log")).overallLog(build, complete);
+      } else {
+        return esLog;
       }
     }
 
     @Override
     public AnnotatedLargeText<FlowNode> stepLog(FlowNode node, boolean complete)
     {
-      if(!config.isReadLogsFromElasticsearch()) {
-        AnnotatedLargeText<FlowNode> stepLogFromLog = tryReadStepFromLogFile(node, complete);
-        return (stepLogFromLog != null) ? stepLogFromLog : new AnnotatedLargeText<>(new ByteBuffer(), StandardCharsets.UTF_8, true, node);
-      }
-
-      try {
-        AnnotatedLargeText<FlowNode> stepLog = new ElasticSearchLogReader(config).stepLog(node, complete);
-        if(stepLog.length() <= 0) {
-          AnnotatedLargeText<FlowNode> stepLogFromLog = tryReadStepFromLogFile(node, complete);
-          if(stepLogFromLog != null) return stepLogFromLog;
+        AnnotatedLargeText<FlowNode> esLog = null;
+        if(config.isReadLogsFromElasticsearch()) esLog = readStepLogFromElasticsearch(node, complete);
+        if(esLog != null && esLog.length() > 0) {
+          return esLog;
         }
-        return stepLog; 
-      } catch (Exception e) {
-        AnnotatedLargeText<FlowNode> stepLogFromLog = tryReadStepFromLogFile(node, complete);
-        if(stepLogFromLog != null) {
-          return stepLogFromLog;
-        } else {
-          LOGGER.log(Level.SEVERE, "Could not get stepLog", e);
+        
+        AnnotatedLargeText<FlowNode> fileLog = null;
+        fileLog = tryReadStepFromLogFile(node, complete);
+        if(fileLog != null) {
+          return fileLog;
+        }
+        
+        if(esLog == null) {
           return new BrokenLogStorage(new RuntimeException("Could not get log")).stepLog(node, complete);
+        } else {
+          return esLog;
         }
-      }      
+    }
+
+    private AnnotatedLargeText<Executable> readOverallLogFromElasticsearch(Executable build, boolean complete) {
+        try {
+            return new ElasticSearchLogReader(config).overallLog(build, complete);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Could not get overallLog", e);
+            return null;
+        }
+    }
+
+    private AnnotatedLargeText<FlowNode> readStepLogFromElasticsearch(FlowNode node, boolean complete) {
+        try {
+            return new ElasticSearchLogReader(config).stepLog(node, complete);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Could not get stepLog", e);
+            return null;
+        }
     }
 
     /**
