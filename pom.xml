@@ -124,6 +124,11 @@
             <version>1.9.7</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+        	<groupId>org.jenkinsci.plugins</groupId>
+        	<artifactId>pipeline-stage-tags-metadata</artifactId>
+        	<version>1.3.9</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
