@@ -90,19 +90,23 @@ public class ElasticSearchLogStorageFactory implements LogStorageFactory
     public AnnotatedLargeText<Executable> overallLog(Executable build, boolean complete)
     {
       if(!config.isReadLogsFromElasticsearch()) {
-        return new AnnotatedLargeText<>(new ByteBuffer(), StandardCharsets.UTF_8, true, build);
+        AnnotatedLargeText<Executable> logFromFile = tryReadLogFile(build, complete);
+        if(logFromFile != null && logFromFile.length() > 0) {
+          return logFromFile;
+        } else {
+          return new AnnotatedLargeText<Executable>(new ByteBuffer(), StandardCharsets.UTF_8, true, build);
+        }
       }
+
       try {
         AnnotatedLargeText<Executable> logFromElasticsearch = new ElasticSearchLogReader(config).overallLog(build, complete);
         if(logFromElasticsearch.length() <= 0) {
-          //Check if there is a log file. Then this build ran with deactivated Elasticsearch logging.
           AnnotatedLargeText<Executable> logFromFile = tryReadLogFile(build, complete);
           if(logFromFile != null && logFromFile.length() > 0) return logFromFile;
         }
         return logFromElasticsearch;
       }
       catch (IOException e) {
-        //Check if there is a log file. Then this build ran with deactivated Elasticsearch logging.
         AnnotatedLargeText<Executable> logFromFile = tryReadLogFile(build, complete);
         if(logFromFile != null && logFromFile.length() > 0) {
           return logFromFile;
@@ -117,18 +121,22 @@ public class ElasticSearchLogStorageFactory implements LogStorageFactory
     public AnnotatedLargeText<FlowNode> stepLog(FlowNode node, boolean complete)
     {
       if(!config.isReadLogsFromElasticsearch()) {
-        return new AnnotatedLargeText<>(new ByteBuffer(), StandardCharsets.UTF_8, true, node);
+        AnnotatedLargeText<FlowNode> stepLogFromLog = tryReadStepFromLogFile(node, complete);
+        if(stepLogFromLog != null && stepLogFromLog.length() > 0) {
+          return stepLogFromLog;
+        } else {
+          return new AnnotatedLargeText<>(new ByteBuffer(), StandardCharsets.UTF_8, true, node);
+        }
       }
+
       try {
         AnnotatedLargeText<FlowNode> stepLog = new ElasticSearchLogReader(config).stepLog(node, complete);
         if(stepLog.length() <= 0) {
-          //Check if there is a log file. Then this build ran with deactivated Elasticsearch logging.
           AnnotatedLargeText<FlowNode> stepLogFromLog = tryReadStepFromLogFile(node, complete);
           if(stepLogFromLog != null && stepLogFromLog.length() > 0) return stepLogFromLog;
         }
         return stepLog; 
       } catch (Exception e) {
-        //Check if there is a log file. Then this build ran with deactivated Elasticsearch logging.
         AnnotatedLargeText<FlowNode> stepLogFromLog = tryReadStepFromLogFile(node, complete);
         if(stepLogFromLog != null && stepLogFromLog.length() > 0) {
           return stepLogFromLog;

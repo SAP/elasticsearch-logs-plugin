@@ -83,7 +83,7 @@ public class ElasticSearchLogReader
     }
   }
 
-  private void queryElasticSearch(Writer writer, String nodeId, @CheckForNull JSONArray searchAfter) throws IOException
+  private void queryElasticSearch(Writer writer, @CheckForNull String nodeId, @CheckForNull JSONArray searchAfter) throws IOException
   {
       BoolQueryBuilder qb = QueryBuilders.boolQuery()
               .must(QueryBuilders.matchQuery("uid", uid))
@@ -104,17 +104,14 @@ public class ElasticSearchLogReader
       LOGGER.log(Level.FINE, format("SearchRequest[%s] - %s: %s", reqId, config.getUri(), searchRequest.toString()));
       SearchResponse scrollResponse = client.search(searchRequest, RequestOptions.DEFAULT);
       LOGGER.log(Level.FINER, format("SearchResponse[%s] hits: %s", reqId, scrollResponse.getHits().getTotalHits()));
-      ScrollingEntryIterable entryIterable = new ScrollingEntryIterable(client, scrollResponse, reqId);
-      try {
+      try (ScrollingEntryIterable entryIterable = new ScrollingEntryIterable(client, scrollResponse, reqId)) {
           for(SearchHit hit : entryIterable) {
               ConsoleNotes.write(writer, hit.getSourceAsMap());
           }
-      } finally {
-          entryIterable.close();
       }
   }
 
-    private static class ScrollingEntryIterable implements Iterable<SearchHit> {
+    private static class ScrollingEntryIterable implements Iterable<SearchHit>, AutoCloseable {
 
         private SearchResponse scrollResponse;
         private final RestHighLevelClient client;
