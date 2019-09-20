@@ -1,22 +1,7 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
-import com.google.common.collect.Range;
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
+import static com.google.common.collect.Ranges.closedOpen;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -32,15 +17,38 @@ import java.security.cert.CertificateException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static com.google.common.collect.Ranges.closedOpen;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpHost;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicHeader;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
+
+import com.google.common.collect.Range;
 
 /**
  * Post data to Elastic Search.
  *
  */
-public class ElasticSearchWriter
+public class ElasticSearchAccess
 {
-  private static final Logger LOGGER = Logger.getLogger(ElasticSearchWriter.class.getName());
+  private static final Logger LOGGER = Logger.getLogger(ElasticSearchAccess.class.getName());
 
   private static final Range<Integer> SUCCESS_CODES = closedOpen(200, 300);
 
@@ -59,7 +67,7 @@ public class ElasticSearchWriter
   @CheckForNull
   private transient HttpClientBuilder clientBuilder;
 
-  public ElasticSearchWriter(URI uri, String username, String password)
+  public ElasticSearchAccess(URI uri, String username, String password)
   {
     this.uri = uri;
     this.password = password;
@@ -95,6 +103,12 @@ public class ElasticSearchWriter
       postRequest.addHeader("Authorization", "Basic " + auth);
     }
     return postRequest;
+  }  
+
+  public RestHighLevelClient createNewRestClient() {
+      RestClientBuilder builder = RestClient.builder(new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme()));
+      if(getAuth() != null) builder.setDefaultHeaders(new Header[] {new BasicHeader("Authorization", "Basic " + getAuth())});
+      return new RestHighLevelClient(builder);
   }
 
   @Nonnull
@@ -102,7 +116,6 @@ public class ElasticSearchWriter
   {
     if (clientBuilder == null)
     {
-
       clientBuilder = HttpClientBuilder.create();
       RequestConfig.Builder requestBuilder = RequestConfig.custom();
       requestBuilder.setConnectTimeout(2000);
@@ -220,4 +233,5 @@ public class ElasticSearchWriter
       }
     }
   }
+
 }

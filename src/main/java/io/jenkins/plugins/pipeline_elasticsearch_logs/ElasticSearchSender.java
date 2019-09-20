@@ -28,7 +28,7 @@ public class ElasticSearchSender implements BuildListener, Closeable
   private transient @CheckForNull PrintStream logger;
   private final @CheckForNull NodeInfo nodeInfo;
 
-  protected transient ElasticSearchWriter writer;
+  protected transient ElasticSearchAccess writer;
   protected final ElasticSearchRunConfiguration config;
   protected String eventPrefix;
 
@@ -72,11 +72,11 @@ public class ElasticSearchSender implements BuildListener, Closeable
     writer = null;
   }
 
-  private ElasticSearchWriter getElasticSearchWriter() throws IOException
+  private ElasticSearchAccess getElasticSearchWriter() throws IOException
   {
     if (writer == null)
     {
-      writer = config.createWriter();
+      writer = config.createAccess();
     }
     return writer;
   }

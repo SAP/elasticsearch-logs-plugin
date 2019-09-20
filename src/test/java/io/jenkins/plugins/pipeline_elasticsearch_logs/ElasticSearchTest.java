@@ -42,29 +42,29 @@ public class ElasticSearchTest {
         FreeStyleProject project = jenkinsRule.createProject(FreeStyleProject.class);
         if (Functions.isWindows()) {
             project.getBuildersList().add(new BatchFile("echo 'yes'"));
-            FreeStyleBuild build = jenkinsRule.buildAndAssertSuccess(project);
+            jenkinsRule.buildAndAssertSuccess(project);
 
             assertLogLine(0, "buildStart");
             assertLogLine(1, "buildMessage", "Legacy code started this job.  No cause information is available");
-            assertLogLine(4, "buildMessage", "");
-            assertLogLine(6, "buildMessage", "'yes'");
-            assertLogLine(7, "buildMessage", "");
-            assertLogLine(9, "buildMessage", "Finished: SUCCESS");
-            assertLogLine(10, "buildEnd");
-            assertEquals(11, elasticSearchLoggedLines.size());
+            assertLogLine(5, "buildMessage", "");
+            assertLogLine(7, "buildMessage", "'yes'");
+            assertLogLine(8, "buildMessage", "");
+            assertLogLine(10, "buildMessage", "Finished: SUCCESS");
+            assertLogLine(11, "buildEnd");
+            assertEquals(12, elasticSearchLoggedLines.size());
         }
         else {
             project.getBuildersList().add(new Shell("echo 'yes'"));
-            FreeStyleBuild build = jenkinsRule.buildAndAssertSuccess(project);
-            assertEquals(Arrays.asList("+ echo yes", "yes", "Finished: SUCCESS"), build.getLog(1000).subList(3, 6));
+            jenkinsRule.buildAndAssertSuccess(project);
 
             assertLogLine(0, "buildStart");
             assertLogLine(1, "buildMessage", "Legacy code started this job.  No cause information is available");
-            assertLogLine(4, "buildMessage", "+ echo yes");
-            assertLogLine(5, "buildMessage", "yes");
-            assertLogLine(6, "buildMessage", "Finished: SUCCESS");
-            assertLogLine(7, "buildEnd");
-            assertEquals(8, elasticSearchLoggedLines.size());
+            assertLogLine(5, "buildMessage", "");
+            assertLogLine(7, "buildMessage", "'yes'");
+            assertLogLine(8, "buildMessage", "");
+            assertLogLine(10, "buildMessage", "Finished: SUCCESS");
+            assertLogLine(11, "buildEnd");
+            assertEquals(12, elasticSearchLoggedLines.size());
         }
     }
 

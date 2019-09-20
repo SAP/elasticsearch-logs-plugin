@@ -1,34 +1,5 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.common.StandardCertificateCredentials;
-import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
-import com.cloudbees.plugins.credentials.common.StandardUsernameListBoxModel;
-import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
-import com.cloudbees.plugins.credentials.matchers.IdMatcher;
-import hudson.Extension;
-import hudson.model.AbstractDescribableImpl;
-import hudson.model.Descriptor;
-import hudson.model.Item;
-import hudson.model.Run;
-import hudson.security.ACL;
-import hudson.util.FormValidation;
-import hudson.util.ListBoxModel;
-import hudson.util.Secret;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.DefaultRunIdProvider;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.RunIdProvider;
-import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.Symbol;
-import org.jenkinsci.plugins.uniqueid.IdStore;
-import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.QueryParameter;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -42,9 +13,45 @@ import java.security.cert.CertificateException;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+
+import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.Symbol;
+import org.jenkinsci.plugins.uniqueid.IdStore;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
+
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardCertificateCredentials;
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.cloudbees.plugins.credentials.common.StandardUsernameListBoxModel;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.matchers.IdMatcher;
+
+import hudson.Extension;
+import hudson.model.AbstractDescribableImpl;
+import hudson.model.Descriptor;
+import hudson.model.Item;
+import hudson.model.Run;
+import hudson.security.ACL;
+import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
+import hudson.util.Secret;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.DefaultRunIdProvider;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.RunIdProvider;
+import jenkins.model.Jenkins;
 
 public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticSearchConfiguration>
 {
+  private static final transient Logger LOGGER = Logger.getLogger(ElasticSearchConfiguration.class.getName());
+    
   private transient String host;
 
   private transient int port;
@@ -59,6 +66,8 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
   private String credentialsId;
 
   private Boolean saveAnnotations = true;
+
+  private Boolean readLogsFromElasticsearch = false;
 
   private RunIdProvider runIdProvider;
 
@@ -121,7 +130,17 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
   {
     this.saveAnnotations = saveAnnotations;
   }
+  
+  public boolean isReadLogsFromElasticsearch()
+  {
+    return readLogsFromElasticsearch;
+  }
 
+  @DataBoundSetter
+  public void setReadLogsFromElasticsearch(boolean readLogsFromElasticsearch)
+  {
+    this.readLogsFromElasticsearch = readLogsFromElasticsearch;
+  }
 
   public String getCertificateId()
   {
@@ -213,7 +232,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     return "https".equals(scheme);
   }
 
-  private byte[] getKeyStoreBytes()
+  private byte[] getKeyStoreBytes() throws IOException
   {
     KeyStore keyStore = getCustomKeyStore();
     if (isSsl() && keyStore != null)
@@ -226,8 +245,9 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
       }
       catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e)
       {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+          LOGGER.log(Level.WARNING, "Could not read keystore", e);
+          if(e instanceof IOException) throw (IOException)e;
+          throw new IOException("Could not read keystore", e);
       }
     }
     return null;
@@ -262,13 +282,13 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     }
 
     return new ElasticSearchRunConfiguration(uri, username, password, getKeyStoreBytes(), isSaveAnnotations(),
-            getUniqueRunId(run), getRunIdProvider().getRunId(run), getWriterFactory());
+            getUniqueRunId(run), getRunIdProvider().getRunId(run), isReadLogsFromElasticsearch(), getAccessFactory());
   }
 
   // Can be overwritten in tests
   @CheckForNull
   @Restricted(NoExternalUse.class)
-  protected Supplier<ElasticSearchWriter> getWriterFactory() {
+  protected Supplier<ElasticSearchAccess> getAccessFactory() {
     return null;
   }
 
@@ -359,7 +379,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
       try
       {
-        ElasticSearchWriter writer = new ElasticSearchWriter(new URI(url), username, password);
+        ElasticSearchAccess writer = new ElasticSearchAccess(new URI(url), username, password);
         writer.setTrustKeyStore(trustStore);
         writer.testConnection();
       }

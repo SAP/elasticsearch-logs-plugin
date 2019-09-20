@@ -57,12 +57,14 @@ public class ElasticSearchRunConfiguration implements Serializable
   private final boolean saveAnnotations;
 
   private final String uid;
-  private transient Supplier<ElasticSearchWriter> writerFactory;
+  private transient Supplier<ElasticSearchAccess> accessFactory;
 
   private final String runIdJsonString;
 
+  private final boolean readLogsFromElasticsearch;
+
   public ElasticSearchRunConfiguration(URI uri, String username, String password,
-        byte[] keyStoreBytes, boolean saveAnnotations, String uid, JSONObject runId, Supplier<ElasticSearchWriter> writerFactory)
+        byte[] keyStoreBytes, boolean saveAnnotations, String uid, JSONObject runId, boolean readLogsFromElasticsearch, Supplier<ElasticSearchAccess> accessFactory)
   {
     super();
     this.uri = uri;
@@ -70,7 +72,7 @@ public class ElasticSearchRunConfiguration implements Serializable
     this.password = password;
     this.runIdJsonString = runId.toString();
     this.uid = uid;
-    this.writerFactory = writerFactory;
+    this.accessFactory = accessFactory;
     if (keyStoreBytes != null)
     {
       this.keyStoreBytes = keyStoreBytes.clone();
@@ -80,11 +82,22 @@ public class ElasticSearchRunConfiguration implements Serializable
       this.keyStoreBytes = null;
     }
     this.saveAnnotations = saveAnnotations;
+    this.readLogsFromElasticsearch = readLogsFromElasticsearch;
+  }
+
+  public String getUid()
+  {
+    return uid;
   }
 
   public boolean isSaveAnnotations()
   {
     return saveAnnotations;
+  }
+
+  public boolean isReadLogsFromElasticsearch()
+  {
+    return readLogsFromElasticsearch;
   }
 
   public URI getUri()
@@ -130,15 +143,23 @@ public class ElasticSearchRunConfiguration implements Serializable
     return data;
   }
 
-  public ElasticSearchWriter createWriter() {
-    if (writerFactory != null) {
-      return writerFactory.get();
+  public ElasticSearchAccess createAccess() {
+    if (accessFactory != null) {
+      return accessFactory.get();
     } else {
-      ElasticSearchWriter writer = new ElasticSearchWriter(getUri(), getUsername(), getPassword());
+        ElasticSearchAccess writer = new ElasticSearchAccess(getUri(), getUsername(), getPassword());
       if (getTrustKeyStore() != null) {
         writer.setTrustKeyStore(getTrustKeyStore());
       }
       return writer;
     }
   }
+
+    public String[] getIndices() {
+        String path = uri.getPath();
+        while(path.startsWith("/")) path = path.substring(1);
+        String[] splitPath = path.split("/");
+        return new String[] {splitPath[0]};
+    }
+
 }
