@@ -38,12 +38,12 @@ import net.sf.json.JSONArray;
  * of the Elasticsearch plugin and with different Pipeline definitions.
  * 
  * The expected entries sent to Elasticsearch are compared with the actual entries sent.
- * For this not an actual Elasticsearch instance is used but the {@link ElasticSearchWriterMock} is used
- * which overrrides the {@link ElasticSearchWriter#push(String)} method which normally sends the data to
+ * For this not an actual Elasticsearch instance is used but the {@link ElasticSearchAccessMock} is used
+ * which overrrides the {@link ElasticSearchAccess#push(String)} method which normally sends the data to
  * Elasticsearch.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ElasticSearchWriter.class})
+@PrepareForTest({ElasticSearchAccess.class})
 @PowerMockIgnore({"javax.crypto.*"}) //this needs to be excluded to prevent errors
 public class IntegrationTest
 {
@@ -98,7 +98,7 @@ public class IntegrationTest
 
   @Test
   public void testPipelineWithElasticsearchPlugin() throws Exception {
-    ElasticSearchWriterMock mockWriter = mockWriter();
+    ElasticSearchAccessMock mockWriter = mockWriter();
     configureElasticsearchPlugin(true);
 
     WorkflowJob project = j.createProject(WorkflowJob.class);
@@ -120,7 +120,7 @@ public class IntegrationTest
 
   @Test
   public void testPipelineWithSkippedStages() throws Exception {
-    ElasticSearchWriterMock mockWriter = mockWriter();
+    ElasticSearchAccessMock mockWriter = mockWriter();
     configureElasticsearchPlugin(true);
 
     WorkflowJob project = j.createProject(WorkflowJob.class);
@@ -142,17 +142,17 @@ public class IntegrationTest
   
   
   /**
-   * We need to make {@link ElasticSearchWriter#createElasticSearchWriter(ElasticSearchRunConfiguration)}
-   * return our mocked {@link ElasticSearchWriterMock}.
+   * We need to make {@link ElasticSearchAccess#createElasticSearchAccess(ElasticSearchRunConfiguration)}
+   * return our mocked {@link ElasticSearchAccessMock}.
    * @return
    * @throws IOException
    * @throws URISyntaxException
    */
-  private ElasticSearchWriterMock mockWriter() throws IOException, URISyntaxException {
-    ElasticSearchWriterMock elasticSearchWriterMock = new ElasticSearchWriterMock(false);
-    PowerMockito.mockStatic(ElasticSearchWriter.class);
-    Mockito.when(ElasticSearchWriter.createElasticSearchWriter(Mockito.any())).thenReturn(elasticSearchWriterMock);
-    return elasticSearchWriterMock;
+  private ElasticSearchAccessMock mockWriter() throws IOException, URISyntaxException {
+    ElasticSearchAccessMock ElasticSearchAccessMock = new ElasticSearchAccessMock(false);
+    PowerMockito.mockStatic(ElasticSearchAccess.class);
+    Mockito.when(ElasticSearchAccess.createElasticSearchAccess(Mockito.any())).thenReturn(ElasticSearchAccessMock);
+    return ElasticSearchAccessMock;
   }
   
   private void configureElasticsearchPlugin(boolean activate) throws URISyntaxException {

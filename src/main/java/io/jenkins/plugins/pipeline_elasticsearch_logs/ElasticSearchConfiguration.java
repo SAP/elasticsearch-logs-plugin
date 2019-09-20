@@ -12,6 +12,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -46,6 +48,8 @@ import jenkins.model.Jenkins;
 
 public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticSearchConfiguration>
 {
+  private static final transient Logger LOGGER = Logger.getLogger(ElasticSearchConfiguration.class.getName());
+    
   private transient String host;
 
   private transient int port;
@@ -60,6 +64,8 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
   private String credentialsId;
 
   private Boolean saveAnnotations = true;
+  
+  private Boolean readLogsFromElasticsearch = false;
   
   private RunIdProvider runIdProvider;
 
@@ -122,7 +128,17 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
   {
     this.saveAnnotations = saveAnnotations;
   }
+  
+  public boolean isReadLogsFromElasticsearch()
+  {
+    return readLogsFromElasticsearch;
+  }
 
+  @DataBoundSetter
+  public void setReadLogsFromElasticsearch(boolean readLogsFromElasticsearch)
+  {
+    this.readLogsFromElasticsearch = readLogsFromElasticsearch;
+  }
 
   public String getCertificateId()
   {
@@ -214,7 +230,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     return "https".equals(scheme);
   }
   
-  private byte[] getKeyStoreBytes()
+  private byte[] getKeyStoreBytes() throws IOException
   {
     KeyStore keyStore = getCustomKeyStore();
     if (isSsl() && keyStore != null)
@@ -227,8 +243,9 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
       }
       catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e)
       {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+          LOGGER.log(Level.WARNING, "Could not read keystore", e);
+          if(e instanceof IOException) throw (IOException)e;
+          throw new IOException("Could not read keystore", e);
       }
     }
     return null;
@@ -262,7 +279,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
       throw new IOException(e);
     }
 
-    return new ElasticSearchRunConfiguration(uri, username, password, getKeyStoreBytes(), isSaveAnnotations(), getUniqueRunId(run), getRunIdProvider().getRunId(run));
+    return new ElasticSearchRunConfiguration(uri, username, password, getKeyStoreBytes(), isSaveAnnotations(), getUniqueRunId(run), getRunIdProvider().getRunId(run), isReadLogsFromElasticsearch());
   }
 
   public static String getUniqueRunId(Run<?, ?> run)
@@ -352,7 +369,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
       
       try
       {
-        ElasticSearchWriter writer = new ElasticSearchWriter(new URI(url), username, password);
+        ElasticSearchAccess writer = new ElasticSearchAccess(new URI(url), username, password);
         writer.setTrustKeyStore(trustStore);
         writer.testConnection();
       }

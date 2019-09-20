@@ -60,8 +60,10 @@ public class ElasticSearchRunConfiguration implements Serializable
 
   private final String runIdJsonString;
 
+  private final boolean readLogsFromElasticsearch;
+
   public ElasticSearchRunConfiguration(URI uri, String username, String password,
-        byte[] keyStoreBytes, boolean saveAnnotations, String uid, JSONObject runId)
+        byte[] keyStoreBytes, boolean saveAnnotations, String uid, JSONObject runId, boolean readLogsFromElasticsearch)
   {
     super();
     this.uri = uri;
@@ -78,11 +80,22 @@ public class ElasticSearchRunConfiguration implements Serializable
       this.keyStoreBytes = null;
     }
     this.saveAnnotations = saveAnnotations;
+    this.readLogsFromElasticsearch = readLogsFromElasticsearch;
+  }
+
+  public String getUid()
+  {
+    return uid;
   }
 
   public boolean isSaveAnnotations()
   {
     return saveAnnotations;
+  }
+
+  public boolean isReadLogsFromElasticsearch()
+  {
+    return readLogsFromElasticsearch;
   }
 
   public URI getUri()
@@ -127,5 +140,12 @@ public class ElasticSearchRunConfiguration implements Serializable
     data.put(UID, uid);
     return data;
   }
+
+    public String[] getIndices() {
+        String path = uri.getPath();
+        while(path.startsWith("/")) path = path.substring(1);
+        String[] splitPath = path.split("/");
+        return new String[] {splitPath[0]};
+    }
 
 }

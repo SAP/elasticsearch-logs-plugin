@@ -15,10 +15,13 @@
   </f:nested>
   <f:advanced>
     <f:entry field="saveAnnotations" title="Save Annotations">
-      <f:checkbox default="checked"/>
+      <f:checkbox default="true"/>
     </f:entry>
     <f:entry >
       <f:dropdownDescriptorSelector title="RunID Provider" field="runIdProvider"/>
     </f:entry>  
+    <f:entry field="readLogsFromElasticsearch" title="Read logs from Elasticsearch">
+      <f:checkbox default="true"/>
+    </f:entry>
   </f:advanced>
 </j:jelly>

@@ -26,7 +26,7 @@ public class ElasticSearchRunListener extends RunListener<Run<?, ?>>
         return;
       }
 
-      ElasticSearchWriter writer = ElasticSearchWriter.createElasticSearchWriter(config);
+      ElasticSearchAccess writer = ElasticSearchAccess.createElasticSearchAccess(config);
       Map<String, Object> data = config.createData();
 
       data.put("eventType", "buildEnd");
@@ -63,7 +63,7 @@ public class ElasticSearchRunListener extends RunListener<Run<?, ?>>
         return;
       }
 
-      ElasticSearchWriter writer = ElasticSearchWriter.createElasticSearchWriter(config);
+      ElasticSearchAccess writer = ElasticSearchAccess.createElasticSearchAccess(config);
       Map<String, Object> data = config.createData();
 
       data.put("eventType", "buildStart");

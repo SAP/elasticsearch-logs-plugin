@@ -9,16 +9,16 @@ import java.security.KeyStore;
 import java.util.ArrayList;
 
 /**
- * This class mocks an ElasticSearchWriter and overrides the {@link ElasticSearchWriter#push(String)} method.
+ * This class mocks an ElasticSearchAccess and overrides the {@link ElasticSearchAccess#push(String)} method.
  * The data the plugin tries to send to Elasticsearch are collected and can be retrieved via {@link #getEntries()}.
  */
-public class ElasticSearchWriterMock extends ElasticSearchWriter
+public class ElasticSearchAccessMock extends ElasticSearchAccess
 {
 
   private ArrayList<String> entries = new ArrayList<String>();
   private boolean printToLog;
   
-  public ElasticSearchWriterMock(boolean printToLog) throws URISyntaxException {
+  public ElasticSearchAccessMock(boolean printToLog) throws URISyntaxException {
     super(new URI("http://localhost:9200/jenkins/_doc"), "test", "test");
     this.printToLog = printToLog;
   }
