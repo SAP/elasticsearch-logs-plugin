@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.SleepBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,32 +41,15 @@ public class ElasticSearchTest {
     @Test
     public void testSimpleJobOutput() throws Exception {
         FreeStyleProject project = jenkinsRule.createProject(FreeStyleProject.class);
-        if (Functions.isWindows()) {
-            project.getBuildersList().add(new BatchFile("echo 'yes'"));
-            jenkinsRule.buildAndAssertSuccess(project);
+        project.getBuildersList().add(new SleepBuilder(2));
+        jenkinsRule.buildAndAssertSuccess(project);
 
-            assertLogLine(0, "buildStart");
-            assertLogLine(1, "buildMessage", "Legacy code started this job.  No cause information is available");
-            assertLogLine(5, "buildMessage", "");
-            assertLogLine(7, "buildMessage", "'yes'");
-            assertLogLine(8, "buildMessage", "");
-            assertLogLine(10, "buildMessage", "Finished: SUCCESS");
-            assertLogLine(11, "buildEnd");
-            assertEquals(12, elasticSearchLoggedLines.size());
-        }
-        else {
-            project.getBuildersList().add(new Shell("echo 'yes'"));
-            jenkinsRule.buildAndAssertSuccess(project);
-
-            assertLogLine(0, "buildStart");
-            assertLogLine(1, "buildMessage", "Legacy code started this job.  No cause information is available");
-            assertLogLine(5, "buildMessage", "");
-            assertLogLine(7, "buildMessage", "'yes'");
-            assertLogLine(8, "buildMessage", "");
-            assertLogLine(10, "buildMessage", "Finished: SUCCESS");
-            assertLogLine(11, "buildEnd");
-            assertEquals(12, elasticSearchLoggedLines.size());
-        }
+        assertLogLine(0, "buildStart");
+        assertLogLine(1, "buildMessage", "Legacy code started this job.  No cause information is available");
+        assertLogLine(4, "buildMessage", "Sleeping 2ms");
+        assertLogLine(5, "buildMessage", "Finished: SUCCESS");
+        assertLogLine(6, "buildEnd");
+        assertEquals(7, elasticSearchLoggedLines.size());
     }
 
     private void assertLogLine(int lineIndex, String eventType, String message) {
