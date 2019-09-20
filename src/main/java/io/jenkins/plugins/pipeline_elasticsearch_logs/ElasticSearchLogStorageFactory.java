@@ -101,33 +101,41 @@ public class ElasticSearchLogStorageFactory implements LogStorageFactory
         return fileLog;
       }
       
-      if(esLog == null) {
-        return new BrokenLogStorage(new RuntimeException("Could not get log")).overallLog(build, complete);
-      } else {
+      if(esLog != null) {
         return esLog;
+      } else {
+        if(config.isReadLogsFromElasticsearch()) {
+          return new BrokenLogStorage(new RuntimeException("Could not get log")).overallLog(build, complete);
+        } else {
+          return new AnnotatedLargeText<>(new ByteBuffer(), StandardCharsets.UTF_8, true, build);
+        }
       }
     }
 
     @Override
     public AnnotatedLargeText<FlowNode> stepLog(FlowNode node, boolean complete)
     {
-        AnnotatedLargeText<FlowNode> esLog = null;
-        if(config.isReadLogsFromElasticsearch()) esLog = readStepLogFromElasticsearch(node, complete);
-        if(esLog != null && esLog.length() > 0) {
-          return esLog;
-        }
-        
-        AnnotatedLargeText<FlowNode> fileLog = null;
-        fileLog = tryReadStepFromLogFile(node, complete);
-        if(fileLog != null) {
-          return fileLog;
-        }
-        
-        if(esLog == null) {
+      AnnotatedLargeText<FlowNode> esLog = null;
+      if (config.isReadLogsFromElasticsearch()) esLog = readStepLogFromElasticsearch(node, complete);
+      if (esLog != null && esLog.length() > 0) {
+        return esLog;
+      }
+
+      AnnotatedLargeText<FlowNode> fileLog = null;
+      fileLog = tryReadStepFromLogFile(node, complete);
+      if (fileLog != null) {
+        return fileLog;
+      }
+
+      if (esLog != null) {
+        return esLog;
+      } else {
+        if (config.isReadLogsFromElasticsearch()) {
           return new BrokenLogStorage(new RuntimeException("Could not get log")).stepLog(node, complete);
         } else {
-          return esLog;
+          return new AnnotatedLargeText<>(new ByteBuffer(), StandardCharsets.UTF_8, true, node);
         }
+      }
     }
 
     private AnnotatedLargeText<Executable> readOverallLogFromElasticsearch(Executable build, boolean complete) {
