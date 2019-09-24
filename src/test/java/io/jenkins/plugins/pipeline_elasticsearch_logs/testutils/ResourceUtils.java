@@ -1,17 +1,16 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs.testutils;
 
-import java.io.File;
+import net.sf.json.JSONArray;
+import org.apache.commons.io.IOUtils;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.net.URL;
-
-import org.apache.commons.io.FileUtils;
-
-import net.sf.json.JSONArray;
+import java.nio.charset.StandardCharsets;
 
 /**
- * Helper to handle resource files corresponding to specific test methods. 
+ * Helper to handle resource files corresponding to specific test methods.
  */
 public class ResourceUtils
 {
@@ -65,9 +64,9 @@ public class ResourceUtils
     return String.format("%s/%s.%s",
           method.getDeclaringClass().getName().replace(".", "/"),
           method.getName().replace(".", "/"),
-          fileExtension);    
+          fileExtension);
   }
-  
+
   /**
    * Identifies the calling test method
    * @return
@@ -98,10 +97,9 @@ public class ResourceUtils
    */
   private static String readResource(String filePath) throws IOException {
     ClassLoader classLoader = ResourceUtils.class.getClassLoader();
-    URL resource = classLoader.getResource(filePath);
-    if(resource == null) throw new IOException("Could not find resource: " + filePath);
-    File file = new File(resource.getFile());
-    return FileUtils.readFileToString(file, "UTF-8");
+    InputStream in = classLoader.getResourceAsStream(filePath);
+    if (in == null) throw new IOException("Could not find resource: " + filePath);
+    return IOUtils.toString(in, StandardCharsets.UTF_8);
   }
 
 }
