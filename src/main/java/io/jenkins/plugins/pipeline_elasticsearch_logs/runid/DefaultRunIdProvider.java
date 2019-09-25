@@ -5,7 +5,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import hudson.Extension;
 import hudson.model.Run;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchConfiguration;
 import net.sf.json.JSONObject;
 
 /**

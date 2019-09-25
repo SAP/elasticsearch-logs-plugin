@@ -30,7 +30,7 @@ import net.sf.json.JSONArray;
  * The tests in this class are executed in a running Jenkins instance with
  * different configurations of the Elasticsearch plugin and with different
  * Pipeline definitions.
- * 
+ *
  * The expected entries sent to Elasticsearch are compared with the actual
  * entries sent. For this not an actual Elasticsearch instance is used but the
  * {@link ElasticSearchAccessMock} is used which overrrides the

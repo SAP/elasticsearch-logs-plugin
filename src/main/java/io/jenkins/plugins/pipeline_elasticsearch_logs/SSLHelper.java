@@ -3,7 +3,7 @@
  * The MIT License
  *
  * Copyright 2014 Barnes and Noble College
- * 
+ *
  * Source: https://github.com/jenkinsci/logstash-plugin/blob/f3eea8d405d8c4e5df228b61e06efcfb173c5be9/src/main/java/jenkins/plugins/logstash/utils/SSLHelper.java
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy

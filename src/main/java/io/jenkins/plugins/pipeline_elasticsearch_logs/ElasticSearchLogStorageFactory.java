@@ -146,7 +146,7 @@ public class ElasticSearchLogStorageFactory implements LogStorageFactory {
          * Tries to read the log file from the Jenkins master file system. This is the
          * case for logs which were written when the Elasticsearch plugin was
          * deactivated.
-         * 
+         *
          * @param build
          * @param complete
          * @return null if log file not found or extraction failed
@@ -171,7 +171,7 @@ public class ElasticSearchLogStorageFactory implements LogStorageFactory {
          * Tries to read the step log file from the Jenkins master file system. This is
          * the case for logs which were written when the Elasticsearch plugin was
          * deactivated.
-         * 
+         *
          * @param node
          * @param complete
          * @return null if log file not found or extraction failed

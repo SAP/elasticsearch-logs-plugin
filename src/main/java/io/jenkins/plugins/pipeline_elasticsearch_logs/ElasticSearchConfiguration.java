@@ -223,7 +223,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
      * credentials resolved. Reason: on remote side credentials cannot be accessed
      * by credentialsId, same for keystore. That's why the values are transfered to
      * remote.
-     * 
+     *
      * @return the ElasticSearchSerializableConfiguration
      * @throws IOException
      */

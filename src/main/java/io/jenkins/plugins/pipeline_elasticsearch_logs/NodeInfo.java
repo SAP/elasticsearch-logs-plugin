@@ -70,7 +70,7 @@ public class NodeInfo implements Serializable {
 
     /**
      * Appends this nodes info to the given map.
-     * 
+     *
      * @param data
      *            The map to receive the node info
      */
@@ -102,7 +102,7 @@ public class NodeInfo implements Serializable {
     /**
      * Returns the FlowNode of a stage step that encloses the given FlowNode or the
      * current FlowNode if it is a stage.
-     * 
+     *
      * @param node
      *            The FlowNode to check.
      * @return The BlockStartNode representing the start of the stage step or null
@@ -138,7 +138,7 @@ public class NodeInfo implements Serializable {
     /**
      * Returns the FlowNode of a parallel branch step that encloses the given
      * FlowNode.
-     * 
+     *
      * @param node
      *            The FlowNode to check.
      * @return The BlockStartNode representing the start of the parallel branch step
@@ -174,7 +174,7 @@ public class NodeInfo implements Serializable {
 
     /**
      * Returns the name of the agent this FlowNode is running on.
-     * 
+     *
      * @param node
      *            The FlowNode to check
      * @return The name of the agent or null if not running on an agent.
