@@ -5,8 +5,7 @@ import org.junit.Test;
 
 import net.sf.json.JSONObject;
 
-public class StringJsonSourceTest
-{
+public class StringJsonSourceTest {
 
     @Test
     public void testGetJsonString() {

@@ -11,8 +11,7 @@ import org.junit.Test;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
-public class FileJsonSourceTest
-{
+public class FileJsonSourceTest {
 
     @Test
     public void testGetJsonString() throws JSONException, IOException {
@@ -31,9 +30,9 @@ public class FileJsonSourceTest
         try {
             new FileJsonSource(createTestFile("{  \"a\";  \"b\"  }")).getJsonObject();
             Assert.fail("Expected JSONException");
-        } catch(JSONException e) {
+        } catch (JSONException e) {
         }
-        
+
     }
 
     @Test
@@ -41,9 +40,9 @@ public class FileJsonSourceTest
         try {
             new FileJsonSource("/temp/fileDoesNotExist").getJsonObject();
             Assert.fail("Expected FileNotFoundException");
-        } catch(FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
         }
-        
+
     }
 
     private String createTestFile(String string) throws IOException {
@@ -51,5 +50,5 @@ public class FileJsonSourceTest
         FileUtils.write(tempFile, string, "UTF-8");
         return tempFile.getAbsolutePath();
     }
-    
+
 }

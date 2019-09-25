@@ -37,79 +37,67 @@ import org.kohsuke.stapler.framework.io.ByteBuffer;
 import hudson.console.AnnotatedLargeText;
 import net.sf.json.JSONArray;
 
-public class ElasticSearchLogReader
-{
+public class ElasticSearchLogReader {
 
-  private final static int QUERY_SIZE = 9999;
-  private static final TimeValue SCROLL_TIME_VALUE = TimeValue.timeValueSeconds(60);  
-  
-  private static final Logger LOGGER = Logger.getLogger(ElasticSearchLogReader.class.getName());
+    private final static int QUERY_SIZE = 9999;
+    private static final TimeValue SCROLL_TIME_VALUE = TimeValue.timeValueSeconds(60);
 
-  private final ElasticSearchAccess access;
-  private final String uid;
-  private final ElasticSearchRunConfiguration config;
+    private static final Logger LOGGER = Logger.getLogger(ElasticSearchLogReader.class.getName());
 
-  public ElasticSearchLogReader(ElasticSearchRunConfiguration config) throws IOException
-  {
-    access = config.createAccess();
-    this.config = config;
-    this.uid = config.getUid();
-  }
+    private final ElasticSearchAccess access;
+    private final String uid;
+    private final ElasticSearchRunConfiguration config;
 
-  AnnotatedLargeText<FlowNode> stepLog(FlowNode node, boolean completed) throws IOException
-  {
-    ByteBuffer buf = new ByteBuffer();
-    readFromElasticsearch(buf, node.getId());
-    return new AnnotatedLargeText<>(buf, StandardCharsets.UTF_8, completed, node);
-  }
-  
-  AnnotatedLargeText<Executable> overallLog(Executable build, boolean complete) throws IOException {
-    ByteBuffer buf = new ByteBuffer();
-    readFromElasticsearch(buf, null);
-    return new AnnotatedLargeText<FlowExecutionOwner.Executable>(buf, StandardCharsets.UTF_8, complete, build);
-  }
-
-  private void readFromElasticsearch(OutputStream os, @CheckForNull String nodeId)
-        throws IOException
-  {
-    try (Writer w = new OutputStreamWriter(os, StandardCharsets.UTF_8))
-    {
-      queryElasticSearch(w, nodeId, null);
-      w.flush();
+    public ElasticSearchLogReader(ElasticSearchRunConfiguration config) throws IOException {
+        access = config.createAccess();
+        this.config = config;
+        this.uid = config.getUid();
     }
-    catch (RuntimeException x)
-    {
-      throw new IOException(x);
+
+    AnnotatedLargeText<FlowNode> stepLog(FlowNode node, boolean completed) throws IOException {
+        ByteBuffer buf = new ByteBuffer();
+        readFromElasticsearch(buf, node.getId());
+        return new AnnotatedLargeText<>(buf, StandardCharsets.UTF_8, completed, node);
     }
-  }
 
-  private void queryElasticSearch(Writer writer, @CheckForNull String nodeId, @CheckForNull JSONArray searchAfter) throws IOException
-  {
-      BoolQueryBuilder qb = QueryBuilders.boolQuery()
-              .must(QueryBuilders.matchQuery("uid", uid))
-              .must(QueryBuilders.matchQuery("eventType", "nodeMessage buildMessage"));
-      if(nodeId != null) qb.must(QueryBuilders.matchQuery("flowNodeId", nodeId));
+    AnnotatedLargeText<Executable> overallLog(Executable build, boolean complete) throws IOException {
+        ByteBuffer buf = new ByteBuffer();
+        readFromElasticsearch(buf, null);
+        return new AnnotatedLargeText<FlowExecutionOwner.Executable>(buf, StandardCharsets.UTF_8, complete, build);
+    }
 
-      SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder()
-              .size(QUERY_SIZE)
-              .sort("timestampMillis", SortOrder.ASC)
-              .query(qb);
-      SearchRequest searchRequest = new SearchRequest()
-              .indices(config.getIndices())
-              .source(searchSourceBuilder)
-              .scroll(SCROLL_TIME_VALUE);
-      
-      RestHighLevelClient client = access.createNewRestClient();
-      String reqId = UUID.randomUUID().toString();
-      LOGGER.log(Level.FINE, format("SearchRequest[%s] - %s: %s", reqId, config.getUri(), searchRequest.toString()));
-      SearchResponse scrollResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-      LOGGER.log(Level.FINER, format("SearchResponse[%s] hits: %s", reqId, scrollResponse.getHits().getTotalHits()));
-      try (ScrollingEntryIterable entryIterable = new ScrollingEntryIterable(client, scrollResponse, reqId)) {
-          for(SearchHit hit : entryIterable) {
-              ConsoleNotes.write(writer, hit.getSourceAsMap());
-          }
-      }
-  }
+    private void readFromElasticsearch(OutputStream os, @CheckForNull String nodeId) throws IOException {
+        try (Writer w = new OutputStreamWriter(os, StandardCharsets.UTF_8)) {
+            queryElasticSearch(w, nodeId, null);
+            w.flush();
+        } catch (RuntimeException x) {
+            throw new IOException(x);
+        }
+    }
+
+    private void queryElasticSearch(Writer writer, @CheckForNull String nodeId, @CheckForNull JSONArray searchAfter)
+            throws IOException {
+        BoolQueryBuilder qb = QueryBuilders.boolQuery().must(QueryBuilders.matchQuery("uid", uid))
+                .must(QueryBuilders.matchQuery("eventType", "nodeMessage buildMessage"));
+        if (nodeId != null)
+            qb.must(QueryBuilders.matchQuery("flowNodeId", nodeId));
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().size(QUERY_SIZE)
+                .sort("timestampMillis", SortOrder.ASC).query(qb);
+        SearchRequest searchRequest = new SearchRequest().indices(config.getIndices()).source(searchSourceBuilder)
+                .scroll(SCROLL_TIME_VALUE);
+
+        RestHighLevelClient client = access.createNewRestClient();
+        String reqId = UUID.randomUUID().toString();
+        LOGGER.log(Level.FINE, format("SearchRequest[%s] - %s: %s", reqId, config.getUri(), searchRequest.toString()));
+        SearchResponse scrollResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+        LOGGER.log(Level.FINER, format("SearchResponse[%s] hits: %s", reqId, scrollResponse.getHits().getTotalHits()));
+        try (ScrollingEntryIterable entryIterable = new ScrollingEntryIterable(client, scrollResponse, reqId)) {
+            for (SearchHit hit : entryIterable) {
+                ConsoleNotes.write(writer, hit.getSourceAsMap());
+            }
+        }
+    }
 
     private static class ScrollingEntryIterable implements Iterable<SearchHit>, AutoCloseable {
 
@@ -157,11 +145,13 @@ public class ElasticSearchLogReader
                 }
 
                 private void requestNextSearchScrollBatch() throws IOException {
-                    LOGGER.log(Level.FINE, format("SearchRequest[%s]: Preemptive scroll search with id '%s'", reqId, scrollResponse.getScrollId()));
+                    LOGGER.log(Level.FINE, format("SearchRequest[%s]: Preemptive scroll search with id '%s'", reqId,
+                            scrollResponse.getScrollId()));
                     SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollResponse.getScrollId())
                             .scroll(SCROLL_TIME_VALUE);
                     scrollResponse = client.scroll(scrollRequest, RequestOptions.DEFAULT);
-                    LOGGER.log(Level.FINER, format("SearchResponse[%s] scroll hits: %s", reqId, scrollResponse.getHits().getTotalHits()));
+                    LOGGER.log(Level.FINER, format("SearchResponse[%s] scroll hits: %s", reqId,
+                            scrollResponse.getHits().getTotalHits()));
                     currentIndex = 0;
                 }
 
@@ -192,5 +182,5 @@ public class ElasticSearchLogReader
                     });
         }
     }
-  
+
 }

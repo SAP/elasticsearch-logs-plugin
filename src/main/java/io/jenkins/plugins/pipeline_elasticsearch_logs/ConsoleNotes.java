@@ -55,7 +55,7 @@ class ConsoleNotes {
 
     static void parse(byte[] b, int len, Map<String, Object> data, boolean saveAnnotations) {
         assert len > 0 && len <= b.length;
-        
+
         assert data != null;
 
         int eol = len;
@@ -67,11 +67,13 @@ class ConsoleNotes {
                 break;
             }
         }
-        
+
         String line = new String(b, 0, eol, StandardCharsets.UTF_8);
-        
-        // Would be more efficient to do searches at the byte[] level, but too much bother for now,
-        // especially since there is no standard library method to do offset searches like String has.
+
+        // Would be more efficient to do searches at the byte[] level, but too much
+        // bother for now,
+        // especially since there is no standard library method to do offset searches
+        // like String has.
         if (!line.contains(ConsoleNote.PREAMBLE_STR)) {
             // Shortcut for the common case that we have no notes.
             data.put(MESSAGE_KEY, line);
@@ -91,21 +93,22 @@ class ConsoleNotes {
                     break;
                 }
                 buf.append(line, pos, preamble);
-                annotations.add(ImmutableMap.of(POSITION_KEY, buf.length(), NOTE_KEY, line.substring(endOfPreamble, postamble)));
+                annotations.add(ImmutableMap.of(POSITION_KEY, buf.length(), NOTE_KEY,
+                        line.substring(endOfPreamble, postamble)));
                 pos = postamble + ConsoleNote.POSTAMBLE_STR.length();
             }
             buf.append(line, pos, line.length()); // append tail
             data.put(MESSAGE_KEY, buf.toString());
-            if (saveAnnotations)
-            {
-              data.put(ANNOTATIONS_KEY, annotations);
+            if (saveAnnotations) {
+                data.put(ANNOTATIONS_KEY, annotations);
             }
         }
     }
 
     static void write(Writer w, Map<String, Object> source) throws IOException {
-        if(source == null) throw new NullPointerException("source is null");
-        String message = (String)source.get(MESSAGE_KEY);
+        if (source == null)
+            throw new NullPointerException("source is null");
+        String message = (String) source.get(MESSAGE_KEY);
         Object annotations = source.get(ANNOTATIONS_KEY);
         if (annotations == null || !(annotations instanceof ArrayList)) {
             w.write(message);
@@ -123,9 +126,10 @@ class ConsoleNotes {
             }
             w.write(message, pos, message.length() - pos);
         }
-        w.write('\n');    
+        w.write('\n');
     }
 
-    private ConsoleNotes() {}
-    
+    private ConsoleNotes() {
+    }
+
 }

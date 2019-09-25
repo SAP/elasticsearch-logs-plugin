@@ -8,52 +8,46 @@ import hudson.model.Descriptor;
 import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 
-public class StringJsonSource extends JsonSource
-{
-  
-  private transient JSONObject jsonObject;
-  
-  private final String jsonString;
+public class StringJsonSource extends JsonSource {
 
-  @DataBoundConstructor
-  public StringJsonSource(String jsonString)
-  {
-    this.jsonObject = JSONObject.fromObject(jsonString);
-    this.jsonString = jsonObject.toString();
-  }
+    private transient JSONObject jsonObject;
 
-  public String getJsonString()
-  {
-    return jsonString;
-  }
+    private final String jsonString;
 
-  @Override
-  public JSONObject getJsonObject() {
-    if(jsonObject == null) jsonObject = JSONObject.fromObject(jsonString);
-    return jsonObject;
-  }
+    @DataBoundConstructor
+    public StringJsonSource(String jsonString) {
+        this.jsonObject = JSONObject.fromObject(jsonString);
+        this.jsonString = jsonObject.toString();
+    }
 
-  @Extension
-  public static class DescriptorImpl extends Descriptor<JsonSource>
-  {
+    public String getJsonString() {
+        return jsonString;
+    }
 
     @Override
-    public String getDisplayName()
-    {
-      return "JSON String";
-    }
-    
-    public FormValidation doCheckJsonString(@QueryParameter("value") String value)
-    {
-      FormValidation result = doValidateJSON(value);
-      return result;
-    }    
-    
-    public FormValidation doValidateJSON(@QueryParameter(fixEmpty = true) String jsonString)
-    {
-      return validateJSONString(jsonString);
+    public JSONObject getJsonObject() {
+        if (jsonObject == null)
+            jsonObject = JSONObject.fromObject(jsonString);
+        return jsonObject;
     }
 
-  }
+    @Extension
+    public static class DescriptorImpl extends Descriptor<JsonSource> {
+
+        @Override
+        public String getDisplayName() {
+            return "JSON String";
+        }
+
+        public FormValidation doCheckJsonString(@QueryParameter("value") String value) {
+            FormValidation result = doValidateJSON(value);
+            return result;
+        }
+
+        public FormValidation doValidateJSON(@QueryParameter(fixEmpty = true) String jsonString) {
+            return validateJSONString(jsonString);
+        }
+
+    }
 
 }
