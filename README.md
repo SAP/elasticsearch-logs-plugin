@@ -38,7 +38,13 @@ Open an issue in [Github](https://github.com/sap/pipeline-elasticsearch-logs-plu
 
 ### Contributing
 
-Please open a Pull Request in our [Github](https://github.com/sap/pipeline-elasticsearch-logs-plugin) repository.
+Please open a Pull Request in our [Github](https://github.com/sap/elasticsearch-logs-plugin) repository.
+
+#### Code Style
+
+The [Jenkins Beginners Guide to Contribute](https://wiki.jenkins.io/display/JENKINS/Beginners+Guide+to+Contributing#BeginnersGuidetoContributing-CodeStyle) recommends the [Oracle Code Conventions for Java](http://www.oracle.com/technetwork/java/codeconvtoc-136057.html) from 1999.
+
+Those [Guidelines](https://wiki.jenkins.io/display/JENKINS/Code+Style+Guidelines) however might better describe the Code Style rules we apply.
 
 ### To-Do (upcoming changes)
 
