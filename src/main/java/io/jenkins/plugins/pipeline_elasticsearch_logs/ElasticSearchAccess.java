@@ -74,16 +74,6 @@ public class ElasticSearchAccess
     this.username = username;
   }
 
-  public static ElasticSearchAccess createElasticSearchAccess(ElasticSearchRunConfiguration config) throws IOException
-  {
-    ElasticSearchAccess writer = new ElasticSearchAccess(config.getUri(), config.getUsername(), config.getPassword());
-    if (config.getTrustKeyStore() != null)
-    {
-      writer.setTrustKeyStore(config.getTrustKeyStore());
-    }
-    return writer;
-  }
-
   public void setTrustKeyStore(KeyStore trustKeyStore)
   {
     this.trustKeyStore = trustKeyStore;
@@ -147,7 +137,7 @@ public class ElasticSearchAccess
     }
     return clientBuilder;
   }
-  
+
   @Restricted(NoExternalUse.class)
   String testConnection() throws URISyntaxException, IOException
   {
@@ -158,7 +148,7 @@ public class ElasticSearchAccess
     {
       getRequest.addHeader("Authorization", "Basic " + auth);
     }
-    
+
     try (CloseableHttpClient httpClient = getClientBuilder().build())
     {
       try (CloseableHttpResponse response = httpClient.execute(getRequest))
@@ -174,20 +164,19 @@ public class ElasticSearchAccess
         throw new IOException(e);
       }
     }
-    
+
     return "";
   }
 
   /**
    * Posts the given string to elastic search.
-   * 
+   *
    * @param data
    *          The data to post
    * @throws IOException
    */
   public void push(String data) throws IOException
   {
-
     HttpPost post = getHttpPost(data);
 
     try (CloseableHttpClient httpClient = getClientBuilder().build())

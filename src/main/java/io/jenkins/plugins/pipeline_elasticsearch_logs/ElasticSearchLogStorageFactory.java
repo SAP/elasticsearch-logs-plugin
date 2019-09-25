@@ -57,7 +57,7 @@ public class ElasticSearchLogStorageFactory implements LogStorageFactory
       return new BrokenLogStorage(x);
     }
   }
-  
+
   static ElasticSearchLogStorageFactory get()
   {
     return ExtensionList.lookupSingleton(ElasticSearchLogStorageFactory.class);
@@ -66,17 +66,16 @@ public class ElasticSearchLogStorageFactory implements LogStorageFactory
   private static class ElasticSearchLogStorage implements LogStorage
   {
     private ElasticSearchRunConfiguration config;
-    
+
     ElasticSearchLogStorage(ElasticSearchRunConfiguration config)
     {
       this.config = config;
     }
-    
+
     @Override
     public BuildListener overallListener() throws IOException, InterruptedException
     {
-      ElasticSearchSender sender = new ElasticSearchSender(null, config);
-      return sender;
+      return new ElasticSearchSender(null, config);
     }
 
     @Override

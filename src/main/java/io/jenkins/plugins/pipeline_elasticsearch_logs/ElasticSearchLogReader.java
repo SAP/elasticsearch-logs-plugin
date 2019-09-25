@@ -51,7 +51,7 @@ public class ElasticSearchLogReader
 
   public ElasticSearchLogReader(ElasticSearchRunConfiguration config) throws IOException
   {
-    access = ElasticSearchAccess.createElasticSearchAccess(config);
+    access = config.createAccess();
     this.config = config;
     this.uid = config.getUid();
   }

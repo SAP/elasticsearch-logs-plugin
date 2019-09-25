@@ -1,19 +1,19 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
+import hudson.console.LineTransformationOutputStream;
+import hudson.model.BuildListener;
+import net.sf.json.JSONObject;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
-import hudson.console.LineTransformationOutputStream;
-import hudson.model.BuildListener;
-import net.sf.json.JSONObject;
 
 public class ElasticSearchSender implements BuildListener, Closeable
 {
@@ -45,20 +45,22 @@ public class ElasticSearchSender implements BuildListener, Closeable
       eventPrefix = EVENT_PREFIX_BUILD;
     }
   }
-  
+
+  public PrintStream getWrappedLogger(@CheckForNull OutputStream logger) {
+    try {
+      return new PrintStream(new ElasticSearchOutputStream(logger), false, "UTF-8");
+    } catch (UnsupportedEncodingException x) {
+      throw new AssertionError(x);
+    }
+  }
+
+
   @Override
   public PrintStream getLogger()
   {
     if (logger == null)
     {
-      try
-      {
-        logger = new PrintStream(new ElasticSearchOutputStream(), false, "UTF-8");
-      }
-      catch (UnsupportedEncodingException x)
-      {
-        throw new AssertionError(x);
-      }
+      logger = getWrappedLogger(null);
     }
     return logger;
   }
@@ -74,7 +76,7 @@ public class ElasticSearchSender implements BuildListener, Closeable
   {
     if (writer == null)
     {
-      writer = ElasticSearchAccess.createElasticSearchAccess(config);
+      writer = config.createAccess();
     }
     return writer;
   }
@@ -82,10 +84,21 @@ public class ElasticSearchSender implements BuildListener, Closeable
   private class ElasticSearchOutputStream extends LineTransformationOutputStream
   {
     private static final String EVENT_TYPE_MESSAGE = "Message";
+    private @CheckForNull OutputStream forwardingLogger;
+
+    public ElasticSearchOutputStream(@CheckForNull OutputStream logger) {
+      this.forwardingLogger = logger;
+    }
+
+    public ElasticSearchOutputStream() {
+    }
 
     @Override
     protected void eol(byte[] b, int len) throws IOException
     {
+      if (forwardingLogger != null) {
+        forwardingLogger.write(b,0,len);
+      }
       Map<String, Object> data = config.createData();
 
       ConsoleNotes.parse(b, len, data, config.isSaveAnnotations());

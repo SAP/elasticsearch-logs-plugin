@@ -7,8 +7,8 @@ import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.ResourceU
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.ResourceUtils.getExpectedTestLog;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.ResourceUtils.getTestPipeline;
 
-import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.function.Supplier;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -17,13 +17,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.jvnet.hudson.test.JenkinsRule;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import hudson.model.Build;
 import hudson.model.Cause;
@@ -42,9 +36,6 @@ import net.sf.json.JSONArray;
  * which overrrides the {@link ElasticSearchAccess#push(String)} method which normally sends the data to
  * Elasticsearch.
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ElasticSearchAccess.class})
-@PowerMockIgnore({"javax.crypto.*"}) //this needs to be excluded to prevent errors
 public class IntegrationTest
 {
   
@@ -98,8 +89,8 @@ public class IntegrationTest
 
   @Test
   public void testPipelineWithElasticsearchPlugin() throws Exception {
-    ElasticSearchAccessMock mockWriter = mockWriter();
-    configureElasticsearchPlugin(true);
+    ElasticSearchAccessMock mockWriter = new ElasticSearchAccessMock(false);
+    configureElasticsearchPlugin(true, mockWriter);
 
     WorkflowJob project = j.createProject(WorkflowJob.class);
     project.setDefinition(new CpsFlowDefinition(getTestPipeline(), true));
@@ -120,8 +111,8 @@ public class IntegrationTest
 
   @Test
   public void testPipelineWithSkippedStages() throws Exception {
-    ElasticSearchAccessMock mockWriter = mockWriter();
-    configureElasticsearchPlugin(true);
+    ElasticSearchAccessMock mockWriter = new ElasticSearchAccessMock(false);
+    configureElasticsearchPlugin(true, mockWriter);
 
     WorkflowJob project = j.createProject(WorkflowJob.class);
     project.setDefinition(new CpsFlowDefinition(getTestPipeline(), true));
@@ -139,33 +130,36 @@ public class IntegrationTest
     JSONArray expectedLog = getExpectedTestJsonLog();
     assertMatchEntries(expectedLog, mockWriter.getEntries());
   }
-  
-  
-  /**
-   * We need to make {@link ElasticSearchAccess#createElasticSearchAccess(ElasticSearchRunConfiguration)}
-   * return our mocked {@link ElasticSearchAccessMock}.
-   * @return
-   * @throws IOException
-   * @throws URISyntaxException
-   */
-  private ElasticSearchAccessMock mockWriter() throws IOException, URISyntaxException {
-    ElasticSearchAccessMock ElasticSearchAccessMock = new ElasticSearchAccessMock(false);
-    PowerMockito.mockStatic(ElasticSearchAccess.class);
-    Mockito.when(ElasticSearchAccess.createElasticSearchAccess(Mockito.any())).thenReturn(ElasticSearchAccessMock);
-    return ElasticSearchAccessMock;
-  }
-  
-  private void configureElasticsearchPlugin(boolean activate) throws URISyntaxException {
+
+
+  private void configureElasticsearchPlugin(boolean activate, ElasticSearchAccessMock mockWriter) throws URISyntaxException {
     ElasticSearchGlobalConfiguration globalConfig = ElasticSearchGlobalConfiguration.get();
 
     ElasticSearchConfiguration config = null;
     if(activate) {
-      config = new ElasticSearchConfiguration("http://localhost:9200/jenkins_logs/_doc");
+      config = new TestConfig("http://localhost:9200/jenkins_logs/_doc", mockWriter);
       config.setRunIdProvider(new DefaultRunIdProvider("test_instance"));
     }
 
     globalConfig.setElasticSearch(config);
     globalConfig.save();
+  }
+
+
+  private static class TestConfig extends ElasticSearchConfiguration {
+
+    private ElasticSearchAccessMock mockWriter;
+
+    public TestConfig(String url, ElasticSearchAccessMock mockWriter) throws URISyntaxException {
+        super(url);
+        this.mockWriter = mockWriter;
+    }
+
+    @Override
+    protected Supplier<ElasticSearchAccess> getAccessFactory() {
+      return () -> mockWriter;
+    }
+
   }
   
 }

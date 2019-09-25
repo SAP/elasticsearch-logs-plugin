@@ -56,7 +56,7 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous
 
   public ElasticSearchGraphListener(ElasticSearchRunConfiguration config) throws IOException
   {
-    writer = ElasticSearchAccess.createElasticSearchAccess(config);
+    writer = config.createAccess();
     this.config = config;
   }
 
@@ -80,7 +80,7 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous
           sendNodeEnd((BlockEndNode<?>)parent);
         }
       }
-      
+
       if (node instanceof AtomNode || node instanceof BlockStartNode)
       {
         sendNodeStart(node);
@@ -118,10 +118,10 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous
     {
       return FLOW_GRAPH_NODE_END;
     }
-    
+
     return "unknown";
   }
-  
+
   private void sendAtomNodeEnd(FlowNode node, FlowNode successor) throws IOException
   {
     Map<String, Object> data = createData(node);
@@ -163,10 +163,10 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous
     data.put(EVENT_TYPE, getEventType(node));
     writer.push(JSONObject.fromObject(data).toString());
   }
-  
+
   private long getDuration(FlowNode startNode, FlowNode endNode)
   {
-      return TimingAction.getStartTime(endNode) -  TimingAction.getStartTime(startNode); 
+      return TimingAction.getStartTime(endNode) -  TimingAction.getStartTime(startNode);
   }
 
   private Map<String, Object> createData(FlowNode node) throws IOException
@@ -187,7 +187,7 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous
 
     return data;
   }
-  
+
   private String getErrorMessage(FlowNode node)
   {
     String errorMessage = null;
@@ -198,18 +198,18 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous
     }
     return errorMessage;
   }
-  
+
   private String getStatus(FlowNode node)
   {
     if (node instanceof FlowEndNode)
     {
       return ((FlowEndNode) node).getResult().toString();
     }
-    
+
     // Identify skipped stages, similar to BlueOcean (https://github.com/jenkinsci/blueocean-plugin/blob/07bbd5082d314c215c4b750f337f20b88b19b3fa/blueocean-pipeline-api-impl/src/main/java/io/jenkins/blueocean/rest/impl/pipeline/PipelineNodeUtil.java#L95)
     if(StageStatus.isSkippedStage(node)) return Result.NOT_BUILT.toString();
     if(node instanceof BlockEndNode && StageStatus.isSkippedStage(((BlockEndNode<?>)node).getStartNode())) return Result.NOT_BUILT.toString();
-    
+
     ErrorAction error = node.getError();
     WarningAction warning = node.getPersistentAction(WarningAction.class);
     if (error != null)
@@ -230,5 +230,5 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous
 
     return Result.SUCCESS.toString();
   }
-  
+
 }
