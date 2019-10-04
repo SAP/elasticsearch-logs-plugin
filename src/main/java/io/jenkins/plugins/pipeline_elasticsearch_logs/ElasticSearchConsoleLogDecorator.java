@@ -18,8 +18,9 @@ public class ElasticSearchConsoleLogDecorator extends ConsoleLogFilter implement
         if (config != null) {
             ElasticSearchSender sender = new ElasticSearchSender(null, config);
             return sender.getWrappedLogger(logger);
+        } else {
+            return logger;
         }
-        else return logger;
     }
 
     protected ElasticSearchGlobalConfiguration getConfiguration() {

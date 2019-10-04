@@ -1,10 +1,6 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
-import hudson.Functions;
-import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
-import hudson.tasks.BatchFile;
-import hudson.tasks.Shell;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -59,10 +55,7 @@ public class ElasticSearchTest {
     @Test
     public void testSimplePipelineOutput() throws Exception {
         WorkflowJob project = jenkinsRule.createProject(WorkflowJob.class);
-        project.setDefinition(new CpsFlowDefinition("" +
-                "node {" +
-                "  echo message: 'hello'" +
-                "}", true));
+        project.setDefinition(new CpsFlowDefinition("node { echo message: 'hello' }", true));
         WorkflowRun build = jenkinsRule.buildAndAssertSuccess(project);
 
         // if elastic search output is enabled, nothing will be logged to build-log.
@@ -113,8 +106,7 @@ public class ElasticSearchTest {
             assertEquals("testInstance", runId.get("instance"));
         }
         assertEquals(eventType, line.get("eventType"));
-        if (message != null)
-            assertEquals(message, line.get("message"));
+        if (message != null) assertEquals(message, line.get("message"));
     }
 
 }

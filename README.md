@@ -38,7 +38,17 @@ Open an issue in [Github](https://github.com/sap/pipeline-elasticsearch-logs-plu
 
 ### Contributing
 
-Please open a Pull Request in our [Github](https://github.com/sap/pipeline-elasticsearch-logs-plugin) repository.
+Please open a Pull Request in our [Github](https://github.com/sap/elasticsearch-logs-plugin) repository.
+
+#### Code Style
+
+The [Jenkins Beginners Guide to Contribute](https://wiki.jenkins.io/display/JENKINS/Beginners+Guide+to+Contributing#BeginnersGuidetoContributing-CodeStyle) recommends the [Oracle Code Conventions for Java](http://www.oracle.com/technetwork/java/codeconvtoc-136057.html) from 1999.
+[Those Guidelines](https://wiki.jenkins.io/display/JENKINS/Code+Style+Guidelines) however might better describe the Code Style rules we apply.
+
+Most relevant rules:
+- line width: 140
+- indentation: 4 spaces
+    - no tabs
 
 ### To-Do (upcoming changes)
 
@@ -47,5 +57,5 @@ Please open a Pull Request in our [Github](https://github.com/sap/pipeline-elast
 
 ### License
 
-Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.   
+Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
 This project is licensed under "Apache Software License, v. 2" except as noted otherwise in the LICENSE file.
