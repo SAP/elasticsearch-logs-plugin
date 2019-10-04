@@ -55,7 +55,7 @@ public class ElasticSearchTest {
     @Test
     public void testSimplePipelineOutput() throws Exception {
         WorkflowJob project = jenkinsRule.createProject(WorkflowJob.class);
-        project.setDefinition(new CpsFlowDefinition("" + "node {" + "  echo message: 'hello'" + "}", true));
+        project.setDefinition(new CpsFlowDefinition("node { echo message: 'hello' }", true));
         WorkflowRun build = jenkinsRule.buildAndAssertSuccess(project);
 
         // if elastic search output is enabled, nothing will be logged to build-log.
