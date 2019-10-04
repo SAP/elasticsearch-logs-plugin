@@ -12,38 +12,30 @@ import hudson.Extension;
 import hudson.model.Queue;
 
 @Extension
-public class ElasticSearchFlowExecutionListener extends FlowExecutionListener
-{
+public class ElasticSearchFlowExecutionListener extends FlowExecutionListener {
 
-  private static final Logger LOGGER = Logger.getLogger(ElasticSearchFlowExecutionListener.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ElasticSearchFlowExecutionListener.class.getName());
 
-  @Override
-  public void onCreated(FlowExecution execution)
-  {
+    @Override
+    public void onCreated(FlowExecution execution) {
 
-    try
-    {
+        try {
 
-      Queue.Executable exec = execution.getOwner().getExecutable();
-      if (exec instanceof WorkflowRun)
-      {
+            Queue.Executable exec = execution.getOwner().getExecutable();
+            if (exec instanceof WorkflowRun) {
 
-        ElasticSearchRunConfiguration config = ElasticSearchGlobalConfiguration.getRunConfiguration((WorkflowRun) exec);
+                ElasticSearchRunConfiguration config = ElasticSearchGlobalConfiguration.getRunConfiguration((WorkflowRun) exec);
 
-        if (config == null)
-        {
-          return;
+                if (config == null) {
+                    return;
+                }
+
+                ElasticSearchGraphListener graphListener = new ElasticSearchGraphListener(config);
+                execution.addListener(graphListener);
+            }
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Failed to get Executable of FlowExecution.");
         }
-
-        ElasticSearchGraphListener graphListener = new ElasticSearchGraphListener(config);
-        execution.addListener(graphListener);
-      }
     }
-    catch (IOException e)
-    {
-      LOGGER.log(Level.SEVERE, "Failed to get Executable of FlowExecution.");
-    }
-  }
-
 
 }

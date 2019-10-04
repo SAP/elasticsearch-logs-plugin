@@ -46,192 +46,154 @@ import com.google.common.collect.Range;
  * Post data to Elastic Search.
  *
  */
-public class ElasticSearchAccess
-{
-  private static final Logger LOGGER = Logger.getLogger(ElasticSearchAccess.class.getName());
+public class ElasticSearchAccess {
+    private static final Logger LOGGER = Logger.getLogger(ElasticSearchAccess.class.getName());
 
-  private static final Range<Integer> SUCCESS_CODES = closedOpen(200, 300);
+    private static final Range<Integer> SUCCESS_CODES = closedOpen(200, 300);
 
-  private final URI uri;
+    private final URI uri;
 
-  @CheckForNull
-  private String username;
+    @CheckForNull
+    private String username;
 
-  @CheckForNull
-  private String password;
+    @CheckForNull
+    private String password;
 
-  private transient String auth;
+    private transient String auth;
 
-  private KeyStore trustKeyStore;
+    private KeyStore trustKeyStore;
 
-  @CheckForNull
-  private transient HttpClientBuilder clientBuilder;
+    @CheckForNull
+    private transient HttpClientBuilder clientBuilder;
 
-  public ElasticSearchAccess(URI uri, String username, String password)
-  {
-    this.uri = uri;
-    this.password = password;
-    this.username = username;
-  }
-
-  public void setTrustKeyStore(KeyStore trustKeyStore)
-  {
-    this.trustKeyStore = trustKeyStore;
-  }
-
-  @CheckForNull
-  private String getAuth()
-  {
-    if (auth == null && StringUtils.isNotBlank(username))
-    {
-      auth = Base64
-        .encodeBase64String((username + ":" + StringUtils.defaultString(password)).getBytes(StandardCharsets.UTF_8));
+    public ElasticSearchAccess(URI uri, String username, String password) {
+        this.uri = uri;
+        this.password = password;
+        this.username = username;
     }
-    return auth;
-  }
 
-  private HttpPost getHttpPost(String data)
-  {
-    HttpPost postRequest = new HttpPost(uri);
-    // char encoding is set to UTF_8 since this request posts a JSON string
-    StringEntity input = new StringEntity(data, StandardCharsets.UTF_8);
-    input.setContentType(ContentType.APPLICATION_JSON.toString());
-    postRequest.setEntity(input);
-    auth = getAuth();
-    if (auth != null)
-    {
-      postRequest.addHeader("Authorization", "Basic " + auth);
+    public void setTrustKeyStore(KeyStore trustKeyStore) {
+        this.trustKeyStore = trustKeyStore;
     }
-    return postRequest;
-  }  
 
-  public RestHighLevelClient createNewRestClient() {
-      RestClientBuilder builder = RestClient.builder(new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme()));
-      if(getAuth() != null) builder.setDefaultHeaders(new Header[] {new BasicHeader("Authorization", "Basic " + getAuth())});
-      return new RestHighLevelClient(builder);
-  }
-
-  @Nonnull
-  private HttpClientBuilder getClientBuilder()
-  {
-    if (clientBuilder == null)
-    {
-      clientBuilder = HttpClientBuilder.create();
-      RequestConfig.Builder requestBuilder = RequestConfig.custom();
-      requestBuilder.setConnectTimeout(2000);
-      requestBuilder.setConnectionRequestTimeout(2000);
-      requestBuilder.setSocketTimeout(2000);
-      clientBuilder.setDefaultRequestConfig(requestBuilder.build());
-      if (trustKeyStore != null)
-      {
-        try
-        {
-          SSLHelper.setClientBuilderSSLContext(clientBuilder, trustKeyStore);
+    @CheckForNull
+    private String getAuth() {
+        if (auth == null && StringUtils.isNotBlank(username)) {
+            auth = Base64.encodeBase64String((username + ":" + StringUtils.defaultString(password)).getBytes(StandardCharsets.UTF_8));
         }
-        catch (KeyManagementException | CertificateException | NoSuchAlgorithmException | KeyStoreException
-              | IOException e)
-        {
-          LOGGER.log(Level.SEVERE, "Failed to set SSLContext for http client. Will try without.", e);
+        return auth;
+    }
+
+    private HttpPost getHttpPost(String data) {
+        HttpPost postRequest = new HttpPost(uri);
+        // char encoding is set to UTF_8 since this request posts a JSON string
+        StringEntity input = new StringEntity(data, StandardCharsets.UTF_8);
+        input.setContentType(ContentType.APPLICATION_JSON.toString());
+        postRequest.setEntity(input);
+        auth = getAuth();
+        if (auth != null) {
+            postRequest.addHeader("Authorization", "Basic " + auth);
         }
-      }
-    }
-    return clientBuilder;
-  }
-
-  @Restricted(NoExternalUse.class)
-  String testConnection() throws URISyntaxException, IOException
-  {
-    URI testUri = new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), null, null, null);
-    HttpGet getRequest = new HttpGet(testUri);
-    String auth = getAuth();
-    if (auth != null)
-    {
-      getRequest.addHeader("Authorization", "Basic " + auth);
+        return postRequest;
     }
 
-    try (CloseableHttpClient httpClient = getClientBuilder().build())
-    {
-      try (CloseableHttpResponse response = httpClient.execute(getRequest))
-      {
-        if (!SUCCESS_CODES.contains(response.getStatusLine().getStatusCode()))
-        {
-          String errorMessage = this.getErrorMessage(response);
-          throw new IOException(errorMessage);
+    public RestHighLevelClient createNewRestClient() {
+        RestClientBuilder builder = RestClient.builder(new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme()));
+        if (getAuth() != null) builder.setDefaultHeaders(new Header[] { new BasicHeader("Authorization", "Basic " + getAuth()) });
+        return new RestHighLevelClient(builder);
+    }
+
+    @Nonnull
+    private HttpClientBuilder getClientBuilder() {
+        if (clientBuilder == null) {
+            clientBuilder = HttpClientBuilder.create();
+            RequestConfig.Builder requestBuilder = RequestConfig.custom();
+            requestBuilder.setConnectTimeout(2000);
+            requestBuilder.setConnectionRequestTimeout(2000);
+            requestBuilder.setSocketTimeout(2000);
+            clientBuilder.setDefaultRequestConfig(requestBuilder.build());
+            if (trustKeyStore != null) {
+                try {
+                    SSLHelper.setClientBuilderSSLContext(clientBuilder, trustKeyStore);
+                } catch (KeyManagementException | CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {
+                    LOGGER.log(Level.SEVERE, "Failed to set SSLContext for http client. Will try without.", e);
+                }
+            }
         }
-      }
-      catch (Exception e)
-      {
-        throw new IOException(e);
-      }
+        return clientBuilder;
     }
 
-    return "";
-  }
-
-  /**
-   * Posts the given string to elastic search.
-   *
-   * @param data
-   *          The data to post
-   * @throws IOException
-   */
-  public void push(String data) throws IOException
-  {
-    HttpPost post = getHttpPost(data);
-
-    try (CloseableHttpClient httpClient = getClientBuilder().build())
-    {
-      try (CloseableHttpResponse response = httpClient.execute(post))
-      {
-        if (!SUCCESS_CODES.contains(response.getStatusLine().getStatusCode()))
-        {
-          String errorMessage = this.getErrorMessage(response);
-          throw new IOException(errorMessage);
+    @Restricted(NoExternalUse.class)
+    String testConnection() throws URISyntaxException, IOException {
+        URI testUri = new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), null, null, null);
+        HttpGet getRequest = new HttpGet(testUri);
+        String auth = getAuth();
+        if (auth != null) {
+            getRequest.addHeader("Authorization", "Basic " + auth);
         }
-      }
-      catch (Exception e)
-      {
-        throw new IOException(e);
-      }
-    }
-  }
 
-  private String getErrorMessage(CloseableHttpResponse response)
-  {
-    ByteArrayOutputStream byteStream = null;
-    PrintStream stream = null;
-    try
-    {
-      byteStream = new ByteArrayOutputStream();
-      stream = new PrintStream(byteStream, true, StandardCharsets.UTF_8.name());
+        try (CloseableHttpClient httpClient = getClientBuilder().build()) {
+            try (CloseableHttpResponse response = httpClient.execute(getRequest)) {
+                if (!SUCCESS_CODES.contains(response.getStatusLine().getStatusCode())) {
+                    String errorMessage = this.getErrorMessage(response);
+                    throw new IOException(errorMessage);
+                }
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
 
-      try
-      {
-        stream.print("HTTP error code: ");
-        stream.println(response.getStatusLine().getStatusCode());
-        stream.print("URI: ");
-        stream.println(uri.toString());
-        stream.println("RESPONSE: " + response.toString());
-        response.getEntity().writeTo(stream);
-      }
-      catch (IOException e)
-      {
-        stream.println(ExceptionUtils.getStackTrace(e));
-      }
-      stream.flush();
-      return byteStream.toString(StandardCharsets.UTF_8.name());
+        return "";
     }
-    catch (UnsupportedEncodingException e)
-    {
-      return ExceptionUtils.getStackTrace(e);
+
+    /**
+     * Posts the given string to elastic search.
+     *
+     * @param data
+     *            The data to post
+     * @throws IOException
+     */
+    public void push(String data) throws IOException {
+        HttpPost post = getHttpPost(data);
+
+        try (CloseableHttpClient httpClient = getClientBuilder().build()) {
+            try (CloseableHttpResponse response = httpClient.execute(post)) {
+                if (!SUCCESS_CODES.contains(response.getStatusLine().getStatusCode())) {
+                    String errorMessage = this.getErrorMessage(response);
+                    throw new IOException(errorMessage);
+                }
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
     }
-    finally
-    {
-      if (stream != null)
-      {
-        stream.close();
-      }
+
+    private String getErrorMessage(CloseableHttpResponse response) {
+        ByteArrayOutputStream byteStream = null;
+        PrintStream stream = null;
+        try {
+            byteStream = new ByteArrayOutputStream();
+            stream = new PrintStream(byteStream, true, StandardCharsets.UTF_8.name());
+
+            try {
+                stream.print("HTTP error code: ");
+                stream.println(response.getStatusLine().getStatusCode());
+                stream.print("URI: ");
+                stream.println(uri.toString());
+                stream.println("RESPONSE: " + response.toString());
+                response.getEntity().writeTo(stream);
+            } catch (IOException e) {
+                stream.println(ExceptionUtils.getStackTrace(e));
+            }
+            stream.flush();
+            return byteStream.toString(StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            return ExceptionUtils.getStackTrace(e);
+        } finally {
+            if (stream != null) {
+                stream.close();
+            }
+        }
     }
-  }
 
 }
