@@ -1,10 +1,6 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
-import hudson.Functions;
-import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
-import hudson.tasks.BatchFile;
-import hudson.tasks.Shell;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;

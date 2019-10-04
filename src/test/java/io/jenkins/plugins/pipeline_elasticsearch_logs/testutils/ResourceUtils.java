@@ -17,7 +17,7 @@ public class ResourceUtils {
     /**
      * Returns the content of the {@code <testMethod>.Jenkinsfile} corresponding to the test method
      * which (indirectly) called this method.
-     * 
+     *
      * @return
      * @throws IOException
      * @throws SecurityException
@@ -30,7 +30,7 @@ public class ResourceUtils {
     /**
      * Returns the content of the {@code <testMethod>.log} file corresponding to the test method
      * which (indirectly) called this method.
-     * 
+     *
      * @return
      * @throws IOException
      * @throws SecurityException
@@ -43,7 +43,7 @@ public class ResourceUtils {
     /**
      * Returns the content of the {@code <testMethod>.log.json} file corresponding to the test method
      * which (indirectly) called this method.
-     * 
+     *
      * @return The JSONArray contained in the .log.json file.
      * @throws IOException
      * @throws SecurityException
@@ -56,7 +56,7 @@ public class ResourceUtils {
     /**
      * Returns the resource path of the file, corresponding to the test method
      * which (indirectly) calls this method, with the specified fileExtension.
-     * 
+     *
      * @param fileExtension
      * @return
      * @throws SecurityException
@@ -70,7 +70,7 @@ public class ResourceUtils {
 
     /**
      * Identifies the calling test method
-     * 
+     *
      * @return
      * @throws SecurityException
      * @throws ClassNotFoundException
@@ -93,7 +93,7 @@ public class ResourceUtils {
 
     /**
      * Reads the file content into a String
-     * 
+     *
      * @param filePath
      * @return the content as String
      * @throws IOException

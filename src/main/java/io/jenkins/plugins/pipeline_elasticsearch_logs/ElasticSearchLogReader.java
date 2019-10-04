@@ -158,6 +158,7 @@ public class ElasticSearchLogReader {
             };
         }
 
+        @Override
         public void close() {
             LOGGER.finer(String.format("Request to clear scroll search with id '%s'", scrollResponse.getScrollId()));
 

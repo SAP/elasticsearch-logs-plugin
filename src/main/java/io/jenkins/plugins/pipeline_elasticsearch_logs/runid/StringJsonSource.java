@@ -20,6 +20,7 @@ public class StringJsonSource extends JsonSource {
         this.jsonString = jsonObject.toString();
     }
 
+    @Override
     public String getJsonString() {
         return jsonString;
     }

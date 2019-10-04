@@ -9,7 +9,7 @@ public class LogUtils {
 
     /**
      * Removes annotations in the log and returns the plaintext log.
-     * 
+     *
      * @param logText
      * @return
      * @throws IOException

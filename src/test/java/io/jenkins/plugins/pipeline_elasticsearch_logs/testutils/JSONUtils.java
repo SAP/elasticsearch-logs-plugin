@@ -53,13 +53,13 @@ public class JSONUtils {
      * This method replaces in the json object the values of all keys in the replaceKeyValue
      * map with the values from there. This method can be used to generate test content e.g. with
      * regex values accepting ANY value for all timestamps.
-     * 
+     *
      * @param json
      * @param replaceKeyValue
      */
     public static void replaceValues(JSONObject json, Map<String, String> replaceKeyValue) {
         @SuppressWarnings("unchecked")
-        Set<String> keySet = (Set<String>) json.keySet();
+        Set<String> keySet = json.keySet();
         for (String key : keySet) {
             String value = replaceKeyValue.get(key);
             if (value != null) {
@@ -80,7 +80,7 @@ public class JSONUtils {
      * <code>io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.JSONUtils.writeTestResourceContent(
      *     new java.io.File("testResource.json"), mockWriter.getEntries())</code></li>
      * </ul>
-     * 
+     *
      * @param targetFile
      * @param mockWriterData
      *            list with json strings per log entry
@@ -101,7 +101,7 @@ public class JSONUtils {
     /**
      * Sorts the first level keys of the json object according to
      * the order defined in PRETTYPRINT_KEY_ORDER.
-     * 
+     *
      * @param json
      * @return
      */

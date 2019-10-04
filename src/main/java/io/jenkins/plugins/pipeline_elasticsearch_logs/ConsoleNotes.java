@@ -3,7 +3,7 @@
  *
  * Copyright 2018 CloudBees, Inc.
  * Copyright 2019 SAP SE
- * 
+ *
  * Source: https://github.com/jenkinsci/pipeline-cloudwatch-logs-plugin/blob/66f4d48a5560e518646d04739c3d2f7224e9dc93/src/main/java/io/jenkins/plugins/pipeline_cloudwatch_logs/ConsoleNotes.java
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -27,8 +27,6 @@
 
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
-import static java.lang.String.format;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
@@ -39,9 +37,6 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 
 import hudson.console.ConsoleNote;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONException;
-import net.sf.json.JSONObject;
 
 /**
  * Utilities for extracting and reinserting {@link ConsoleNote}s.
