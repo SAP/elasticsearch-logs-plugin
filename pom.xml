@@ -11,11 +11,9 @@
     </parent>
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>pipeline-elasticsearch-logs</artifactId>
-    <version>${revision}${changelist}</version>
+    <version>0.9-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <properties>
-        <revision>0.9</revision>
-        <changelist>-SNAPSHOT</changelist>
         <jenkins.version>2.176.1</jenkins.version>
         <java.level>8</java.level>
         <useBeta>true</useBeta>
