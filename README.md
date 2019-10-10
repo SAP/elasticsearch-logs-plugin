@@ -24,9 +24,10 @@ Go to **Manage Jenkins > System Configuration > Logging to Elasticsearch for Pip
 
 ### Limitations
 
-Currently the plugin is only able to push the logs to Elasticsearch but the way back to read the logs from ElasticSearch and display in Jenkins is not yet implemented.
-The initial scope of this plugin was to use it it in a [JenkinsFileRunner](https://github.com/jenkinsci/jenkinsfile-runner) scenario.
+The Elasticsearch [Java High Level REST Client](https://www.elastic.co/guide/en/elasticsearch/client/java-rest/master/java-rest-high.html)
+used by this plugin [should match](https://www.elastic.co/guide/en/elasticsearch/client/java-rest/master/java-rest-high-compatibility.html) the Elasticsearch server version in order to prevent unexpected results.
 
+In order to not only support the latest Elasticsearch version, and since we did not experience any issues (client: 6.x, server: 7.x), [we decided](https://github.com/SAP/elasticsearch-logs-plugin/issues/13) to stay on a smaller client major version. If you experience any problems please create a GitHub issue.
 
 ### Known Issues
 
