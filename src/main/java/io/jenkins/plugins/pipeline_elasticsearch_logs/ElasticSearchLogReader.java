@@ -1,5 +1,6 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.Utils.logThrowableHideDetails;
 import static java.lang.String.format;
 
 import java.io.IOException;
@@ -71,7 +72,7 @@ public class ElasticSearchLogReader {
             queryElasticSearch(w, nodeId, null);
             w.flush();
         } catch (RuntimeException x) {
-            throw new IOException(x);
+            logThrowableHideDetails(LOGGER, Level.SEVERE, "Could not read from Elasticsearch", x);
         }
     }
 
