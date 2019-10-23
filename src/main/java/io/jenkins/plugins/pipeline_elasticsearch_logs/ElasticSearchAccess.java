@@ -1,6 +1,9 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
 import static com.google.common.collect.Ranges.closedOpen;
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.Utils.logExceptionAndReraiseWithTruncatedDetails;
+
+import com.google.common.collect.Range;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -39,8 +42,6 @@ import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
-
-import com.google.common.collect.Range;
 
 /**
  * Post data to Elastic Search.
@@ -139,7 +140,7 @@ public class ElasticSearchAccess {
                     throw new IOException(errorMessage);
                 }
             } catch (Exception e) {
-                throw new IOException(e);
+                logExceptionAndReraiseWithTruncatedDetails(LOGGER, Level.SEVERE, "Test GET request to Elasticsearch failed", e);
             }
         }
 
@@ -163,7 +164,7 @@ public class ElasticSearchAccess {
                     throw new IOException(errorMessage);
                 }
             } catch (Exception e) {
-                throw new IOException(e);
+                logExceptionAndReraiseWithTruncatedDetails(LOGGER, Level.SEVERE, "Could not push log to Elasticsearch", e);
             }
         }
     }

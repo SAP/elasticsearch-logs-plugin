@@ -7,8 +7,16 @@ import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.ResourceU
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.ResourceUtils.getExpectedTestLog;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.ResourceUtils.getTestPipeline;
 
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
@@ -18,6 +26,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.LoggerRule;
 
 import hudson.model.Build;
 import hudson.model.Cause;
@@ -40,6 +49,10 @@ public class IntegrationTest {
     @Rule
     public JenkinsRule j = new JenkinsRule();
 
+    @Rule
+    public LoggerRule logs = new LoggerRule().record(Logger.getLogger(""),
+            Level.WARNING);
+    
     @Before
     public void before() {
     }
@@ -86,7 +99,7 @@ public class IntegrationTest {
     @Test
     public void testPipelineWithElasticsearchPlugin() throws Exception {
         ElasticSearchAccessMock mockWriter = new ElasticSearchAccessMock(false);
-        configureElasticsearchPlugin(true, mockWriter);
+        configureElasticsearchPlugin(true, false, mockWriter);
 
         WorkflowJob project = j.createProject(WorkflowJob.class);
         project.setDefinition(new CpsFlowDefinition(getTestPipeline(), true));
@@ -104,11 +117,93 @@ public class IntegrationTest {
         JSONArray expectedLog = getExpectedTestJsonLog();
         assertMatchEntries(expectedLog, mockWriter.getEntries());
     }
+    
+    @Test
+    public void testPipelinePushLogsWithConnectionIssues() throws Exception {
+        // SETUP
+        ElasticSearchAccess elasticSearchAccess = new ElasticSearchAccess(new URI("http://wrongurl.does.not.exist"), null, null);
+        configureElasticsearchPlugin(true, false, elasticSearchAccess);
+
+        WorkflowJob project = j.createProject(WorkflowJob.class);
+        project.setDefinition(new CpsFlowDefinition(getTestPipeline(), true));
+        WorkflowRun build;
+        logs.capture(9999);
+        
+        // EXERCISE
+        project.scheduleBuild(new Cause.UserIdCause());
+        while ((build = project.getLastBuild()) == null || build.getResult() == null) {
+            Thread.sleep(100);
+        }
+
+        // VERIFY
+        Assert.assertEquals(Result.SUCCESS, project.getLastBuild().getResult());
+
+        // Jenkins build log is empty if ES plugin is active, and read from ES in not enabled.
+        Assert.assertEquals("", build.getLog());
+        
+        List<LogRecord> records = new ArrayList<LogRecord>(logs.getRecords());
+        Collections.reverse(records);
+        Iterator<LogRecord> logEntries = records.iterator();
+
+        //Log entry with full details
+        String expectedPrefix = "Could not push log to Elasticsearch - ErrorID: '";
+        LogRecord logEntryWithFullInfos = findNext(expectedPrefix, logEntries);
+        Assert.assertTrue("Log does not contain: " + expectedPrefix, logEntryWithFullInfos != null);
+        String message = logEntryWithFullInfos.getMessage();
+        Assert.assertNotNull("The full log entry does not contain the cause (has to)", logEntryWithFullInfos.getThrown());
+
+        String errorId = message.substring(expectedPrefix.length(), message.length()-1).trim();
+        
+        //Stripped log entry without sensitive information
+        String expectedMessage = "Could not push log to Elasticsearch - Search Jenkins log for ErrorID '" + errorId + "'";
+        LogRecord logEntryStripped = findNext(expectedMessage, logEntries);
+        Assert.assertTrue("Log does not contain: " + expectedMessage, logEntryStripped != null);
+        Throwable theException = findExceptionWithMessage(logEntryStripped, expectedMessage);
+        Assert.assertNotNull("Could not find the stripped exception", theException);
+        Assert.assertNull("The stripped exception contains a cause (must not): " + theException.getCause() , theException.getCause());
+    }
+
+    private LogRecord findNext(String string, Iterator<LogRecord> logEntries) {
+        while(logEntries.hasNext()) {
+            LogRecord entry = logEntries.next();
+            if(entry.getMessage().contains(string)) return entry;
+            if(entry.getThrown() != null && entry.getThrown().getMessage().contains(string)) return entry;
+        }
+        return null;
+    }
+
+    private Throwable findExceptionWithMessage(LogRecord logEntry, String expectedMessage) {
+        Throwable cause = logEntry.getThrown();
+        if(cause.getMessage().contains(expectedMessage)) return cause;
+        while((cause = cause.getCause()) != null) {
+            if(cause.getMessage().contains(expectedMessage)) return cause;
+        }
+        return null;
+    }
+
+    @Test
+    public void testPipelineReadLogsWithConnectionIssues() throws Exception {
+        ElasticSearchAccess elasticSearchAccess = new ElasticSearchAccess(new URI("http://wrongurl.does.not.exist"), null, null);
+        configureElasticsearchPlugin(true, true, elasticSearchAccess);
+
+        WorkflowJob project = j.createProject(WorkflowJob.class);
+        project.setDefinition(new CpsFlowDefinition(getTestPipeline(), true));
+        WorkflowRun build;
+        project.scheduleBuild(new Cause.UserIdCause());
+        while ((build = project.getLastBuild()) == null || build.getResult() == null) {
+            Thread.sleep(100);
+        }
+
+        Assert.assertEquals(Result.SUCCESS, project.getLastBuild().getResult());
+
+        String expectedError = "java.lang.RuntimeException: Could not get log";
+        Assert.assertTrue("Log does not start with " + expectedError, build.getLog().startsWith(expectedError));
+    }
 
     @Test
     public void testPipelineWithSkippedStages() throws Exception {
         ElasticSearchAccessMock mockWriter = new ElasticSearchAccessMock(false);
-        configureElasticsearchPlugin(true, mockWriter);
+        configureElasticsearchPlugin(true, false, mockWriter);
 
         WorkflowJob project = j.createProject(WorkflowJob.class);
         project.setDefinition(new CpsFlowDefinition(getTestPipeline(), true));
@@ -127,13 +222,14 @@ public class IntegrationTest {
         assertMatchEntries(expectedLog, mockWriter.getEntries());
     }
 
-    private void configureElasticsearchPlugin(boolean activate, ElasticSearchAccessMock mockWriter) throws URISyntaxException {
+    private void configureElasticsearchPlugin(boolean activate, boolean readLogsFromEs, ElasticSearchAccess mockWriter) throws URISyntaxException {
         ElasticSearchGlobalConfiguration globalConfig = ElasticSearchGlobalConfiguration.get();
 
         ElasticSearchConfiguration config = null;
         if (activate) {
             config = new TestConfig("http://localhost:9200/jenkins_logs/_doc", mockWriter);
             config.setRunIdProvider(new DefaultRunIdProvider("test_instance"));
+            config.setReadLogsFromElasticsearch(readLogsFromEs);
         }
 
         globalConfig.setElasticSearch(config);
@@ -142,9 +238,9 @@ public class IntegrationTest {
 
     private static class TestConfig extends ElasticSearchConfiguration {
 
-        private ElasticSearchAccessMock mockWriter;
+        private ElasticSearchAccess mockWriter;
 
-        public TestConfig(String url, ElasticSearchAccessMock mockWriter) throws URISyntaxException {
+        public TestConfig(String url, ElasticSearchAccess mockWriter) throws URISyntaxException {
             super(url);
             this.mockWriter = mockWriter;
         }

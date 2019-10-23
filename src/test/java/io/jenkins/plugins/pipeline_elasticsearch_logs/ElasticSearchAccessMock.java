@@ -8,6 +8,8 @@ import java.net.URISyntaxException;
 import java.security.KeyStore;
 import java.util.ArrayList;
 
+import org.apache.http.conn.ConnectTimeoutException;
+
 /**
  * This class mocks an ElasticSearchAccess and overrides the {@link ElasticSearchAccess#push(String)} method.
  * The data the plugin tries to send to Elasticsearch are collected and can be retrieved via {@link #getEntries()}.
@@ -15,7 +17,8 @@ import java.util.ArrayList;
 public class ElasticSearchAccessMock extends ElasticSearchAccess {
 
     private ArrayList<String> entries = new ArrayList<String>();
-    private boolean printToLog;
+    private boolean printToLog = false;
+    private boolean failConnection = false;
 
     public ElasticSearchAccessMock(boolean printToLog) throws URISyntaxException {
         super(new URI("http://localhost:9200/jenkins/_doc"), "test", "test");
@@ -33,8 +36,13 @@ public class ElasticSearchAccessMock extends ElasticSearchAccess {
 
     @Override
     public void push(String data) throws IOException {
+        if(failConnection) {
+            throw new ConnectTimeoutException("Connect to Elasticsearch failed: connect timed out");
+        }
         data = prettyPrint(data);
-        if (printToLog) System.out.println(data);
+        if (printToLog) {
+            System.out.println(data);
+        }
         entries.add(data);
     }
 
@@ -43,6 +51,10 @@ public class ElasticSearchAccessMock extends ElasticSearchAccess {
      */
     public ArrayList<String> getEntries() {
         return entries;
+    }
+
+    public void failConnection(boolean failConnection) {
+        this.failConnection = failConnection;
     }
 
 }
