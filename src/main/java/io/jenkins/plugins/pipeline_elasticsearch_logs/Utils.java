@@ -9,12 +9,12 @@ import java.util.logging.Logger;
 
 public class Utils {
 
-    public static void logThrowableHideDetails(Logger logger, Level level, String message, Throwable error) throws IOException {
-        String errorId = logThrowableWithID(logger, level, message, error);
+    public static void logExceptionAndReraiseWithTruncatedDetails(Logger logger, Level level, String message, Throwable error) throws IOException {
+        String errorId = logExceptionWithID(logger, level, message, error);
         throw new IOException(format("%s - Search Jenkins log for ErrorID '%s'", message, errorId));
     }
     
-    public static String logThrowableWithID(Logger logger, Level level, String message, Throwable error) {
+    private static String logExceptionWithID(Logger logger, Level level, String message, Throwable error) {
         String errorId = UUID.randomUUID().toString();
         logger.log(level, format("%s - ErrorID: '%s'", message, errorId), error);
         return errorId;

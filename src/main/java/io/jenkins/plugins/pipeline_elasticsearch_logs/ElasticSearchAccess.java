@@ -1,7 +1,7 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
 import static com.google.common.collect.Ranges.closedOpen;
-import static io.jenkins.plugins.pipeline_elasticsearch_logs.Utils.logThrowableHideDetails;
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.Utils.logExceptionAndReraiseWithTruncatedDetails;
 
 import com.google.common.collect.Range;
 
@@ -140,7 +140,7 @@ public class ElasticSearchAccess {
                     throw new IOException(errorMessage);
                 }
             } catch (Exception e) {
-                logThrowableHideDetails(LOGGER, Level.SEVERE, "Test GET request to Elasticsearch failed", e);
+                logExceptionAndReraiseWithTruncatedDetails(LOGGER, Level.SEVERE, "Test GET request to Elasticsearch failed", e);
             }
         }
 
@@ -164,7 +164,7 @@ public class ElasticSearchAccess {
                     throw new IOException(errorMessage);
                 }
             } catch (Exception e) {
-                logThrowableHideDetails(LOGGER, Level.SEVERE, "Could not push log to Elasticsearch", e);
+                logExceptionAndReraiseWithTruncatedDetails(LOGGER, Level.SEVERE, "Could not push log to Elasticsearch", e);
             }
         }
     }
