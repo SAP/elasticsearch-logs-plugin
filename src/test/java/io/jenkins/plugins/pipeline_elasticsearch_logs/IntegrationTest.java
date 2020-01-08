@@ -1,5 +1,6 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchConfiguration.CONNECTION_TIMEOUT_DEFAULT;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.AssertionUtils.assertMatchEntries;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.AssertionUtils.assertMatchLines;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.LogUtils.removeAnnotations;
@@ -121,7 +122,7 @@ public class IntegrationTest {
     @Test
     public void testPipelinePushLogsWithConnectionIssues() throws Exception {
         // SETUP
-        ElasticSearchAccess elasticSearchAccess = new ElasticSearchAccess(new URI("http://wrongurl.does.not.exist"), null, null, ElasticSearchConfiguration.CONNECTION_TIMEOUT_DEFAULT);
+        ElasticSearchAccess elasticSearchAccess = new ElasticSearchAccess(new URI("http://wrongurl.does.not.exist"), null, null, CONNECTION_TIMEOUT_DEFAULT);
         configureElasticsearchPlugin(true, false, elasticSearchAccess);
 
         WorkflowJob project = j.createProject(WorkflowJob.class);
@@ -183,7 +184,7 @@ public class IntegrationTest {
 
     @Test
     public void testPipelineReadLogsWithConnectionIssues() throws Exception {
-        ElasticSearchAccess elasticSearchAccess = new ElasticSearchAccess(new URI("http://wrongurl.does.not.exist"), null, null, ElasticSearchConfiguration.CONNECTION_TIMEOUT_DEFAULT);
+        ElasticSearchAccess elasticSearchAccess = new ElasticSearchAccess(new URI("http://wrongurl.does.not.exist"), null, null, CONNECTION_TIMEOUT_DEFAULT);
         configureElasticsearchPlugin(true, true, elasticSearchAccess);
 
         WorkflowJob project = j.createProject(WorkflowJob.class);
