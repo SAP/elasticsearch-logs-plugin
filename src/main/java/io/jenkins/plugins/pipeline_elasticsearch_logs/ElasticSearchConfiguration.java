@@ -1,5 +1,14 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
+import static org.apache.commons.lang.StringUtils.isEmpty;
+
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardCertificateCredentials;
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.cloudbees.plugins.credentials.common.StandardUsernameListBoxModel;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.matchers.IdMatcher;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -27,13 +36,6 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
-
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.common.StandardCertificateCredentials;
-import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
-import com.cloudbees.plugins.credentials.common.StandardUsernameListBoxModel;
-import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
-import com.cloudbees.plugins.credentials.matchers.IdMatcher;
 
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
@@ -72,6 +74,10 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
     private String url;
 
+    static final int CONNECTION_TIMEOUT_DEFAULT = 10000;
+
+    private String connectionTimeoutMillis;
+
     @DataBoundConstructor
     public ElasticSearchConfiguration(String url) throws URISyntaxException {
         this.url = url;
@@ -108,6 +114,15 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
     public String getUrl() {
         return url;
+    }
+
+    public String getConnectionTimeoutMillis() {
+        return connectionTimeoutMillis;
+    }
+
+    @DataBoundSetter
+    public void setConnectionTimeoutMillis(String connectionTimeoutMillis) {
+        this.connectionTimeoutMillis = connectionTimeoutMillis;
     }
 
     public boolean isSaveAnnotations() {
@@ -241,8 +256,10 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
             throw new IOException(e);
         }
 
+        int connectionTimeout = isEmpty(connectionTimeoutMillis) ? CONNECTION_TIMEOUT_DEFAULT : Integer.parseInt(connectionTimeoutMillis);
+
         return new ElasticSearchRunConfiguration(uri, username, password, getKeyStoreBytes(), isSaveAnnotations(), getUniqueRunId(run),
-                getRunIdProvider().getRunId(run), isReadLogsFromElasticsearch(), getAccessFactory());
+                getRunIdProvider().getRunId(run), isReadLogsFromElasticsearch(), getAccessFactory(), connectionTimeout);
     }
 
     // Can be overwritten in tests
@@ -265,6 +282,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     @Extension
     @Symbol("elasticsearch")
     public static class DescriptorImpl extends Descriptor<ElasticSearchConfiguration> {
+        
         public static ListBoxModel doFillCredentialsIdItems(@QueryParameter String credentialsId) {
             StandardUsernameListBoxModel model = new StandardUsernameListBoxModel();
 
@@ -280,6 +298,17 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
                     .includeCurrentValue(certificateId);
 
             return model;
+        }
+        
+        public FormValidation doCheckConnectionTimeoutMillis(@QueryParameter("value") String value) {
+            try {
+                if(isEmpty(value)) return FormValidation.warning("Default " + CONNECTION_TIMEOUT_DEFAULT + " is used.");
+                int timeout = Integer.parseInt(value);
+                if(timeout <= 0) return FormValidation.error("Value must be greater than 0");
+            } catch(NumberFormatException e) {
+                return FormValidation.error("Value must be an Integer");
+            }
+            return FormValidation.ok();
         }
 
         public FormValidation doCheckUrl(@QueryParameter("value") String value) {
@@ -320,7 +349,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
             }
 
             try {
-                ElasticSearchAccess writer = new ElasticSearchAccess(new URI(url), username, password);
+                ElasticSearchAccess writer = new ElasticSearchAccess(new URI(url), username, password, CONNECTION_TIMEOUT_DEFAULT);
                 writer.setTrustKeyStore(trustStore);
                 writer.testConnection();
             } catch (URISyntaxException e) {

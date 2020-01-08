@@ -21,7 +21,7 @@ public class ElasticSearchAccessMock extends ElasticSearchAccess {
     private boolean failConnection = false;
 
     public ElasticSearchAccessMock(boolean printToLog) throws URISyntaxException {
-        super(new URI("http://localhost:9200/jenkins/_doc"), "test", "test");
+        super(new URI("http://localhost:9200/jenkins/_doc"), "test", "test", ElasticSearchConfiguration.CONNECTION_TIMEOUT_DEFAULT);
         this.printToLog = printToLog;
     }
 

@@ -62,8 +62,10 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     private final boolean readLogsFromElasticsearch;
 
+    private final int connectionTimeoutMillis;
+
     public ElasticSearchRunConfiguration(URI uri, String username, String password, byte[] keyStoreBytes, boolean saveAnnotations,
-            String uid, JSONObject runId, boolean readLogsFromElasticsearch, Supplier<ElasticSearchAccess> accessFactory) {
+            String uid, JSONObject runId, boolean readLogsFromElasticsearch, Supplier<ElasticSearchAccess> accessFactory, int connectionTimeoutMillis) {
         super();
         this.uri = uri;
         this.username = username;
@@ -78,6 +80,7 @@ public class ElasticSearchRunConfiguration implements Serializable {
         }
         this.saveAnnotations = saveAnnotations;
         this.readLogsFromElasticsearch = readLogsFromElasticsearch;
+        this.connectionTimeoutMillis = connectionTimeoutMillis;
     }
 
     public String getUid() {
@@ -130,7 +133,7 @@ public class ElasticSearchRunConfiguration implements Serializable {
         if (accessFactory != null) {
             return accessFactory.get();
         } else {
-            ElasticSearchAccess writer = new ElasticSearchAccess(getUri(), getUsername(), getPassword());
+            ElasticSearchAccess writer = new ElasticSearchAccess(getUri(), getUsername(), getPassword(), connectionTimeoutMillis);
             if (getTrustKeyStore() != null) {
                 writer.setTrustKeyStore(getTrustKeyStore());
             }

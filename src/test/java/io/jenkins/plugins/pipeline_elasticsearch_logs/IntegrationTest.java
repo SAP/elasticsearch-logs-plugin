@@ -121,7 +121,7 @@ public class IntegrationTest {
     @Test
     public void testPipelinePushLogsWithConnectionIssues() throws Exception {
         // SETUP
-        ElasticSearchAccess elasticSearchAccess = new ElasticSearchAccess(new URI("http://wrongurl.does.not.exist"), null, null);
+        ElasticSearchAccess elasticSearchAccess = new ElasticSearchAccess(new URI("http://wrongurl.does.not.exist"), null, null, ElasticSearchConfiguration.CONNECTION_TIMEOUT_DEFAULT);
         configureElasticsearchPlugin(true, false, elasticSearchAccess);
 
         WorkflowJob project = j.createProject(WorkflowJob.class);
@@ -183,7 +183,7 @@ public class IntegrationTest {
 
     @Test
     public void testPipelineReadLogsWithConnectionIssues() throws Exception {
-        ElasticSearchAccess elasticSearchAccess = new ElasticSearchAccess(new URI("http://wrongurl.does.not.exist"), null, null);
+        ElasticSearchAccess elasticSearchAccess = new ElasticSearchAccess(new URI("http://wrongurl.does.not.exist"), null, null, ElasticSearchConfiguration.CONNECTION_TIMEOUT_DEFAULT);
         configureElasticsearchPlugin(true, true, elasticSearchAccess);
 
         WorkflowJob project = j.createProject(WorkflowJob.class);
