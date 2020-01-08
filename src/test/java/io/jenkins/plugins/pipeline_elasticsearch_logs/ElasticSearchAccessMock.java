@@ -1,5 +1,6 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchConfiguration.CONNECTION_TIMEOUT_DEFAULT;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.JSONUtils.prettyPrint;
 
 import java.io.IOException;
@@ -21,7 +22,7 @@ public class ElasticSearchAccessMock extends ElasticSearchAccess {
     private boolean failConnection = false;
 
     public ElasticSearchAccessMock(boolean printToLog) throws URISyntaxException {
-        super(new URI("http://localhost:9200/jenkins/_doc"), "test", "test");
+        super(new URI("http://localhost:9200/jenkins/_doc"), "test", "test", CONNECTION_TIMEOUT_DEFAULT);
         this.printToLog = printToLog;
     }
 

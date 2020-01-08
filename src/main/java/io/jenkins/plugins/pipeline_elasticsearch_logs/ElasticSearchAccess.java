@@ -63,14 +63,17 @@ public class ElasticSearchAccess {
     private transient String auth;
 
     private KeyStore trustKeyStore;
+    
+    private final int connectionTimeout;
 
     @CheckForNull
     private transient HttpClientBuilder clientBuilder;
 
-    public ElasticSearchAccess(URI uri, String username, String password) {
+    public ElasticSearchAccess(URI uri, String username, String password, int connectionTimeout) {
         this.uri = uri;
         this.password = password;
         this.username = username;
+        this.connectionTimeout = connectionTimeout;
     }
 
     public void setTrustKeyStore(KeyStore trustKeyStore) {
@@ -109,9 +112,9 @@ public class ElasticSearchAccess {
         if (clientBuilder == null) {
             clientBuilder = HttpClientBuilder.create();
             RequestConfig.Builder requestBuilder = RequestConfig.custom();
-            requestBuilder.setConnectTimeout(2000);
-            requestBuilder.setConnectionRequestTimeout(2000);
-            requestBuilder.setSocketTimeout(2000);
+            requestBuilder.setConnectTimeout(connectionTimeout);
+            requestBuilder.setConnectionRequestTimeout(connectionTimeout);
+            requestBuilder.setSocketTimeout(connectionTimeout);
             clientBuilder.setDefaultRequestConfig(requestBuilder.build());
             if (trustKeyStore != null) {
                 try {
