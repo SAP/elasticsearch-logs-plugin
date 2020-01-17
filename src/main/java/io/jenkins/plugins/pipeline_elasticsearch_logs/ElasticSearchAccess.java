@@ -123,7 +123,7 @@ public class ElasticSearchAccess {
                 }
             }
             client = clientBuilder.build();
-            LOGGER.fine("New Http client created");
+            if(LOGGER.isLoggable(Level.FINE)) LOGGER.fine("New Http client created");
         }
         return client;
     }
@@ -169,13 +169,12 @@ public class ElasticSearchAccess {
         try {
             CloseableHttpClient httpClient = getClient();
             response = httpClient.execute(post);
-            LOGGER.info("Data sent: " + data);
             if (!SUCCESS_CODES.contains(response.getStatusLine().getStatusCode())) {
                 String errorMessage = this.getErrorMessage(response);
                 throw new IOException(errorMessage);
             }
         } catch (Exception e) {
-            logExceptionAndReraiseWithTruncatedDetails(LOGGER, Level.SEVERE, "Could not push log to Elasticsearch: '"+data+"'", e);
+            logExceptionAndReraiseWithTruncatedDetails(LOGGER, Level.SEVERE, "Could not push log to Elasticsearch", e);
         } finally {
             if(response != null) EntityUtils.consumeQuietly(response.getEntity());
         }

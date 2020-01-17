@@ -8,6 +8,10 @@ import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.ResourceU
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.ResourceUtils.getExpectedTestLog;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.ResourceUtils.getTestPipeline;
 
+import com.google.common.base.Strings;
+
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -19,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.FileUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -33,6 +38,7 @@ import hudson.model.Build;
 import hudson.model.Cause;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
+import io.github.stephenc.crypto.sscg.internal.bc.util.Arrays;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.DefaultRunIdProvider;
 import net.sf.json.JSONArray;
 
@@ -158,10 +164,19 @@ public class IntegrationTest {
         //Stripped log entry without sensitive information
         String expectedMessage = "Could not push log to Elasticsearch - Search Jenkins log for ErrorID '" + errorId + "'";
         LogRecord logEntryStripped = findNext(expectedMessage, logEntries);
-        Assert.assertTrue("Log does not contain: " + expectedMessage, logEntryStripped != null);
+        if(logEntryStripped == null) {
+            File logFile = persistLog(logs);
+            Assert.fail("Log does not contain: " + expectedMessage + " - see " + logFile.getAbsolutePath());
+        }
         Throwable theException = findExceptionWithMessage(logEntryStripped, expectedMessage);
         Assert.assertNotNull("Could not find the stripped exception", theException);
         Assert.assertNull("The stripped exception contains a cause (must not): " + theException.getCause() , theException.getCause());
+    }
+
+    private File persistLog(LoggerRule logs2) throws IOException {
+        File file = File.createTempFile(this.getClass().getSimpleName(), ".log");
+        FileUtils.writeLines(file, logs.getMessages());
+        return file;
     }
 
     private LogRecord findNext(String string, Iterator<LogRecord> logEntries) {
