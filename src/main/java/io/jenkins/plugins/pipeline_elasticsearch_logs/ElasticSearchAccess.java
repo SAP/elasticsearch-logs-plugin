@@ -21,7 +21,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -37,6 +36,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.util.EntityUtils;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -67,7 +67,7 @@ public class ElasticSearchAccess {
     private final int connectionTimeout;
 
     @CheckForNull
-    private transient HttpClientBuilder clientBuilder;
+    private transient CloseableHttpClient client;
 
     public ElasticSearchAccess(URI uri, String username, String password, int connectionTimeout) {
         this.uri = uri;
@@ -107,10 +107,9 @@ public class ElasticSearchAccess {
         return new RestHighLevelClient(builder);
     }
 
-    @Nonnull
-    private HttpClientBuilder getClientBuilder() {
-        if (clientBuilder == null) {
-            clientBuilder = HttpClientBuilder.create();
+    private CloseableHttpClient getClient() {
+        if(client == null) {
+            HttpClientBuilder clientBuilder = HttpClientBuilder.create();
             RequestConfig.Builder requestBuilder = RequestConfig.custom();
             requestBuilder.setConnectTimeout(connectionTimeout);
             requestBuilder.setConnectionRequestTimeout(connectionTimeout);
@@ -123,9 +122,12 @@ public class ElasticSearchAccess {
                     LOGGER.log(Level.SEVERE, "Failed to set SSLContext for http client. Will try without.", e);
                 }
             }
+            client = clientBuilder.build();
+            LOGGER.fine("New Http client created");
         }
-        return clientBuilder;
+        return client;
     }
+    
 
     @Restricted(NoExternalUse.class)
     String testConnection() throws URISyntaxException, IOException {
@@ -136,15 +138,18 @@ public class ElasticSearchAccess {
             getRequest.addHeader("Authorization", "Basic " + auth);
         }
 
-        try (CloseableHttpClient httpClient = getClientBuilder().build()) {
-            try (CloseableHttpResponse response = httpClient.execute(getRequest)) {
-                if (!SUCCESS_CODES.contains(response.getStatusLine().getStatusCode())) {
-                    String errorMessage = this.getErrorMessage(response);
-                    throw new IOException(errorMessage);
-                }
-            } catch (Exception e) {
-                logExceptionAndReraiseWithTruncatedDetails(LOGGER, Level.SEVERE, "Test GET request to Elasticsearch failed", e);
+        CloseableHttpResponse response = null;
+        try {
+            CloseableHttpClient httpClient = getClient();
+            response = httpClient.execute(getRequest);
+            if (!SUCCESS_CODES.contains(response.getStatusLine().getStatusCode())) {
+                String errorMessage = this.getErrorMessage(response);
+                throw new IOException(errorMessage);
             }
+        } catch (Exception e) {
+            logExceptionAndReraiseWithTruncatedDetails(LOGGER, Level.SEVERE, "Test GET request to Elasticsearch failed", e);
+        } finally {
+            if(response != null) EntityUtils.consumeQuietly(response.getEntity());
         }
 
         return "";
@@ -160,15 +165,19 @@ public class ElasticSearchAccess {
     public void push(String data) throws IOException {
         HttpPost post = getHttpPost(data);
 
-        try (CloseableHttpClient httpClient = getClientBuilder().build()) {
-            try (CloseableHttpResponse response = httpClient.execute(post)) {
-                if (!SUCCESS_CODES.contains(response.getStatusLine().getStatusCode())) {
-                    String errorMessage = this.getErrorMessage(response);
-                    throw new IOException(errorMessage);
-                }
-            } catch (Exception e) {
-                logExceptionAndReraiseWithTruncatedDetails(LOGGER, Level.SEVERE, "Could not push log to Elasticsearch", e);
+        CloseableHttpResponse response = null;
+        try {
+            CloseableHttpClient httpClient = getClient();
+            response = httpClient.execute(post);
+            LOGGER.info("Data sent: " + data);
+            if (!SUCCESS_CODES.contains(response.getStatusLine().getStatusCode())) {
+                String errorMessage = this.getErrorMessage(response);
+                throw new IOException(errorMessage);
             }
+        } catch (Exception e) {
+            logExceptionAndReraiseWithTruncatedDetails(LOGGER, Level.SEVERE, "Could not push log to Elasticsearch: '"+data+"'", e);
+        } finally {
+            if(response != null) EntityUtils.consumeQuietly(response.getEntity());
         }
     }
 
