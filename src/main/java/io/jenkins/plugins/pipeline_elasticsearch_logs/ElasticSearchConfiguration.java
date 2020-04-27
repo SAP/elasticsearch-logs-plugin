@@ -2,13 +2,6 @@ package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.common.StandardCertificateCredentials;
-import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
-import com.cloudbees.plugins.credentials.common.StandardUsernameListBoxModel;
-import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
-import com.cloudbees.plugins.credentials.matchers.IdMatcher;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -37,6 +30,13 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardCertificateCredentials;
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.cloudbees.plugins.credentials.common.StandardUsernameListBoxModel;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.matchers.IdMatcher;
+
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
@@ -46,7 +46,6 @@ import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.read.ElasticSearchReadAccess;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.DefaultRunIdProvider;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.RunIdProvider;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
@@ -74,14 +73,12 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
     private ElasticSearchWriteAccess elasticsearchWriteAccess;
 
-    private ElasticSearchReadAccess elasticsearchReadAccess;
-
     private String url;
 
     static final int CONNECTION_TIMEOUT_DEFAULT = 10000;
 
     private String connectionTimeoutMillis;
-
+    
     @DataBoundConstructor
     public ElasticSearchConfiguration(String url) throws URISyntaxException {
         this.url = url;
@@ -104,15 +101,6 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     @DataBoundSetter
     public void setElasticsearchWriteAccess(ElasticSearchWriteAccess elasticsearchWriteAccess) {
         this.elasticsearchWriteAccess = elasticsearchWriteAccess;
-    }
-
-    public ElasticSearchReadAccess getElasticsearchReadAccess() {
-        return elasticsearchReadAccess;
-    }
-
-    @DataBoundSetter
-    public void setElasticsearchReadAccess(ElasticSearchReadAccess elasticsearchReadAccess) {
-        this.elasticsearchReadAccess = elasticsearchReadAccess;
     }
 
     protected Object readResolve() {
@@ -272,7 +260,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         int connectionTimeout = isEmpty(connectionTimeoutMillis) ? CONNECTION_TIMEOUT_DEFAULT : Integer.parseInt(connectionTimeoutMillis);
 
         return new ElasticSearchRunConfiguration(uri, username, password, getKeyStoreBytes(), isSaveAnnotations(), getUniqueRunId(run),
-                getRunIdProvider().getRunId(run), getWriteAccessFactory(), getReadAccessFactory(), connectionTimeout);
+                getRunIdProvider().getRunId(run), getWriteAccessFactory(), connectionTimeout);
     }
 
     // Can be overwritten in tests
@@ -280,13 +268,6 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     @Restricted(NoExternalUse.class)
     protected Supplier<ElasticSearchWriteAccess> getWriteAccessFactory() {
         return elasticsearchWriteAccess.getSupplier();
-    }
-
-    // Can be overwritten in tests
-    @CheckForNull
-    @Restricted(NoExternalUse.class)
-    protected Supplier<ElasticSearchReadAccess> getReadAccessFactory() {
-        return elasticsearchReadAccess.getSupplier();
     }
 
     public static String getUniqueRunId(Run<?, ?> run) {

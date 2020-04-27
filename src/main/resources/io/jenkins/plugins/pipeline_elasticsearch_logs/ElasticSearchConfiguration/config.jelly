@@ -13,9 +13,6 @@
   <f:entry >
     <f:dropdownDescriptorSelector title="Write Access Implementation" field="elasticsearchWriteAccess"/>
   </f:entry>  
-  <f:entry >
-    <f:dropdownDescriptorSelector title="Read Access Implementation" field="elasticsearchReadAccess"/>
-  </f:entry>  
   <f:nested>
     <f:validateButton with="url,credentialsId,certificateId" title="${%Test Connection to Elastic Search}" method="validateConnection"/>
   </f:nested>

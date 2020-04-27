@@ -14,7 +14,6 @@ import java.util.function.Supplier;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
-import io.jenkins.plugins.pipeline_elasticsearch_logs.read.ElasticSearchReadAccess;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
 import net.sf.json.JSONObject;
 
@@ -49,12 +48,10 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     private Supplier<ElasticSearchWriteAccess> writeAccessFactory;
 
-    private Supplier<ElasticSearchReadAccess> readAccessFactory;
-
     private final String runIdJsonString;
 
     public ElasticSearchRunConfiguration(URI uri, String username, String password, byte[] keyStoreBytes, boolean saveAnnotations,
-            String uid, JSONObject runId, Supplier<ElasticSearchWriteAccess> writeAccessFactory, Supplier<ElasticSearchReadAccess> readAccessFactory, int connectionTimeoutMillis) {
+            String uid, JSONObject runId, Supplier<ElasticSearchWriteAccess> writeAccessFactory, int connectionTimeoutMillis) {
         super();
         this.uri = uri;
         this.username = username;
@@ -62,7 +59,6 @@ public class ElasticSearchRunConfiguration implements Serializable {
         this.runIdJsonString = runId.toString();
         this.uid = uid;
         this.writeAccessFactory = writeAccessFactory;
-        this.readAccessFactory = readAccessFactory;
         this.saveAnnotations = saveAnnotations;
     }
 
@@ -100,10 +96,6 @@ public class ElasticSearchRunConfiguration implements Serializable {
         return writeAccessFactory.get();
     }
     
-    public ElasticSearchReadAccess createReadAccess() {
-        return readAccessFactory.get();
-    }
-
     public String[] getIndices() {
         String path = uri.getPath();
         while (path.startsWith("/"))

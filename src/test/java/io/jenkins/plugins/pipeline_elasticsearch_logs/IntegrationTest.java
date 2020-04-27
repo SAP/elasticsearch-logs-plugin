@@ -7,6 +7,7 @@ import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.LogUtils.
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.ResourceUtils.getExpectedTestJsonLog;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.ResourceUtils.getExpectedTestLog;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.ResourceUtils.getTestPipeline;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,8 +37,6 @@ import hudson.model.Build;
 import hudson.model.Cause;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.read.ElasticSearchReadAccess;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.read.none.ElasticSearchReadAccessNone;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.DefaultRunIdProvider;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.direct_es.ElasticSearchWriteAccessDirect;
@@ -107,8 +106,7 @@ public class IntegrationTest {
     @Test
     public void testPipelineWithElasticsearchPlugin() throws Exception {
         ElasticSearchWriteAccessMock mockWriter = new ElasticSearchWriteAccessMock(false);
-        ElasticSearchReadAccess mockReader = new ElasticSearchReadAccessNone();
-        configureElasticsearchPlugin(true, false, mockWriter, mockReader);
+        configureElasticsearchPlugin(true, false, mockWriter);
 
         WorkflowJob project = j.createProject(WorkflowJob.class);
         project.setDefinition(new CpsFlowDefinition(getTestPipeline(), true));
@@ -120,19 +118,40 @@ public class IntegrationTest {
 
         Assert.assertEquals(Result.SUCCESS, project.getLastBuild().getResult());
 
-        // Jenkins build log is empty if ES plugin is active, and read from ES in not enabled.
-        Assert.assertEquals("", build.getLog());
-
         JSONArray expectedLog = getExpectedTestJsonLog();
         assertMatchEntries(expectedLog, mockWriter.getEntries());
     }
-    
+
+    @Test
+    public void testPipelineWithElasticsearchPluginReadLogsFromFile() throws Exception {
+        ElasticSearchWriteAccessMock mockWriter = new ElasticSearchWriteAccessMock(false);
+        configureElasticsearchPlugin(true, false, mockWriter);
+
+        WorkflowJob project = j.createProject(WorkflowJob.class);
+        project.setDefinition(new CpsFlowDefinition(getTestPipeline(), true));
+        WorkflowRun build;
+        project.scheduleBuild(new Cause.UserIdCause());
+        while ((build = project.getLastBuild()) == null || build.getResult() == null) {
+            Thread.sleep(100);
+        }
+
+        Assert.assertEquals(Result.SUCCESS, project.getLastBuild().getResult());
+        File logFile = new File(build.getRootDir(), "log");
+        Assert.assertThat(logFile.exists(), equalTo(true));
+
+        JSONArray expectedJsonLog = getExpectedTestJsonLog();
+        assertMatchEntries(expectedJsonLog, mockWriter.getEntries());
+        
+        String expectedLog = getExpectedTestLog();
+        String log = removeAnnotations(build.getLogText());
+        assertMatchLines(expectedLog, log);
+    }
+
     @Test
     public void testPipelinePushLogsWithConnectionIssues() throws Exception {
         // SETUP
         ElasticSearchWriteAccess elasticSearchAccess = new ElasticSearchWriteAccessDirect(new URI("http://wrongurl.does.not.exist"), null, null, CONNECTION_TIMEOUT_DEFAULT);
-        ElasticSearchReadAccess mockReader = new ElasticSearchReadAccessNone();
-        configureElasticsearchPlugin(true, false, elasticSearchAccess, mockReader);
+        configureElasticsearchPlugin(true, false, elasticSearchAccess);
 
         WorkflowJob project = j.createProject(WorkflowJob.class);
         project.setDefinition(new CpsFlowDefinition(getTestPipeline(), true));
@@ -148,10 +167,7 @@ public class IntegrationTest {
         // VERIFY
         Assert.assertEquals(Result.SUCCESS, project.getLastBuild().getResult());
 
-        // Jenkins build log is empty if ES plugin is active, and read from ES in not enabled.
-        Assert.assertEquals("", build.getLog());
-        
-        List<LogRecord> records = new ArrayList<LogRecord>(logs.getRecords());
+        List<LogRecord> records = new ArrayList<>(logs.getRecords());
         Collections.reverse(records);
         Iterator<LogRecord> logEntries = records.iterator();
 
@@ -201,30 +217,9 @@ public class IntegrationTest {
     }
 
     @Test
-    public void testPipelineReadLogsWithConnectionIssues() throws Exception {
-        ElasticSearchWriteAccessDirect elasticSearchAccess = new ElasticSearchWriteAccessDirect(new URI("http://wrongurl.does.not.exist"), null, null, CONNECTION_TIMEOUT_DEFAULT);
-        ElasticSearchReadAccessMock mockReader = new ElasticSearchReadAccessMock();
-        configureElasticsearchPlugin(true, true, elasticSearchAccess, mockReader);
-
-        WorkflowJob project = j.createProject(WorkflowJob.class);
-        project.setDefinition(new CpsFlowDefinition(getTestPipeline(), true));
-        WorkflowRun build;
-        project.scheduleBuild(new Cause.UserIdCause());
-        while ((build = project.getLastBuild()) == null || build.getResult() == null) {
-            Thread.sleep(100);
-        }
-
-        Assert.assertEquals(Result.SUCCESS, project.getLastBuild().getResult());
-
-        String expectedError = "java.lang.RuntimeException: Could not get log";
-        Assert.assertTrue("Log does not start with " + expectedError, build.getLog().startsWith(expectedError));
-    }
-
-    @Test
     public void testPipelineWithSkippedStages() throws Exception {
         ElasticSearchWriteAccessMock mockWriter = new ElasticSearchWriteAccessMock(false);
-        ElasticSearchReadAccess mockReader = new ElasticSearchReadAccessNone();
-        configureElasticsearchPlugin(true, false, mockWriter, mockReader);
+        configureElasticsearchPlugin(true, false, mockWriter);
 
         WorkflowJob project = j.createProject(WorkflowJob.class);
         project.setDefinition(new CpsFlowDefinition(getTestPipeline(), true));
@@ -236,19 +231,16 @@ public class IntegrationTest {
 
         Assert.assertEquals(Result.FAILURE, project.getLastBuild().getResult());
 
-        // Jenkins build log is empty if ES plugin is active, and read from ES in not enabled.
-        Assert.assertEquals("", build.getLog());
-
         JSONArray expectedLog = getExpectedTestJsonLog();
         assertMatchEntries(expectedLog, mockWriter.getEntries());
     }
 
-    private void configureElasticsearchPlugin(boolean activate, boolean readLogsFromEs, ElasticSearchWriteAccess mockWriter, ElasticSearchReadAccess mockReader) throws URISyntaxException {
+    private void configureElasticsearchPlugin(boolean activate, boolean readLogsFromEs, ElasticSearchWriteAccess mockWriter) throws URISyntaxException {
         ElasticSearchGlobalConfiguration globalConfig = ElasticSearchGlobalConfiguration.get();
 
         ElasticSearchConfiguration config = null;
         if (activate) {
-            config = new TestConfig("http://localhost:9200/jenkins_logs/_doc", mockWriter, mockReader);
+            config = new TestConfig("http://localhost:9200/jenkins_logs/_doc", mockWriter);
             config.setRunIdProvider(new DefaultRunIdProvider("test_instance"));
         }
 
@@ -259,24 +251,16 @@ public class IntegrationTest {
     private static class TestConfig extends ElasticSearchConfiguration {
 
         private ElasticSearchWriteAccess mockWriter;
-        private ElasticSearchReadAccess mockReader;
 
-        public TestConfig(String url, ElasticSearchWriteAccess mockWriter, ElasticSearchReadAccess mockReader) throws URISyntaxException {
+        public TestConfig(String url, ElasticSearchWriteAccess mockWriter) throws URISyntaxException {
             super(url);
             this.mockWriter = mockWriter;
-            this.mockReader = mockReader;
         }
 
         @Override
         protected Supplier<ElasticSearchWriteAccess> getWriteAccessFactory() {
             return () -> mockWriter;
         }
-
-        @Override
-        protected Supplier<ElasticSearchReadAccess> getReadAccessFactory() {
-            return () -> mockReader;
-        }
-
     }
 
 }

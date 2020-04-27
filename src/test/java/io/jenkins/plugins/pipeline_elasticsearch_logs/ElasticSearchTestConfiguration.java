@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import io.jenkins.plugins.pipeline_elasticsearch_logs.read.ElasticSearchReadAccess;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.read.none.ElasticSearchReadAccessNone;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.DefaultRunIdProvider;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.direct_es.ElasticSearchWriteAccessDirect;
@@ -31,11 +29,6 @@ class ElasticSearchTestConfiguration extends ElasticSearchConfiguration {
                 receiver.accept(map);
             }
         };
-    }
-
-    @Override
-    protected Supplier<ElasticSearchReadAccess> getReadAccessFactory() {
-        return () -> new ElasticSearchReadAccessNone();
     }
 
 }

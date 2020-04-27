@@ -13,8 +13,12 @@ import java.util.logging.Logger;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
+import org.jenkinsci.remoting.SerializableOnlyOverRemoting;
+
+import hudson.CloseProofOutputStream;
 import hudson.console.LineTransformationOutputStream;
 import hudson.model.BuildListener;
+import hudson.remoting.RemoteOutputStream;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
 import net.sf.json.JSONObject;
 
@@ -33,8 +37,10 @@ public class ElasticSearchSender implements BuildListener, Closeable {
     protected transient ElasticSearchWriteAccess writer;
     protected final ElasticSearchRunConfiguration config;
     protected String eventPrefix;
+    private final @CheckForNull OutputStream out;
 
-    public ElasticSearchSender(@CheckForNull NodeInfo nodeInfo, @Nonnull ElasticSearchRunConfiguration config) throws IOException {
+    public ElasticSearchSender(@CheckForNull NodeInfo nodeInfo, @Nonnull ElasticSearchRunConfiguration config, @CheckForNull OutputStream out)
+                    throws IOException {
         this.nodeInfo = nodeInfo;
         this.config = config;
         if (nodeInfo != null) {
@@ -42,6 +48,7 @@ public class ElasticSearchSender implements BuildListener, Closeable {
         } else {
             eventPrefix = EVENT_PREFIX_BUILD;
         }
+        this.out = out;
     }
 
     public PrintStream getWrappedLogger(@CheckForNull OutputStream logger) {
@@ -55,13 +62,16 @@ public class ElasticSearchSender implements BuildListener, Closeable {
     @Override
     public PrintStream getLogger() {
         if (logger == null) {
-            logger = getWrappedLogger(null);
+            logger = getWrappedLogger(out);
         }
         return logger;
     }
 
     @Override
     public void close() throws IOException {
+        if (logger != null) {
+            logger.close();
+        }
         logger = null;
         writer = null;
     }
@@ -77,7 +87,43 @@ public class ElasticSearchSender implements BuildListener, Closeable {
         return writer;
     }
 
+    private Object writeReplace() {
+        return new Replacement(this);
+    }
+
+    // Method partially copied from BufferedBuildListener or workflow-api plugin
+    private static final class Replacement implements SerializableOnlyOverRemoting {
+
+        private static final long serialVersionUID = 1;
+
+        private final RemoteOutputStream ros;
+        private final DelayBufferedOutputStream.Tuning tuning = DelayBufferedOutputStream.Tuning.DEFAULT; // load defaults on master
+        private final ElasticSearchRunConfiguration config;
+        private final @CheckForNull NodeInfo nodeInfo;
+
+        Replacement(ElasticSearchSender ess) {
+            LOGGER.log(Level.FINER, "Creating Replacement for the ElasticSearchSender during Serialization");
+            this.ros = new RemoteOutputStream(new CloseProofOutputStream(ess.out));
+            this.config = ess.config;
+            this.nodeInfo = ess.nodeInfo;
+        }
+
+        private Object readResolve() throws IOException {
+            LOGGER.log(Level.FINER, "Creating new ElasticSearchSender during Deserialization");
+            return new ElasticSearchSender(nodeInfo, config, new GCFlushedOutputStream(new DelayBufferedOutputStream(ros, tuning)));
+        }
+
+    }
+
     private class ElasticSearchOutputStream extends LineTransformationOutputStream {
+        @Override
+        public void write(int b) throws IOException {
+            if (forwardingLogger != null) {
+                forwardingLogger.write(b);
+            }
+            super.write(b);
+        }
+
         private static final String EVENT_TYPE_MESSAGE = "Message";
         private @CheckForNull OutputStream forwardingLogger;
 
@@ -87,9 +133,6 @@ public class ElasticSearchSender implements BuildListener, Closeable {
 
         @Override
         protected void eol(byte[] b, int len) throws IOException {
-            if (forwardingLogger != null) {
-                forwardingLogger.write(b, 0, len);
-            }
             Map<String, Object> data = config.createData();
 
             ConsoleNotes.parse(b, len, data, config.isSaveAnnotations());
@@ -101,5 +144,26 @@ public class ElasticSearchSender implements BuildListener, Closeable {
             LOGGER.log(Level.FINEST, "Sending data: {0}", JSONObject.fromObject(data).toString());
             getElasticSearchWriter().push(JSONObject.fromObject(data).toString());
         }
+
+        
+        @Override
+        public void close() throws IOException {
+            super.close();
+            if (forwardingLogger != null)
+            {
+                forwardingLogger.close();
+            }
+        }
+
+        @Override
+        public void flush() throws IOException {
+            super.flush();
+            if (forwardingLogger != null)
+            {
+                forwardingLogger.flush();
+            }
+        }
+        
+        
     }
 }

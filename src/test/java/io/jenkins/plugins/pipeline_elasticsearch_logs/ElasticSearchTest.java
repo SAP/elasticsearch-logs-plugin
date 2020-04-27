@@ -1,9 +1,14 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
-import hudson.model.FreeStyleProject;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -11,13 +16,7 @@ import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.SleepBuilder;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import hudson.model.FreeStyleProject;
 
 public class ElasticSearchTest {
     @Rule
@@ -56,10 +55,7 @@ public class ElasticSearchTest {
     public void testSimplePipelineOutput() throws Exception {
         WorkflowJob project = jenkinsRule.createProject(WorkflowJob.class);
         project.setDefinition(new CpsFlowDefinition("node { echo message: 'hello' }", true));
-        WorkflowRun build = jenkinsRule.buildAndAssertSuccess(project);
-
-        // if elastic search output is enabled, nothing will be logged to build-log.
-        assertEquals(Arrays.asList(), build.getLog(1000));
+        jenkinsRule.buildAndAssertSuccess(project);
 
         assertEquals(22, elasticSearchLoggedLines.size());
 
