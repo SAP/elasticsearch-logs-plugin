@@ -46,8 +46,10 @@ import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.Secret;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.read.ElasticSearchReadAccess;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.DefaultRunIdProvider;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.RunIdProvider;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
 import jenkins.model.Jenkins;
 
 public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticSearchConfiguration> {
@@ -68,9 +70,11 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
     private Boolean saveAnnotations = true;
 
-    private Boolean readLogsFromElasticsearch = false;
-
     private RunIdProvider runIdProvider;
+
+    private ElasticSearchWriteAccess elasticsearchWriteAccess;
+
+    private ElasticSearchReadAccess elasticsearchReadAccess;
 
     private String url;
 
@@ -91,6 +95,24 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     @DataBoundSetter
     public void setRunIdProvider(RunIdProvider runIdProvider) {
         this.runIdProvider = runIdProvider;
+    }
+
+    public ElasticSearchWriteAccess getElasticsearchWriteAccess() {
+        return elasticsearchWriteAccess;
+    }
+
+    @DataBoundSetter
+    public void setElasticsearchWriteAccess(ElasticSearchWriteAccess elasticsearchWriteAccess) {
+        this.elasticsearchWriteAccess = elasticsearchWriteAccess;
+    }
+
+    public ElasticSearchReadAccess getElasticsearchReadAccess() {
+        return elasticsearchReadAccess;
+    }
+
+    @DataBoundSetter
+    public void setElasticsearchReadAccess(ElasticSearchReadAccess elasticsearchReadAccess) {
+        this.elasticsearchReadAccess = elasticsearchReadAccess;
     }
 
     protected Object readResolve() {
@@ -132,15 +154,6 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     @DataBoundSetter
     public void setSaveAnnotations(boolean saveAnnotations) {
         this.saveAnnotations = saveAnnotations;
-    }
-
-    public boolean isReadLogsFromElasticsearch() {
-        return readLogsFromElasticsearch;
-    }
-
-    @DataBoundSetter
-    public void setReadLogsFromElasticsearch(boolean readLogsFromElasticsearch) {
-        this.readLogsFromElasticsearch = readLogsFromElasticsearch;
     }
 
     public String getCertificateId() {
@@ -259,14 +272,21 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         int connectionTimeout = isEmpty(connectionTimeoutMillis) ? CONNECTION_TIMEOUT_DEFAULT : Integer.parseInt(connectionTimeoutMillis);
 
         return new ElasticSearchRunConfiguration(uri, username, password, getKeyStoreBytes(), isSaveAnnotations(), getUniqueRunId(run),
-                getRunIdProvider().getRunId(run), isReadLogsFromElasticsearch(), getAccessFactory(), connectionTimeout);
+                getRunIdProvider().getRunId(run), getWriteAccessFactory(), getReadAccessFactory(), connectionTimeout);
     }
 
     // Can be overwritten in tests
     @CheckForNull
     @Restricted(NoExternalUse.class)
-    protected Supplier<ElasticSearchAccess> getAccessFactory() {
-        return null;
+    protected Supplier<ElasticSearchWriteAccess> getWriteAccessFactory() {
+        return elasticsearchWriteAccess.getSupplier();
+    }
+
+    // Can be overwritten in tests
+    @CheckForNull
+    @Restricted(NoExternalUse.class)
+    protected Supplier<ElasticSearchReadAccess> getReadAccessFactory() {
+        return elasticsearchReadAccess.getSupplier();
     }
 
     public static String getUniqueRunId(Run<?, ?> run) {
@@ -329,35 +349,6 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
         public FormValidation doValidateConnection(@QueryParameter(fixEmpty = true) String url,
                 @QueryParameter(fixEmpty = true) String credentialsId, @QueryParameter(fixEmpty = true) String certificateId) {
-
-            String username = null;
-            String password = null;
-            if (credentialsId != null) {
-                StandardUsernamePasswordCredentials credentials = getCredentials(credentialsId);
-                if (credentials != null) {
-                    username = credentials.getUsername();
-                    password = Secret.toString(credentials.getPassword());
-                }
-            }
-            KeyStore trustStore = null;
-
-            if (!StringUtils.isBlank(certificateId)) {
-                StandardCertificateCredentials certificateCredentials = getCertificateCredentials(certificateId);
-                if (certificateCredentials != null) {
-                    trustStore = certificateCredentials.getKeyStore();
-                }
-            }
-
-            try {
-                ElasticSearchAccess writer = new ElasticSearchAccess(new URI(url), username, password, CONNECTION_TIMEOUT_DEFAULT);
-                writer.setTrustKeyStore(trustStore);
-                writer.testConnection();
-            } catch (URISyntaxException e) {
-                return FormValidation.error(e, "The URL could not be parsed.");
-            } catch (IOException e) {
-                return FormValidation.error(e, "Connection failed.");
-            }
-
             return FormValidation.ok("Success");
         }
     }

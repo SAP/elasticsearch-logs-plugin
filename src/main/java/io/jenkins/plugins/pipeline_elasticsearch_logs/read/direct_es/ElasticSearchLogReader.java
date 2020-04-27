@@ -1,4 +1,4 @@
-package io.jenkins.plugins.pipeline_elasticsearch_logs;
+package io.jenkins.plugins.pipeline_elasticsearch_logs.read.direct_es;
 
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.Utils.logExceptionAndReraiseWithTruncatedDetails;
 import static java.lang.String.format;
@@ -36,6 +36,8 @@ import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.kohsuke.stapler.framework.io.ByteBuffer;
 
 import hudson.console.AnnotatedLargeText;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.ConsoleNotes;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchRunConfiguration;
 import net.sf.json.JSONArray;
 
 public class ElasticSearchLogReader {
@@ -45,12 +47,12 @@ public class ElasticSearchLogReader {
 
     private static final Logger LOGGER = Logger.getLogger(ElasticSearchLogReader.class.getName());
 
-    private final ElasticSearchAccess access;
     private final String uid;
     private final ElasticSearchRunConfiguration config;
+    private final RestHighLevelClient client;
 
-    public ElasticSearchLogReader(ElasticSearchRunConfiguration config) throws IOException {
-        access = config.createAccess();
+    public ElasticSearchLogReader(ElasticSearchRunConfiguration config, RestHighLevelClient client) throws IOException {
+        this.client = client;
         this.config = config;
         this.uid = config.getUid();
     }
@@ -86,7 +88,6 @@ public class ElasticSearchLogReader {
         SearchRequest searchRequest = new SearchRequest().indices(config.getIndices()).source(searchSourceBuilder)
                 .scroll(SCROLL_TIME_VALUE);
 
-        RestHighLevelClient client = access.createNewRestClient();
         String reqId = UUID.randomUUID().toString();
         LOGGER.log(Level.FINE, format("SearchRequest[%s] - %s: %s", reqId, config.getUri(), searchRequest.toString()));
         SearchResponse scrollResponse = client.search(searchRequest, RequestOptions.DEFAULT);

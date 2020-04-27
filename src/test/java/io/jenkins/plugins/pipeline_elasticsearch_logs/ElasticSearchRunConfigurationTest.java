@@ -14,8 +14,9 @@ public class ElasticSearchRunConfigurationTest {
 
     @Test
     public void testGetIndices() throws URISyntaxException {
-        ElasticSearchRunConfiguration config = new ElasticSearchRunConfiguration(new URI("http://localhost:9200/index1/_doc"), null, null,
-                null, false, null, JSONObject.fromObject("{}"), false, null, CONNECTION_TIMEOUT_DEFAULT);
+        ElasticSearchRunConfiguration config = new ElasticSearchRunConfiguration(
+                new URI("http://localhost:9200/index1/_doc"),
+                null, null, null, false, null, JSONObject.fromObject("{}"), null, null, CONNECTION_TIMEOUT_DEFAULT);
         String[] indices = config.getIndices();
         Assert.assertEquals(1, indices.length);
         Assert.assertEquals("index1", indices[0]);

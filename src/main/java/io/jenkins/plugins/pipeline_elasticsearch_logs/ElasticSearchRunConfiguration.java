@@ -1,17 +1,8 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
-import net.sf.json.JSONObject;
-import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
+import java.net.URISyntaxException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -19,8 +10,13 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
+
+import io.jenkins.plugins.pipeline_elasticsearch_logs.read.ElasticSearchReadAccess;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
+import net.sf.json.JSONObject;
 
 /**
  * A serializable representation of the plugin configuration with credentials resolved.
@@ -37,8 +33,6 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     private static final String TIMESTAMP = "timestamp";
 
-    private static final Logger LOGGER = Logger.getLogger(ElasticSearchRunConfiguration.class.getName());
-
     private static final DateTimeFormatter UTC_MILLIS = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
 
     private static final long serialVersionUID = 1L;
@@ -47,40 +41,29 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     private final String password;
 
-    private final byte[] keyStoreBytes;
-
     private final URI uri;
-
-    private transient KeyStore trustKeyStore;
 
     private final boolean saveAnnotations;
 
     private final String uid;
-    private transient Supplier<ElasticSearchAccess> accessFactory;
+
+    private Supplier<ElasticSearchWriteAccess> writeAccessFactory;
+
+    private Supplier<ElasticSearchReadAccess> readAccessFactory;
 
     private final String runIdJsonString;
 
-    private final boolean readLogsFromElasticsearch;
-
-    private final int connectionTimeoutMillis;
-
     public ElasticSearchRunConfiguration(URI uri, String username, String password, byte[] keyStoreBytes, boolean saveAnnotations,
-            String uid, JSONObject runId, boolean readLogsFromElasticsearch, Supplier<ElasticSearchAccess> accessFactory, int connectionTimeoutMillis) {
+            String uid, JSONObject runId, Supplier<ElasticSearchWriteAccess> writeAccessFactory, Supplier<ElasticSearchReadAccess> readAccessFactory, int connectionTimeoutMillis) {
         super();
         this.uri = uri;
         this.username = username;
         this.password = password;
         this.runIdJsonString = runId.toString();
         this.uid = uid;
-        this.accessFactory = accessFactory;
-        if (keyStoreBytes != null) {
-            this.keyStoreBytes = keyStoreBytes.clone();
-        } else {
-            this.keyStoreBytes = null;
-        }
+        this.writeAccessFactory = writeAccessFactory;
+        this.readAccessFactory = readAccessFactory;
         this.saveAnnotations = saveAnnotations;
-        this.readLogsFromElasticsearch = readLogsFromElasticsearch;
-        this.connectionTimeoutMillis = connectionTimeoutMillis;
     }
 
     public String getUid() {
@@ -89,10 +72,6 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     public boolean isSaveAnnotations() {
         return saveAnnotations;
-    }
-
-    public boolean isReadLogsFromElasticsearch() {
-        return readLogsFromElasticsearch;
     }
 
     public URI getUri() {
@@ -107,18 +86,6 @@ public class ElasticSearchRunConfiguration implements Serializable {
         return password;
     }
 
-    public KeyStore getTrustKeyStore() {
-        if (trustKeyStore == null && keyStoreBytes != null) {
-            try {
-                trustKeyStore = KeyStore.getInstance("PKCS12");
-                trustKeyStore.load(new ByteArrayInputStream(keyStoreBytes), "".toCharArray());
-            } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
-                LOGGER.log(Level.WARNING, "Failed to create KeyStore from bytes", e);
-            }
-        }
-        return trustKeyStore;
-    }
-
     public Map<String, Object> createData() {
         Map<String, Object> data = new LinkedHashMap<>();
         Date date = new Date();
@@ -129,16 +96,12 @@ public class ElasticSearchRunConfiguration implements Serializable {
         return data;
     }
 
-    public ElasticSearchAccess createAccess() {
-        if (accessFactory != null) {
-            return accessFactory.get();
-        } else {
-            ElasticSearchAccess writer = new ElasticSearchAccess(getUri(), getUsername(), getPassword(), connectionTimeoutMillis);
-            if (getTrustKeyStore() != null) {
-                writer.setTrustKeyStore(getTrustKeyStore());
-            }
-            return writer;
-        }
+    public ElasticSearchWriteAccess createWriteAccess() throws URISyntaxException {
+        return writeAccessFactory.get();
+    }
+    
+    public ElasticSearchReadAccess createReadAccess() {
+        return readAccessFactory.get();
     }
 
     public String[] getIndices() {

@@ -9,7 +9,13 @@
   </f:entry> 
   <f:entry field="certificateId" title="SSL Certificate">
     <c:select/>
-  </f:entry> 
+  </f:entry>
+  <f:entry >
+    <f:dropdownDescriptorSelector title="Write Access Implementation" field="elasticsearchWriteAccess"/>
+  </f:entry>  
+  <f:entry >
+    <f:dropdownDescriptorSelector title="Read Access Implementation" field="elasticsearchReadAccess"/>
+  </f:entry>  
   <f:nested>
     <f:validateButton with="url,credentialsId,certificateId" title="${%Test Connection to Elastic Search}" method="validateConnection"/>
   </f:nested>
@@ -20,9 +26,6 @@
     <f:entry >
       <f:dropdownDescriptorSelector title="RunID Provider" field="runIdProvider"/>
     </f:entry>  
-    <f:entry field="readLogsFromElasticsearch" title="Read logs from Elasticsearch">
-      <f:checkbox default="true"/>
-    </f:entry>
     <f:entry field="connectionTimeoutMillis" title="Connection Timeout (ms)">
       <f:textbox/>
     </f:entry>

@@ -1,19 +1,22 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
-import hudson.console.LineTransformationOutputStream;
-import hudson.model.BuildListener;
-import net.sf.json.JSONObject;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+
+import hudson.console.LineTransformationOutputStream;
+import hudson.model.BuildListener;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
+import net.sf.json.JSONObject;
 
 public class ElasticSearchSender implements BuildListener, Closeable {
     private static final String EVENT_PREFIX_BUILD = "build";
@@ -27,7 +30,7 @@ public class ElasticSearchSender implements BuildListener, Closeable {
     private transient @CheckForNull PrintStream logger;
     private final @CheckForNull NodeInfo nodeInfo;
 
-    protected transient ElasticSearchAccess writer;
+    protected transient ElasticSearchWriteAccess writer;
     protected final ElasticSearchRunConfiguration config;
     protected String eventPrefix;
 
@@ -63,9 +66,13 @@ public class ElasticSearchSender implements BuildListener, Closeable {
         writer = null;
     }
 
-    private ElasticSearchAccess getElasticSearchWriter() throws IOException {
+    private ElasticSearchWriteAccess getElasticSearchWriter() throws IOException {
         if (writer == null) {
-            writer = config.createAccess();
+            try {
+                writer = config.createWriteAccess();
+            } catch (URISyntaxException e) {
+                throw new IOException(e);
+            }
         }
         return writer;
     }
@@ -76,9 +83,6 @@ public class ElasticSearchSender implements BuildListener, Closeable {
 
         public ElasticSearchOutputStream(@CheckForNull OutputStream logger) {
             this.forwardingLogger = logger;
-        }
-
-        public ElasticSearchOutputStream() {
         }
 
         @Override

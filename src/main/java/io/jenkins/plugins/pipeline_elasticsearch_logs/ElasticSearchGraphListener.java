@@ -1,6 +1,7 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -20,6 +21,7 @@ import org.jenkinsci.plugins.workflow.graph.FlowStartNode;
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
 
 import hudson.model.Result;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -50,11 +52,15 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous {
 
     private static final Logger LOGGER = Logger.getLogger(ElasticSearchGraphListener.class.getName());
 
-    private final ElasticSearchAccess writer;
+    private final ElasticSearchWriteAccess writer;
     private final ElasticSearchRunConfiguration config;
 
     public ElasticSearchGraphListener(ElasticSearchRunConfiguration config) throws IOException {
-        writer = config.createAccess();
+        try {
+            writer = config.createWriteAccess();
+        } catch (URISyntaxException e) {
+            throw new IOException(e);
+        }
         this.config = config;
     }
 

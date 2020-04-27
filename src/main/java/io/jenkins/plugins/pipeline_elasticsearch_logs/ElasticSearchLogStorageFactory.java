@@ -22,6 +22,7 @@ import hudson.console.AnnotatedLargeText;
 import hudson.model.BuildListener;
 import hudson.model.Queue;
 import hudson.model.TaskListener;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.read.ElasticSearchReadAccess;
 
 @Extension
 public class ElasticSearchLogStorageFactory implements LogStorageFactory {
@@ -55,9 +56,11 @@ public class ElasticSearchLogStorageFactory implements LogStorageFactory {
 
     private static class ElasticSearchLogStorage implements LogStorage {
         private ElasticSearchRunConfiguration config;
+        private ElasticSearchReadAccess readAccess;
 
         ElasticSearchLogStorage(ElasticSearchRunConfiguration config) {
             this.config = config;
+            this.readAccess = config.createReadAccess();
         }
 
         @Override
@@ -73,37 +76,33 @@ public class ElasticSearchLogStorageFactory implements LogStorageFactory {
 
         @Override
         public AnnotatedLargeText<Executable> overallLog(Executable build, boolean complete) {
-            AnnotatedLargeText<Executable> esLog = null;
-            if (config.isReadLogsFromElasticsearch()) esLog = readOverallLogFromElasticsearch(build, complete);
+            AnnotatedLargeText<Executable> esLog = readAccess.overallLog(build, complete);
             if (esLog != null && esLog.length() > 0) {
                 return esLog;
             }
 
-            AnnotatedLargeText<Executable> fileLog = null;
-            fileLog = tryReadLogFile(build, complete);
+            //Try to read local log file, if it exists
+            AnnotatedLargeText<Executable> fileLog = tryReadLogFile(build, complete);
             if (fileLog != null) {
                 return fileLog;
             }
 
             if (esLog != null) {
+                //Empty log from Elasticsearch
                 return esLog;
             } else {
-                if (config.isReadLogsFromElasticsearch()) {
-                    return new BrokenLogStorage(new RuntimeException("Could not get log")).overallLog(build, complete);
-                } else {
-                    return new AnnotatedLargeText<>(new ByteBuffer(), StandardCharsets.UTF_8, true, build);
-                }
+                return new BrokenLogStorage(new RuntimeException("Could not get log")).overallLog(build, complete);
             }
         }
 
         @Override
         public AnnotatedLargeText<FlowNode> stepLog(FlowNode node, boolean complete) {
-            AnnotatedLargeText<FlowNode> esLog = null;
-            if (config.isReadLogsFromElasticsearch()) esLog = readStepLogFromElasticsearch(node, complete);
+            AnnotatedLargeText<FlowNode> esLog = readAccess.stepLog(node, complete);
             if (esLog != null && esLog.length() > 0) {
                 return esLog;
             }
-
+            
+            //Try to read local log file, if it exists
             AnnotatedLargeText<FlowNode> fileLog = null;
             fileLog = tryReadStepFromLogFile(node, complete);
             if (fileLog != null) {
@@ -111,31 +110,10 @@ public class ElasticSearchLogStorageFactory implements LogStorageFactory {
             }
 
             if (esLog != null) {
+                //Empty log from Elasticsearch
                 return esLog;
             } else {
-                if (config.isReadLogsFromElasticsearch()) {
-                    return new BrokenLogStorage(new RuntimeException("Could not get log")).stepLog(node, complete);
-                } else {
-                    return new AnnotatedLargeText<>(new ByteBuffer(), StandardCharsets.UTF_8, true, node);
-                }
-            }
-        }
-
-        private AnnotatedLargeText<Executable> readOverallLogFromElasticsearch(Executable build, boolean complete) {
-            try {
-                return new ElasticSearchLogReader(config).overallLog(build, complete);
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Could not get overallLog", e);
-                return null;
-            }
-        }
-
-        private AnnotatedLargeText<FlowNode> readStepLogFromElasticsearch(FlowNode node, boolean complete) {
-            try {
-                return new ElasticSearchLogReader(config).stepLog(node, complete);
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Could not get stepLog", e);
-                return null;
+                return new BrokenLogStorage(new RuntimeException("Could not get log")).stepLog(node, complete);
             }
         }
 
