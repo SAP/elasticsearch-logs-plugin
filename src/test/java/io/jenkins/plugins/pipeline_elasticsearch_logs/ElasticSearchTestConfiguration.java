@@ -7,6 +7,8 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.DefaultRunIdProvider;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.direct_es.ElasticSearchWriteAccessDirect;
 import net.sf.json.JSONObject;
 
 class ElasticSearchTestConfiguration extends ElasticSearchConfiguration {
@@ -19,8 +21,8 @@ class ElasticSearchTestConfiguration extends ElasticSearchConfiguration {
     }
 
     @Override
-    protected Supplier<ElasticSearchAccess> getAccessFactory() {
-        return () -> new ElasticSearchAccess(null, null, null, CONNECTION_TIMEOUT_DEFAULT) {
+    protected Supplier<ElasticSearchWriteAccess> getWriteAccessFactory() {
+        return () -> new ElasticSearchWriteAccessDirect(null, null, null, CONNECTION_TIMEOUT_DEFAULT) {
             @Override
             public void push(String data) throws IOException {
                 Map<String, Object> map = JSONObject.fromObject(data);
@@ -28,4 +30,5 @@ class ElasticSearchTestConfiguration extends ElasticSearchConfiguration {
             }
         };
     }
+
 }

@@ -1,15 +1,17 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import hudson.Extension;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.listeners.RunListener;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
 import net.sf.json.JSONObject;
-
-import java.io.IOException;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @Extension
 public class ElasticSearchRunListener extends RunListener<Run<?, ?>> {
@@ -22,7 +24,7 @@ public class ElasticSearchRunListener extends RunListener<Run<?, ?>> {
                 return;
             }
 
-            ElasticSearchAccess writer = config.createAccess();
+            ElasticSearchWriteAccess writer = config.createWriteAccess();
             Map<String, Object> data = config.createData();
 
             data.put("eventType", "buildEnd");
@@ -35,7 +37,7 @@ public class ElasticSearchRunListener extends RunListener<Run<?, ?>> {
                 data.put("duration", run.getDuration());
             }
             writer.push(JSONObject.fromObject(data).toString());
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             LOGGER.log(Level.SEVERE, "Failed to get Executable of FlowExecution.");
         }
     }
@@ -52,12 +54,12 @@ public class ElasticSearchRunListener extends RunListener<Run<?, ?>> {
                 return;
             }
 
-            ElasticSearchAccess writer = config.createAccess();
+            ElasticSearchWriteAccess writer = config.createWriteAccess();
             Map<String, Object> data = config.createData();
 
             data.put("eventType", "buildStart");
             writer.push(JSONObject.fromObject(data).toString());
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             LOGGER.log(Level.SEVERE, "Failed to get Executable of FlowExecution.", e);
         }
 

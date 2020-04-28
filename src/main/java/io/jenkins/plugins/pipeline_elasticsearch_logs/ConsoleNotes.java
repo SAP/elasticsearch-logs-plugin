@@ -27,6 +27,8 @@
 
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
+import com.google.common.collect.ImmutableMap;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
@@ -34,14 +36,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableMap;
-
 import hudson.console.ConsoleNote;
 
 /**
  * Utilities for extracting and reinserting {@link ConsoleNote}s.
  */
-class ConsoleNotes {
+public class ConsoleNotes {
 
     private static final String MESSAGE_KEY = "message";
     private static final String ANNOTATIONS_KEY = "annotations";
@@ -97,7 +97,7 @@ class ConsoleNotes {
         }
     }
 
-    static void write(Writer w, Map<String, Object> source) throws IOException {
+    public static void write(Writer w, Map<String, Object> source) throws IOException {
         if (source == null) throw new NullPointerException("source is null");
         String message = (String) source.get(MESSAGE_KEY);
         Object annotations = source.get(ANNOTATIONS_KEY);
@@ -118,9 +118,6 @@ class ConsoleNotes {
             w.write(message, pos, message.length() - pos);
         }
         w.write('\n');
-    }
-
-    private ConsoleNotes() {
     }
 
 }

@@ -11,17 +11,19 @@ import java.util.ArrayList;
 
 import org.apache.http.conn.ConnectTimeoutException;
 
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.direct_es.ElasticSearchWriteAccessDirect;
+
 /**
- * This class mocks an ElasticSearchAccess and overrides the {@link ElasticSearchAccess#push(String)} method.
+ * This class mocks an ElasticSearchAccess and overrides the {@link ElasticSearchWriteAccessDirect#push(String)} method.
  * The data the plugin tries to send to Elasticsearch are collected and can be retrieved via {@link #getEntries()}.
  */
-public class ElasticSearchAccessMock extends ElasticSearchAccess {
+public class ElasticSearchWriteAccessMock extends ElasticSearchWriteAccessDirect {
 
     private ArrayList<String> entries = new ArrayList<String>();
     private boolean printToLog = false;
     private boolean failConnection = false;
 
-    public ElasticSearchAccessMock(boolean printToLog) throws URISyntaxException {
+    public ElasticSearchWriteAccessMock(boolean printToLog) throws URISyntaxException {
         super(new URI("http://localhost:9200/jenkins/_doc"), "test", "test", CONNECTION_TIMEOUT_DEFAULT);
         this.printToLog = printToLog;
     }
@@ -31,7 +33,7 @@ public class ElasticSearchAccessMock extends ElasticSearchAccess {
     }
 
     @Override
-    String testConnection() throws URISyntaxException, IOException {
+    public String testConnection() throws URISyntaxException, IOException {
         return "";
     }
 

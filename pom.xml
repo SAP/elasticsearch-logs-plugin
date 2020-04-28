@@ -106,11 +106,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.elasticsearch.client</groupId>
-            <artifactId>elasticsearch-rest-high-level-client</artifactId>
-            <version>6.8.6</version>
-        </dependency>
-        <dependency>
         	<groupId>org.jenkinsci.plugins</groupId>
         	<artifactId>pipeline-stage-tags-metadata</artifactId>
         	<version>1.3.9</version>
@@ -203,4 +198,27 @@
             </plugin>
         </plugins>
     </build>
+
+  <!--
+    the profile https allows to start jenkins with https when running maven -Phttps hpi:run
+    for this you need a file keystore in this directory containing the key of the instance and the trusted
+    certificates (for client certs). The password is defined in the jetty-ssl.xml
+  -->
+  <profiles>
+    <profile>
+      <id>https</id>
+        <build>
+          <plugins>
+            <plugin>
+              <groupId>org.jenkins-ci.tools</groupId>
+              <artifactId>maven-hpi-plugin</artifactId>
+              <configuration>
+                <jettyXml>jetty.xml,jetty-ssl.xml,jetty-https.xml</jettyXml>
+              </configuration>
+            </plugin>
+          </plugins>
+        </build>
+    </profile>
+  </profiles>
+
 </project>

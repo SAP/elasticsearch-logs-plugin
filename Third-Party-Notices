@@ -16,6 +16,11 @@ Licensor: Barnes and Noble College
 Website: https://github.com/jenkinsci/logstash-plugin
 License: The MIT License
 
+Component: jenkinsci pipeline-api plugin
+Licensor: Barnes and Noble College
+Website: https://github.com/jenkinsci/workflow-api-plugin
+License: The MIT License
+
 --------------------------------------------------------------------------------------------------------------------------
 
 The MIT License

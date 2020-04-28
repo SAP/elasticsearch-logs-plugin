@@ -1,13 +1,17 @@
-package io.jenkins.plugins.pipeline_elasticsearch_logs;
+package io.jenkins.plugins.pipeline_elasticsearch_logs.write.direct_es;
 
 import static com.google.common.collect.Ranges.closedOpen;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.Utils.logExceptionAndReraiseWithTruncatedDetails;
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.matchers.IdMatcher;
 import com.google.common.collect.Range;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -17,16 +21,18 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -35,20 +41,25 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestClientBuilder;
-import org.elasticsearch.client.RestHighLevelClient;
+import org.jenkinsci.Symbol;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
+import org.kohsuke.stapler.DataBoundConstructor;
+
+import hudson.Extension;
+import hudson.security.ACL;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchConfiguration;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchGlobalConfiguration;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.SSLHelper;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
+import jenkins.model.Jenkins;
 
 /**
  * Post data to Elastic Search.
- *
  */
-public class ElasticSearchAccess {
-    private static final Logger LOGGER = Logger.getLogger(ElasticSearchAccess.class.getName());
+public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
+    private static final Logger LOGGER = Logger.getLogger(ElasticSearchWriteAccessDirect.class.getName());
 
     private static final Range<Integer> SUCCESS_CODES = closedOpen(200, 300);
 
@@ -69,11 +80,59 @@ public class ElasticSearchAccess {
     @CheckForNull
     private transient CloseableHttpClient client;
 
-    public ElasticSearchAccess(URI uri, String username, String password, int connectionTimeout) {
-        this.uri = uri;
+    @DataBoundConstructor
+    public ElasticSearchWriteAccessDirect() throws URISyntaxException {
+        ElasticSearchConfiguration config = ElasticSearchGlobalConfiguration.get().getElasticSearch();
+        if(config != null) {
+            String credentialsId = config.getCredentialsId();
+            if(credentialsId != null) {
+                StandardUsernamePasswordCredentials credentials = getCredentials(credentialsId);
+                if(credentials != null) {
+                    this.username = credentials.getUsername();
+                    this.password = credentials.getPassword().getPlainText();
+                }
+            }
+            this.uri = new URI(config.getUrl());
+            this.connectionTimeout = Integer.parseInt(config.getConnectionTimeoutMillis());
+        } else {
+            this.username = null;
+            this.password = null;
+            this.uri = null;
+            this.connectionTimeout = -1;
+        }
+    }
+    
+    /*
+     * For tests only
+     */
+    public ElasticSearchWriteAccessDirect(URI uri, String user, String password, int connectionTimeout) {
+        this.username = user;
         this.password = password;
-        this.username = username;
+        this.uri = uri;
         this.connectionTimeout = connectionTimeout;
+    }
+
+    @Extension
+    @Symbol("esDirectWrite")
+    public static class DescriptorImpl extends ElasticSearchWriteAccessDescriptor {
+        @Override
+        public String getDisplayName() {
+            return "Direct Elasticsearch Writer";
+        }
+    }
+
+    @CheckForNull
+    private static StandardUsernamePasswordCredentials getCredentials(@Nonnull String id) {
+        StandardUsernamePasswordCredentials credential = null;
+        List<StandardUsernamePasswordCredentials> credentials = CredentialsProvider
+                .lookupCredentials(StandardUsernamePasswordCredentials.class, Jenkins.get(), ACL.SYSTEM, Collections.emptyList());
+        IdMatcher matcher = new IdMatcher(id);
+        for (StandardUsernamePasswordCredentials c : credentials) {
+            if (matcher.matches(c)) {
+                credential = c;
+            }
+        }
+        return credential;
     }
 
     public void setTrustKeyStore(KeyStore trustKeyStore) {
@@ -101,12 +160,6 @@ public class ElasticSearchAccess {
         return postRequest;
     }
 
-    public RestHighLevelClient createNewRestClient() {
-        RestClientBuilder builder = RestClient.builder(new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme()));
-        if (getAuth() != null) builder.setDefaultHeaders(new Header[] { new BasicHeader("Authorization", "Basic " + getAuth()) });
-        return new RestHighLevelClient(builder);
-    }
-
     private CloseableHttpClient getClient() {
         if(client == null) {
             HttpClientBuilder clientBuilder = HttpClientBuilder.create();
@@ -130,7 +183,7 @@ public class ElasticSearchAccess {
     
 
     @Restricted(NoExternalUse.class)
-    String testConnection() throws URISyntaxException, IOException {
+    public String testConnection() throws URISyntaxException, IOException {
         URI testUri = new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), null, null, null);
         HttpGet getRequest = new HttpGet(testUri);
         String auth = getAuth();
@@ -163,6 +216,7 @@ public class ElasticSearchAccess {
      * @throws IOException
      */
     public void push(String data) throws IOException {
+        LOGGER.info(this.getClass().getSimpleName()+".push("+data+")");
         HttpPost post = getHttpPost(data);
 
         CloseableHttpResponse response = null;
@@ -206,6 +260,28 @@ public class ElasticSearchAccess {
                 stream.close();
             }
         }
+    }
+
+
+    private static class MeSupplier implements Supplier<ElasticSearchWriteAccess>, Serializable {
+
+        private MeSupplier(ElasticSearchWriteAccessDirect me) {
+        }
+        
+        @Override
+        public ElasticSearchWriteAccess get() {
+            try {
+                //Currently no need to set parameters. All taken from global config.
+                return new ElasticSearchWriteAccessDirect();
+            } catch (Exception e) {
+                throw new RuntimeException("Could not create ElasticSearchWriteAccessDirect", e);
+            }
+        }        
+    }
+
+    @Override
+    public Supplier<ElasticSearchWriteAccess> getSupplier() {
+        return new MeSupplier(this);
     }
 
 }
