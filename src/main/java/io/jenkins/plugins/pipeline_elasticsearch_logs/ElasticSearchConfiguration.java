@@ -132,8 +132,10 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         return connectionTimeoutMillis;
     }
 
-    public Integer getConnectionTimeoutMillisOrDefault() {
-        return (connectionTimeoutMillis == null || connectionTimeoutMillis < -1) ? CONNECTION_TIMEOUT_DEFAULT : connectionTimeoutMillis;
+    public int getConnectionTimeoutMillisOrDefault() {
+        if(connectionTimeoutMillis == null) return CONNECTION_TIMEOUT_DEFAULT;
+        if(connectionTimeoutMillis < -1) return -1;
+        return connectionTimeoutMillis;
     }
 
     @DataBoundSetter
