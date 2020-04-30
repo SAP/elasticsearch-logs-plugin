@@ -93,7 +93,7 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
                 }
             }
             this.uri = new URI(config.getUrl());
-            this.connectionTimeout = config.getConnectionTimeoutMillisOrDefault();
+            this.connectionTimeout = config.getConnectionTimeoutMillis();
         } else {
             this.username = null;
             this.password = null;

@@ -1,5 +1,6 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchConfiguration.DescriptorImpl.ensureCorrectConnectionTimeoutMillis;
 import static org.apache.commons.lang.StringUtils.isEmpty;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
@@ -77,7 +78,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
     static final int CONNECTION_TIMEOUT_DEFAULT = 10000;
 
-    @CheckForNull
+    @Nonnull
     private Integer connectionTimeoutMillis;
     
     @DataBoundConstructor
@@ -111,9 +112,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         if (runIdProvider == null) {
             runIdProvider = new DefaultRunIdProvider("");
         }
-        if (connectionTimeoutMillis == null || connectionTimeoutMillis < 0) {
-            connectionTimeoutMillis = CONNECTION_TIMEOUT_DEFAULT;
-        }
+        setConnectionTimeoutMillis(connectionTimeoutMillis);
         if (url == null) {
             String protocol = "http";
             if (ssl) {
@@ -129,20 +128,15 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         return url;
     }
 
-    @CheckForNull
+    @Nonnull
     public Integer getConnectionTimeoutMillis() {
-        return connectionTimeoutMillis;
-    }
-
-    public int getConnectionTimeoutMillisOrDefault() {
-        if(connectionTimeoutMillis == null) return CONNECTION_TIMEOUT_DEFAULT;
-        if(connectionTimeoutMillis < 0) return CONNECTION_TIMEOUT_DEFAULT;
-        return connectionTimeoutMillis;
+        //Ensure correct value - just in case something went wrong
+        return ensureCorrectConnectionTimeoutMillis(connectionTimeoutMillis);
     }
 
     @DataBoundSetter
-    public void setConnectionTimeoutMillis(Integer connectionTimeoutMillis) {
-        this.connectionTimeoutMillis = connectionTimeoutMillis;
+    public void setConnectionTimeoutMillis(@CheckForNull Integer connectionTimeoutMillis) {
+        this.connectionTimeoutMillis = ensureCorrectConnectionTimeoutMillis(connectionTimeoutMillis);
     }
 
     public boolean isSaveAnnotations() {
@@ -268,7 +262,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         }
 
         return new ElasticSearchRunConfiguration(uri, username, password, getKeyStoreBytes(), isSaveAnnotations(), getUniqueRunId(run),
-                getRunIdProvider().getRunId(run), getWriteAccessFactory(), getConnectionTimeoutMillisOrDefault());
+                getRunIdProvider().getRunId(run), getWriteAccessFactory(), getConnectionTimeoutMillis());
     }
 
     // Can be overwritten in tests
@@ -309,17 +303,22 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
             return model;
         }
         
-        public FormValidation doCheckConnectionTimeoutMillis(@QueryParameter("value") String value) {
-            try {
-                if(isEmpty(value)) return FormValidation.warning("Default " + CONNECTION_TIMEOUT_DEFAULT + " is used.");
-                int timeout = Integer.parseInt(value);
-                if(timeout <= 0) return FormValidation.error("Value must be greater than 0");
-            } catch(NumberFormatException e) {
-                return FormValidation.error("Value must be an Integer");
-            }
+        public FormValidation doCheckConnectionTimeoutMillis(@QueryParameter("value") Integer value) {
+            if(value == null) return FormValidation.warning("Default " + CONNECTION_TIMEOUT_DEFAULT + " is used.");
+            if(value < 0) return FormValidation.warning("Default " + CONNECTION_TIMEOUT_DEFAULT + " is used.");
+            if(value == 0) return FormValidation.ok("This means no connection timeout is used");
+            if(value > Integer.MAX_VALUE) return FormValidation.error("The value must not be bigger than " + Integer.MAX_VALUE);
             return FormValidation.ok();
         }
 
+        @Nonnull
+        public static Integer ensureCorrectConnectionTimeoutMillis(@CheckForNull Integer value) {
+            if (value == null || value < 0) {
+                return CONNECTION_TIMEOUT_DEFAULT;
+            }
+            return value;
+        }
+        
         public FormValidation doCheckUrl(@QueryParameter("value") String value) {
             if (StringUtils.isBlank(value)) {
                 return FormValidation.warning("URL must not be empty");
