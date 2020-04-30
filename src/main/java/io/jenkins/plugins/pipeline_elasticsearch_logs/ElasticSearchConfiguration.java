@@ -1,8 +1,5 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
-import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchConfiguration.DescriptorImpl.ensureCorrectConnectionTimeoutMillis;
-import static org.apache.commons.lang.StringUtils.isEmpty;
-
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardCertificateCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
@@ -78,7 +75,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
     static final int CONNECTION_TIMEOUT_DEFAULT = 10000;
 
-    @Nonnull
+    @CheckForNull
     private Integer connectionTimeoutMillis;
     
     @DataBoundConstructor
@@ -282,6 +279,14 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         return runId;
     }
 
+    @Nonnull
+    public static Integer ensureCorrectConnectionTimeoutMillis(@CheckForNull Integer value) {
+        if (value == null || value < 0) {
+            return CONNECTION_TIMEOUT_DEFAULT;
+        }
+        return value;
+    }
+
     @Extension
     @Symbol("elasticsearch")
     public static class DescriptorImpl extends Descriptor<ElasticSearchConfiguration> {
@@ -304,19 +309,12 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         }
         
         public FormValidation doCheckConnectionTimeoutMillis(@QueryParameter("value") Integer value) {
-            if(value == null) return FormValidation.warning("Default " + CONNECTION_TIMEOUT_DEFAULT + " is used.");
-            if(value < 0) return FormValidation.warning("Default " + CONNECTION_TIMEOUT_DEFAULT + " is used.");
-            if(value == 0) return FormValidation.ok("This means no connection timeout is used");
-            if(value > Integer.MAX_VALUE) return FormValidation.error("The value must not be bigger than " + Integer.MAX_VALUE);
-            return FormValidation.ok();
-        }
-
-        @Nonnull
-        public static Integer ensureCorrectConnectionTimeoutMillis(@CheckForNull Integer value) {
-            if (value == null || value < 0) {
-                return CONNECTION_TIMEOUT_DEFAULT;
+            int newValue = ensureCorrectConnectionTimeoutMillis(value);
+            if(value == null || newValue != (int)value) {
+                return FormValidation.warning("Illegal value - default " + newValue + " is used instead.");
             }
-            return value;
+            if(value == 0) return FormValidation.ok("This means no connection timeout is used");
+            return FormValidation.ok();
         }
         
         public FormValidation doCheckUrl(@QueryParameter("value") String value) {
