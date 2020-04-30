@@ -1,6 +1,11 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
-import static org.apache.commons.lang.StringUtils.isEmpty;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardCertificateCredentials;
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.cloudbees.plugins.credentials.common.StandardUsernameListBoxModel;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.matchers.IdMatcher;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -29,13 +34,6 @@ import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
-
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.common.StandardCertificateCredentials;
-import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
-import com.cloudbees.plugins.credentials.common.StandardUsernameListBoxModel;
-import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
-import com.cloudbees.plugins.credentials.matchers.IdMatcher;
 
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
@@ -77,7 +75,8 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
     static final int CONNECTION_TIMEOUT_DEFAULT = 10000;
 
-    private String connectionTimeoutMillis;
+    @CheckForNull
+    private Integer connectionTimeoutMillis;
     
     @DataBoundConstructor
     public ElasticSearchConfiguration(String url) throws URISyntaxException {
@@ -110,7 +109,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         if (runIdProvider == null) {
             runIdProvider = new DefaultRunIdProvider("");
         }
-
+        setConnectionTimeoutMillis(connectionTimeoutMillis);
         if (url == null) {
             String protocol = "http";
             if (ssl) {
@@ -126,13 +125,15 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         return url;
     }
 
-    public String getConnectionTimeoutMillis() {
-        return connectionTimeoutMillis;
+    @Nonnull
+    public Integer getConnectionTimeoutMillis() {
+        //Ensure correct value - just in case something went wrong
+        return ensureCorrectConnectionTimeoutMillis(connectionTimeoutMillis);
     }
 
     @DataBoundSetter
-    public void setConnectionTimeoutMillis(String connectionTimeoutMillis) {
-        this.connectionTimeoutMillis = connectionTimeoutMillis;
+    public void setConnectionTimeoutMillis(@CheckForNull Integer connectionTimeoutMillis) {
+        this.connectionTimeoutMillis = ensureCorrectConnectionTimeoutMillis(connectionTimeoutMillis);
     }
 
     public boolean isSaveAnnotations() {
@@ -257,10 +258,8 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
             throw new IOException(e);
         }
 
-        int connectionTimeout = isEmpty(connectionTimeoutMillis) ? CONNECTION_TIMEOUT_DEFAULT : Integer.parseInt(connectionTimeoutMillis);
-
         return new ElasticSearchRunConfiguration(uri, username, password, getKeyStoreBytes(), isSaveAnnotations(), getUniqueRunId(run),
-                getRunIdProvider().getRunId(run), getWriteAccessFactory(), connectionTimeout);
+                getRunIdProvider().getRunId(run), getWriteAccessFactory(), getConnectionTimeoutMillis());
     }
 
     // Can be overwritten in tests
@@ -278,6 +277,14 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         }
 
         return runId;
+    }
+
+    @Nonnull
+    public static Integer ensureCorrectConnectionTimeoutMillis(@CheckForNull Integer value) {
+        if (value == null || value < 0) {
+            return CONNECTION_TIMEOUT_DEFAULT;
+        }
+        return value;
     }
 
     @Extension
@@ -301,17 +308,15 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
             return model;
         }
         
-        public FormValidation doCheckConnectionTimeoutMillis(@QueryParameter("value") String value) {
-            try {
-                if(isEmpty(value)) return FormValidation.warning("Default " + CONNECTION_TIMEOUT_DEFAULT + " is used.");
-                int timeout = Integer.parseInt(value);
-                if(timeout <= 0) return FormValidation.error("Value must be greater than 0");
-            } catch(NumberFormatException e) {
-                return FormValidation.error("Value must be an Integer");
+        public FormValidation doCheckConnectionTimeoutMillis(@QueryParameter("value") Integer value) {
+            int newValue = ensureCorrectConnectionTimeoutMillis(value);
+            if(value == null || newValue != (int)value) {
+                return FormValidation.warning("Illegal value - default " + newValue + " is used instead.");
             }
+            if(value == 0) return FormValidation.ok("This means no connection timeout is used");
             return FormValidation.ok();
         }
-
+        
         public FormValidation doCheckUrl(@QueryParameter("value") String value) {
             if (StringUtils.isBlank(value)) {
                 return FormValidation.warning("URL must not be empty");
