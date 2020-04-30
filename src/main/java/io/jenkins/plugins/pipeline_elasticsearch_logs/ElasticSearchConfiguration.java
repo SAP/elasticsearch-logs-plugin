@@ -111,7 +111,9 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         if (runIdProvider == null) {
             runIdProvider = new DefaultRunIdProvider("");
         }
-
+        if (connectionTimeoutMillis == null || connectionTimeoutMillis < 0) {
+            connectionTimeoutMillis = CONNECTION_TIMEOUT_DEFAULT;
+        }
         if (url == null) {
             String protocol = "http";
             if (ssl) {
