@@ -21,6 +21,6 @@ public abstract class ElasticSearchWriteAccess extends AbstractDescribableImpl<E
      * of this object at a later point in time.
      * @return
      */
-    public abstract Supplier<ElasticSearchWriteAccess> getSupplier();
+    public abstract Supplier<ElasticSearchWriteAccess> getSupplier() throws IOException;
 
 }

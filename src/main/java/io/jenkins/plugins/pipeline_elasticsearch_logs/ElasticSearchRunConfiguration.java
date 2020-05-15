@@ -50,7 +50,7 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     private final String runIdJsonString;
 
-    public ElasticSearchRunConfiguration(URI uri, String username, String password, byte[] keyStoreBytes, boolean saveAnnotations,
+    public ElasticSearchRunConfiguration(URI uri, String username, String password, boolean saveAnnotations,
             String uid, JSONObject runId, Supplier<ElasticSearchWriteAccess> writeAccessFactory, int connectionTimeoutMillis) {
         super();
         this.uri = uri;

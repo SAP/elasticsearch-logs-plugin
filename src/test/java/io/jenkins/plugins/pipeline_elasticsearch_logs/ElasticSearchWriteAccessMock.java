@@ -6,7 +6,6 @@ import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.JSONUtils
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.KeyStore;
 import java.util.ArrayList;
 
 import org.apache.http.conn.ConnectTimeoutException;
@@ -19,17 +18,13 @@ import io.jenkins.plugins.pipeline_elasticsearch_logs.write.direct_es.ElasticSea
  */
 public class ElasticSearchWriteAccessMock extends ElasticSearchWriteAccessDirect {
 
-    private ArrayList<String> entries = new ArrayList<String>();
+    private ArrayList<String> entries = new ArrayList<>();
     private boolean printToLog = false;
     private boolean failConnection = false;
 
     public ElasticSearchWriteAccessMock(boolean printToLog) throws URISyntaxException {
-        super(new URI("http://localhost:9200/jenkins/_doc"), "test", "test", CONNECTION_TIMEOUT_DEFAULT);
+        super(new URI("http://localhost:9200/jenkins/_doc"), "test", "test", CONNECTION_TIMEOUT_DEFAULT, null);
         this.printToLog = printToLog;
-    }
-
-    @Override
-    public void setTrustKeyStore(KeyStore trustKeyStore) {
     }
 
     @Override
