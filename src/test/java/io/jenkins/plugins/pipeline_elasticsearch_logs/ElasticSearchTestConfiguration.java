@@ -22,7 +22,7 @@ class ElasticSearchTestConfiguration extends ElasticSearchConfiguration {
 
     @Override
     protected Supplier<ElasticSearchWriteAccess> getWriteAccessFactory() {
-        return () -> new ElasticSearchWriteAccessDirect(null, null, null, CONNECTION_TIMEOUT_DEFAULT) {
+        return () -> new ElasticSearchWriteAccessDirect(null, null, null, CONNECTION_TIMEOUT_DEFAULT, null) {
             @Override
             public void push(String data) throws IOException {
                 Map<String, Object> map = JSONObject.fromObject(data);

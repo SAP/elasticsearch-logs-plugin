@@ -218,7 +218,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         return "https".equals(scheme);
     }
 
-    private byte[] getKeyStoreBytes() throws IOException {
+    public byte[] getKeyStoreBytes() throws IOException {
         KeyStore keyStore = getCustomKeyStore();
         if (isSsl() && keyStore != null) {
             ByteArrayOutputStream b = new ByteArrayOutputStream(2048);
@@ -258,14 +258,14 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
             throw new IOException(e);
         }
 
-        return new ElasticSearchRunConfiguration(uri, username, password, getKeyStoreBytes(), isSaveAnnotations(), getUniqueRunId(run),
+        return new ElasticSearchRunConfiguration(uri, username, password, isSaveAnnotations(), getUniqueRunId(run),
                 getRunIdProvider().getRunId(run), getWriteAccessFactory(), getConnectionTimeoutMillis());
     }
 
     // Can be overwritten in tests
     @CheckForNull
     @Restricted(NoExternalUse.class)
-    protected Supplier<ElasticSearchWriteAccess> getWriteAccessFactory() {
+    protected Supplier<ElasticSearchWriteAccess> getWriteAccessFactory() throws IOException {
         return elasticsearchWriteAccess.getSupplier();
     }
 

@@ -8,6 +8,7 @@ import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredenti
 import com.cloudbees.plugins.credentials.matchers.IdMatcher;
 import com.google.common.collect.Range;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -71,11 +72,15 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
     @CheckForNull
     private String password;
 
+    private final int connectionTimeout;
+
+    @CheckForNull
+    private byte[] trustStoreBytes;
+
     private transient String auth;
 
-    private KeyStore trustKeyStore;
+    private transient KeyStore trustKeyStore;
     
-    private final int connectionTimeout;
 
     @CheckForNull
     private transient CloseableHttpClient client;
@@ -105,11 +110,24 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
     /*
      * For tests only
      */
-    public ElasticSearchWriteAccessDirect(URI uri, String user, String password, int connectionTimeout) {
+    public ElasticSearchWriteAccessDirect(URI uri, String user, String password, int connectionTimeout, byte[] trustStoreBytes) {
         this.username = user;
         this.password = password;
         this.uri = uri;
         this.connectionTimeout = connectionTimeout;
+        this.trustStoreBytes = trustStoreBytes == null ? null : trustStoreBytes.clone();
+    }
+
+    private KeyStore getTrustKeyStore() {
+      if (trustKeyStore == null && trustStoreBytes != null) {
+          try {
+              trustKeyStore = KeyStore.getInstance("PKCS12");
+              trustKeyStore.load(new ByteArrayInputStream(trustStoreBytes), "".toCharArray());
+          } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
+              LOGGER.log(Level.WARNING, "Failed to create KeyStore from bytes", e);
+          }
+      }
+      return trustKeyStore;
     }
 
     @Extension
@@ -133,10 +151,6 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
             }
         }
         return credential;
-    }
-
-    public void setTrustKeyStore(KeyStore trustKeyStore) {
-        this.trustKeyStore = trustKeyStore;
     }
 
     @CheckForNull
@@ -168,7 +182,7 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
             requestBuilder.setConnectionRequestTimeout(connectionTimeout);
             requestBuilder.setSocketTimeout(connectionTimeout);
             clientBuilder.setDefaultRequestConfig(requestBuilder.build());
-            if (trustKeyStore != null) {
+            if (getTrustKeyStore() != null) {
                 try {
                     SSLHelper.setClientBuilderSSLContext(clientBuilder, trustKeyStore);
                 } catch (KeyManagementException | CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {
@@ -265,22 +279,53 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
 
     private static class MeSupplier implements Supplier<ElasticSearchWriteAccess>, Serializable {
 
-        private MeSupplier(ElasticSearchWriteAccessDirect me) {
+        private final URI uri;
+
+        @CheckForNull
+        private String username;
+
+        @CheckForNull
+        private String password;
+
+        private final int connectionTimeout;
+
+        @CheckForNull
+        private byte[] trustStoreBytes;
+
+        private MeSupplier(ElasticSearchWriteAccessDirect me) throws IOException {
+            ElasticSearchConfiguration config = ElasticSearchGlobalConfiguration.get().getElasticSearch();
+            if (config != null) {
+                String credentialsId = config.getCredentialsId();
+                if (credentialsId != null) {
+                    StandardUsernamePasswordCredentials credentials = getCredentials(credentialsId);
+                    if (credentials != null) {
+                        this.username = credentials.getUsername();
+                        this.password = credentials.getPassword().getPlainText();
+                    }
+                }
+                this.uri = URI.create(config.getUrl());
+                this.connectionTimeout = config.getConnectionTimeoutMillis();
+                this.trustStoreBytes = config.getKeyStoreBytes();
+            } else {
+                this.username = null;
+                this.password = null;
+                this.uri = null;
+                this.connectionTimeout = -1;
+            }
         }
-        
+
         @Override
         public ElasticSearchWriteAccess get() {
             try {
-                //Currently no need to set parameters. All taken from global config.
-                return new ElasticSearchWriteAccessDirect();
+                return new ElasticSearchWriteAccessDirect(uri, username, password, connectionTimeout, trustStoreBytes);
             } catch (Exception e) {
                 throw new RuntimeException("Could not create ElasticSearchWriteAccessDirect", e);
             }
-        }        
+        }
     }
 
     @Override
-    public Supplier<ElasticSearchWriteAccess> getSupplier() {
+    public Supplier<ElasticSearchWriteAccess> getSupplier() throws IOException {
         return new MeSupplier(this);
     }
 
