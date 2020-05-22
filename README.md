@@ -3,7 +3,7 @@
 Configuration of the plugin may change without further notice in an incompatible way!
 
 ### Description
-
+ 
 A Jenkins plugin to send Pipeline build logs to an [Elasticsearch](https://www.elastic.co/products/elasticsearch) instance.
 
 This is an [implementation of JEP-210](https://github.com/jenkinsci/jep/blob/master/jep/210/README.adoc).
