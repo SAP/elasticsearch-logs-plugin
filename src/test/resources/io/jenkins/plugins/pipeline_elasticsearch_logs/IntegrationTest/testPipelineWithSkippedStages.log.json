@@ -1188,6 +1188,22 @@
   },
     {
     "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
+    "message": "/.*at .*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+    {
+    "eventType": "buildMessage",
     "message": "Finished: FAILURE",
     "timestamp": "/.*/",
     "timestampMillis": "/.*/",
