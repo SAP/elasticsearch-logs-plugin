@@ -36,11 +36,9 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.ssl.SSLContextBuilder;
 
 public class SSLHelper {
 
@@ -49,72 +47,15 @@ public class SSLHelper {
         if (customKeyStore == null) return;
         String alias = customKeyStore.aliases().nextElement();
         X509Certificate certificate = (X509Certificate) customKeyStore.getCertificate(alias);
-        if (certificate != null) clientBuilder.setSSLContext(createSSLContext(alias, certificate));
+        if (certificate != null) clientBuilder.setSSLContext(createSSLContext(customKeyStore));
     }
 
-    private static SSLContext createSSLContext(String alias, X509Certificate certificate)
+    private static SSLContext createSSLContext(KeyStore truststore)
             throws CertificateException, NoSuchAlgorithmException, IOException, KeyStoreException, KeyManagementException {
-        // Step 1: Get all defaults
-        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        // Using null here initialises the TMF with the default trust store.
-        tmf.init((KeyStore) null);
 
-        // Get hold of the default trust manager
-        X509TrustManager defaultTM = null;
-        for (TrustManager tm : tmf.getTrustManagers()) {
-            if (tm instanceof X509TrustManager) {
-                defaultTM = (X509TrustManager) tm;
-                break;
-            }
-        }
-
-        // Step 2: Add custom cert to keystore
-        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-        ks.load(null, null);
-        ks.setEntry(alias, new KeyStore.TrustedCertificateEntry(certificate), null);
-
-        // Create TMF with our custom cert's KS
-        tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        tmf.init(ks);
-
-        // Get hold of the custom trust manager
-        X509TrustManager customTM = null;
-        for (TrustManager tm : tmf.getTrustManagers()) {
-            if (tm instanceof X509TrustManager) {
-                customTM = (X509TrustManager) tm;
-                break;
-            }
-        }
-
-        // Step 3: Wrap it in our own class.
-        final X509TrustManager finalDefaultTM = defaultTM;
-        final X509TrustManager finalCustomTM = customTM;
-        X509TrustManager combinedTM = new X509TrustManager() {
-            @Override
-            public X509Certificate[] getAcceptedIssuers() {
-                return finalDefaultTM.getAcceptedIssuers();
-            }
-
-            @Override
-            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                try {
-                    finalCustomTM.checkServerTrusted(chain, authType);
-                } catch (CertificateException e) {
-                    // This will throw another CertificateException if this fails too.
-                    finalDefaultTM.checkServerTrusted(chain, authType);
-                }
-            }
-
-            @Override
-            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                finalDefaultTM.checkClientTrusted(chain, authType);
-            }
-        };
-
-        // Step 4: Finally, create SSLContext based off of this combined TM
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(null, new TrustManager[] { combinedTM }, null);
-
-        return sslContext;
+        SSLContextBuilder sslContextBuilder = new SSLContextBuilder();
+        sslContextBuilder.loadTrustMaterial(truststore, null);
+        
+        return sslContextBuilder.build();
     }
 }
