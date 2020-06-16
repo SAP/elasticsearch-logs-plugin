@@ -2,6 +2,7 @@ package io.jenkins.plugins.pipeline_elasticsearch_logs.runid;
 
 import java.io.IOException;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jenkinsci.Symbol;
@@ -44,10 +45,8 @@ public class JsonRunIdProvider extends RunIdProvider {
         EnvVars env = null;
         try {
             env = run.getEnvironment(new LogTaskListener(LOGGER, LOGGER.getLevel()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (IOException | InterruptedException e) {
+            LOGGER.log(Level.WARNING, "Failed to get environment.", e);
         }
         if (env == null) env = new EnvVars();
         env.put(JENKINS_INSTANCE_ID_KEY, getEffectInstanceId(null));
@@ -65,7 +64,7 @@ public class JsonRunIdProvider extends RunIdProvider {
     protected void expand(Object object, EnvVars env) {
         if (object instanceof JSONObject) {
             JSONObject jsonObject = ((JSONObject) object);
-            Set keys = ((JSONObject) object).keySet();
+            Set<?> keys = ((JSONObject) object).keySet();
             for (Object keyObject : keys) {
                 if (!(keyObject instanceof String)) continue;
                 String key = (String) keyObject;
