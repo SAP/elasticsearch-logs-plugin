@@ -31,15 +31,22 @@ import java.util.logging.Logger;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.AuthCache;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicAuthCache;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
@@ -77,13 +84,13 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
     @CheckForNull
     private byte[] trustStoreBytes;
 
-    private transient String auth;
 
     private transient KeyStore trustKeyStore;
-    
 
     @CheckForNull
     private transient CloseableHttpClient client;
+
+	private transient HttpClientContext context;
 
     @DataBoundConstructor
     public ElasticSearchWriteAccessDirect() throws URISyntaxException {
@@ -106,7 +113,7 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
             this.connectionTimeout = -1;
         }
     }
-    
+
     /*
      * For tests only
      */
@@ -153,62 +160,64 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
         return credential;
     }
 
-    @CheckForNull
-    private String getAuth() {
-        if (auth == null && StringUtils.isNotBlank(username)) {
-            auth = Base64.encodeBase64String((username + ":" + StringUtils.defaultString(password)).getBytes(StandardCharsets.UTF_8));
-        }
-        return auth;
-    }
-
     private HttpPost getHttpPost(String data) {
         HttpPost postRequest = new HttpPost(uri);
         // char encoding is set to UTF_8 since this request posts a JSON string
         StringEntity input = new StringEntity(data, StandardCharsets.UTF_8);
         input.setContentType(ContentType.APPLICATION_JSON.toString());
         postRequest.setEntity(input);
-        auth = getAuth();
-        if (auth != null) {
-            postRequest.addHeader("Authorization", "Basic " + auth);
-        }
         return postRequest;
     }
 
     private CloseableHttpClient getClient() {
-        if(client == null) {
+        if (client == null) {
+            if (context == null) {
+                context = HttpClientContext.create();
+            }
+
             HttpClientBuilder clientBuilder = HttpClientBuilder.create();
             RequestConfig.Builder requestBuilder = RequestConfig.custom();
             requestBuilder.setConnectTimeout(connectionTimeout);
             requestBuilder.setConnectionRequestTimeout(connectionTimeout);
             requestBuilder.setSocketTimeout(connectionTimeout);
+
+            if (StringUtils.isNotBlank(username))
+            {
+                HttpHost targetHost = new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme());
+                org.apache.http.client.CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+                credentialsProvider.setCredentials(new AuthScope(targetHost),
+                        new UsernamePasswordCredentials(username, StringUtils.defaultString(password)));
+
+                AuthCache authCache = new BasicAuthCache();
+                authCache.put(targetHost, new BasicScheme());
+				context.setCredentialsProvider(credentialsProvider);
+				context.setAuthCache(authCache);
+            }
             clientBuilder.setDefaultRequestConfig(requestBuilder.build());
             if (getTrustKeyStore() != null) {
-                try {
+                try
+                {
                     SSLHelper.setClientBuilderSSLContext(clientBuilder, trustKeyStore);
                 } catch (KeyManagementException | CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException e) {
                     LOGGER.log(Level.SEVERE, "Failed to set SSLContext for http client. Will try without.", e);
                 }
             }
             client = clientBuilder.build();
-            if(LOGGER.isLoggable(Level.FINE)) LOGGER.fine("New Http client created");
+            if (LOGGER.isLoggable(Level.FINE)) LOGGER.fine("New Http client created");
         }
         return client;
     }
-    
+
 
     @Restricted(NoExternalUse.class)
     public String testConnection() throws URISyntaxException, IOException {
         URI testUri = new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), null, null, null);
         HttpGet getRequest = new HttpGet(testUri);
-        String auth = getAuth();
-        if (auth != null) {
-            getRequest.addHeader("Authorization", "Basic " + auth);
-        }
 
         CloseableHttpResponse response = null;
         try {
             CloseableHttpClient httpClient = getClient();
-            response = httpClient.execute(getRequest);
+            response = httpClient.execute(getRequest, context);
             if (!SUCCESS_CODES.contains(response.getStatusLine().getStatusCode())) {
                 String errorMessage = this.getErrorMessage(response);
                 throw new IOException(errorMessage);
@@ -229,6 +238,7 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
      *            The data to post
      * @throws IOException
      */
+    @Override
     public void push(String data) throws IOException {
         LOGGER.info(this.getClass().getSimpleName()+".push("+data+")");
         HttpPost post = getHttpPost(data);
@@ -236,7 +246,7 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
         CloseableHttpResponse response = null;
         try {
             CloseableHttpClient httpClient = getClient();
-            response = httpClient.execute(post);
+            response = httpClient.execute(post, context);
             if (!SUCCESS_CODES.contains(response.getStatusLine().getStatusCode())) {
                 String errorMessage = this.getErrorMessage(response);
                 throw new IOException(errorMessage);
