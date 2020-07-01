@@ -240,7 +240,6 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
      */
     @Override
     public void push(String data) throws IOException {
-        LOGGER.info(this.getClass().getSimpleName()+".push("+data+")");
         HttpPost post = getHttpPost(data);
 
         CloseableHttpResponse response = null;
