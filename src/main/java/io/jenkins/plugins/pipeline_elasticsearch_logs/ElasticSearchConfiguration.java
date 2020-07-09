@@ -67,6 +67,8 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
     private Boolean saveAnnotations = true;
 
+    private Boolean writeAnnotationsToLogFile = true;
+
     private RunIdProvider runIdProvider;
 
     private ElasticSearchWriteAccess elasticsearchWriteAccess;
@@ -77,7 +79,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
     @CheckForNull
     private Integer connectionTimeoutMillis;
-    
+
     @DataBoundConstructor
     public ElasticSearchConfiguration(String url) throws URISyntaxException {
         this.url = url;
@@ -105,6 +107,9 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     protected Object readResolve() {
         if (saveAnnotations == null) {
             saveAnnotations = true;
+        }
+        if (writeAnnotationsToLogFile == null) {
+            writeAnnotationsToLogFile = true;
         }
         if (runIdProvider == null) {
             runIdProvider = new DefaultRunIdProvider("");
@@ -143,6 +148,15 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     @DataBoundSetter
     public void setSaveAnnotations(boolean saveAnnotations) {
         this.saveAnnotations = saveAnnotations;
+    }
+
+    public boolean isWriteAnnotationsToLogFile() {
+        return writeAnnotationsToLogFile;
+    }
+
+    @DataBoundSetter
+    public void setWriteAnnotationsToLogFile(boolean writeAnnotationsToLogFile) {
+        this.writeAnnotationsToLogFile = writeAnnotationsToLogFile;
     }
 
     public String getCertificateId() {
@@ -259,7 +273,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         }
 
         return new ElasticSearchRunConfiguration(uri, username, password, isSaveAnnotations(), getUniqueRunId(run),
-                getRunIdProvider().getRunId(run), getWriteAccessFactory(), getConnectionTimeoutMillis());
+                getRunIdProvider().getRunId(run), getWriteAccessFactory(), getConnectionTimeoutMillis(), isWriteAnnotationsToLogFile());
     }
 
     // Can be overwritten in tests
@@ -290,7 +304,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     @Extension
     @Symbol("elasticsearch")
     public static class DescriptorImpl extends Descriptor<ElasticSearchConfiguration> {
-        
+
         public static ListBoxModel doFillCredentialsIdItems(@QueryParameter String credentialsId) {
             StandardUsernameListBoxModel model = new StandardUsernameListBoxModel();
 
@@ -307,16 +321,16 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
             return model;
         }
-        
+
         public FormValidation doCheckConnectionTimeoutMillis(@QueryParameter("value") Integer value) {
             int newValue = ensureCorrectConnectionTimeoutMillis(value);
-            if(value == null || newValue != (int)value) {
+            if(value == null || newValue != value) {
                 return FormValidation.warning("Illegal value - default " + newValue + " is used instead.");
             }
             if(value == 0) return FormValidation.ok("This means no connection timeout is used");
             return FormValidation.ok();
         }
-        
+
         public FormValidation doCheckUrl(@QueryParameter("value") String value) {
             if (StringUtils.isBlank(value)) {
                 return FormValidation.warning("URL must not be empty");

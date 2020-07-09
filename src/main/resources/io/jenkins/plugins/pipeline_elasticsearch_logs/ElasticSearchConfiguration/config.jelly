@@ -20,6 +20,9 @@
     <f:entry field="saveAnnotations" title="Save Annotations">
       <f:checkbox default="true"/>
     </f:entry>
+    <f:entry field="writeAnnotationsToLogFile" title="Write Annotations to log file">
+      <f:checkbox default="true"/>
+    </f:entry>
     <f:entry >
       <f:dropdownDescriptorSelector title="RunID Provider" field="runIdProvider"/>
     </f:entry>
