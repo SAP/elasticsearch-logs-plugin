@@ -30,6 +30,8 @@ import org.kohsuke.stapler.framework.io.ByteBuffer;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.console.AnnotatedLargeText;
 import hudson.console.ConsoleAnnotationOutputStream;
+import hudson.console.ConsoleNote;
+import hudson.console.LineTransformationOutputStream;
 import hudson.model.BuildListener;
 import hudson.model.TaskListener;
 
@@ -132,7 +134,7 @@ class ElasticSearchLogStorage implements LogStorage {
     }
 
     // Copied from FileLogStorage of workflow-api plugin
-    private final class IndexOutputStream extends OutputStream {
+    private final class IndexOutputStream extends LineTransformationOutputStream {
 
         private final String id;
 
@@ -142,26 +144,16 @@ class ElasticSearchLogStorage implements LogStorage {
         }
 
         @Override
-        public void write(int b) throws IOException {
+        protected void eol(byte[] b, int len) throws IOException {
             synchronized (ElasticSearchLogStorage.this) {
                 checkId(id);
-                bos.write(b);
-            }
-        }
-
-        @Override
-        public void write(byte[] b) throws IOException {
-            synchronized (ElasticSearchLogStorage.this) {
-                checkId(id);
-                bos.write(b);
-            }
-        }
-
-        @Override
-        public void write(byte[] b, int off, int len) throws IOException {
-            synchronized (ElasticSearchLogStorage.this) {
-                checkId(id);
-                bos.write(b, off, len);
+                if (!config.isWriteAnnotationsToLogFile()) {
+                    String line = new String(b, 0, len, StandardCharsets.UTF_8);
+                    line = ConsoleNote.removeNotes(line);
+                    bos.write(line.getBytes(StandardCharsets.UTF_8));
+                } else {
+                    bos.write(b, 0, len);
+                }
             }
         }
 
@@ -183,7 +175,6 @@ class ElasticSearchLogStorage implements LogStorage {
                 }
             }
         }
-
     }
 
     // Method copied from FileLogStorage of workflow-api plugin

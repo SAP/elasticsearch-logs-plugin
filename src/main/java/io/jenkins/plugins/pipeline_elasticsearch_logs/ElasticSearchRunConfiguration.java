@@ -44,6 +44,8 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     private final boolean saveAnnotations;
 
+    private final boolean writeAnnotationsToLogFile;
+
     private final String uid;
 
     private Supplier<ElasticSearchWriteAccess> writeAccessFactory;
@@ -51,7 +53,8 @@ public class ElasticSearchRunConfiguration implements Serializable {
     private final String runIdJsonString;
 
     public ElasticSearchRunConfiguration(URI uri, String username, String password, boolean saveAnnotations,
-            String uid, JSONObject runId, Supplier<ElasticSearchWriteAccess> writeAccessFactory, int connectionTimeoutMillis) {
+            String uid, JSONObject runId, Supplier<ElasticSearchWriteAccess> writeAccessFactory, int connectionTimeoutMillis,
+            boolean writeAnnotationsToLogFile) {
         super();
         this.uri = uri;
         this.username = username;
@@ -60,6 +63,7 @@ public class ElasticSearchRunConfiguration implements Serializable {
         this.uid = uid;
         this.writeAccessFactory = writeAccessFactory;
         this.saveAnnotations = saveAnnotations;
+        this.writeAnnotationsToLogFile = writeAnnotationsToLogFile;
     }
 
     public String getUid() {
@@ -68,6 +72,10 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     public boolean isSaveAnnotations() {
         return saveAnnotations;
+    }
+
+    public boolean isWriteAnnotationsToLogFile() {
+        return writeAnnotationsToLogFile;
     }
 
     public URI getUri() {
@@ -95,7 +103,7 @@ public class ElasticSearchRunConfiguration implements Serializable {
     public ElasticSearchWriteAccess createWriteAccess() throws URISyntaxException {
         return writeAccessFactory.get();
     }
-    
+
     public String[] getIndices() {
         String path = uri.getPath();
         while (path.startsWith("/"))
