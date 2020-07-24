@@ -24,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,6 +63,7 @@ import io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchGlobalConfigu
 import io.jenkins.plugins.pipeline_elasticsearch_logs.SSLHelper;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
 import jenkins.model.Jenkins;
+import net.sf.json.JSONObject;
 
 /**
  * Post data to Elastic Search.
@@ -232,15 +234,16 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
     }
 
     /**
-     * Posts the given string to elastic search.
+     * Posts the given Map to elastic search.
      *
      * @param data
      *            The data to post
      * @throws IOException
      */
     @Override
-    public void push(String data) throws IOException {
-        HttpPost post = getHttpPost(data);
+    public void push(Map<String, Object> data) throws IOException {
+        String dataString = JSONObject.fromObject(data).toString();
+        HttpPost post = getHttpPost(dataString);
 
         CloseableHttpResponse response = null;
         try {

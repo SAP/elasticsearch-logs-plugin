@@ -144,7 +144,7 @@ public class ElasticSearchSender implements BuildListener, Closeable {
             String jsonDataString = JSONObject.fromObject(data).toString();
             if (LOGGER.isLoggable(Level.FINEST))
                 LOGGER.log(Level.FINEST, "Sending data: {0}", jsonDataString);
-            getElasticSearchWriter().push(jsonDataString);
+            getElasticSearchWriter().push(data);
         }
 
 

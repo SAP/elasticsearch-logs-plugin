@@ -36,7 +36,7 @@ public class ElasticSearchRunListener extends RunListener<Run<?, ?>> {
             if (duration > 0) {
                 data.put("duration", run.getDuration());
             }
-            writer.push(JSONObject.fromObject(data).toString());
+            writer.push(data);
         } catch (IOException | URISyntaxException e) {
             LOGGER.log(Level.SEVERE, "Failed to get Executable of FlowExecution.");
         }
@@ -58,7 +58,7 @@ public class ElasticSearchRunListener extends RunListener<Run<?, ?>> {
             Map<String, Object> data = config.createData();
 
             data.put("eventType", "buildStart");
-            writer.push(JSONObject.fromObject(data).toString());
+            writer.push(data);
         } catch (IOException | URISyntaxException e) {
             LOGGER.log(Level.SEVERE, "Failed to get Executable of FlowExecution.", e);
         }

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.apache.http.conn.ConnectTimeoutException;
 
@@ -33,15 +34,15 @@ public class ElasticSearchWriteAccessMock extends ElasticSearchWriteAccessDirect
     }
 
     @Override
-    public void push(String data) throws IOException {
+    public void push(Map<String, Object> data) throws IOException {
         if(failConnection) {
             throw new ConnectTimeoutException("Connect to Elasticsearch failed: connect timed out");
         }
-        data = prettyPrint(data);
+        String dataString = prettyPrint(data);
         if (printToLog) {
-            System.out.println(data);
+            System.out.println(dataString);
         }
-        entries.add(data);
+        entries.add(dataString);
     }
 
     /**

@@ -44,7 +44,8 @@ public class JSONUtils {
         return json.toString(2);
     }
 
-    public static String prettyPrint(JSONObject json) {
+    public static String prettyPrint(Map<String, Object> data) {
+        JSONObject json = JSONObject.fromObject(data);
         json = sortKeys(json);
         return json.toString(2);
     }
