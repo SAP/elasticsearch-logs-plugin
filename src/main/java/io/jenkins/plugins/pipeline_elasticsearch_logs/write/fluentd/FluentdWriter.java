@@ -131,7 +131,7 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     public static class DescriptorImpl extends ElasticSearchWriteAccessDescriptor {
         @Override
         public String getDisplayName() {
-            return "Fluentd Elasticsearch Writer";
+            return "Fluentd Writer";
         }
     }
 
