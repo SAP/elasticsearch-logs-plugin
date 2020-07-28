@@ -26,7 +26,7 @@
   </f:entry>
 
   <f:entry field="bufferCapacity" title="Buffer Capacity (bytes)">
-    <f:number clazz="number" min="65535" default="10000000" max="2147483647"/>
+    <f:number clazz="number" min="65535" default="1048576" max="2147483647"/>
   </f:entry>
 
 </j:jelly>
