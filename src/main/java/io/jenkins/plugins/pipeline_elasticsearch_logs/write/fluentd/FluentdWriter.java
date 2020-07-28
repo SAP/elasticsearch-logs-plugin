@@ -19,7 +19,7 @@ import hudson.Extension;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
 
 /**
- * Post data to Elastic Search.
+ * Post data to Fluentd.
  *
  */
 public class FluentdWriter extends ElasticSearchWriteAccess {
