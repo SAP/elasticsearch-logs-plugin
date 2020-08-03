@@ -1,42 +1,41 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs.write.fluentd;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import org.fluentd.logger.errorhandler.ErrorHandler;
+import org.komamitsu.fluency.RetryableException;
+import org.komamitsu.fluency.ingester.sender.ErrorHandler;
 
-public class FluentdErrorHandler extends ErrorHandler {
 
-    private List<Error> errors = new ArrayList<Error>();
-    
-    @Override
-    public void handleNetworkError(IOException ex) {
-        errors.add(new Error(ex));
-    }
+public class FluentdErrorHandler implements ErrorHandler {
+
+    private List<Error> errors = Collections.synchronizedList(new ArrayList<>());
+
 
     private static class Error {
-        private final IOException exception;
-        private final long timemillis;
-        public Error(IOException ex) {
-            this.exception = ex;
-            this.timemillis = System.currentTimeMillis();
+        private final Throwable throwable;
+        public Error(Throwable ex) {
+            this.throwable = ex;
         }
-        
     }
 
     public int getErrorCount() {
         return errors.size();
     }
-    
-    public Exception getLastError(long afterTimestampMillis) {
-        int size = errors.size();
-        if(size <= 0) return null;
-        Error error = errors.get(size-1);
-        if(afterTimestampMillis > 0 && error.timemillis <= afterTimestampMillis) {
-            return null;
+
+    public RetryableException findRetryError()
+    {
+        for (Error error: errors) {
+            if (error.throwable instanceof RetryableException) {
+                return (RetryableException) error.throwable;
+            }
         }
-        return error.exception;
+        return null;
     }
 
+    @Override
+    public void handle(Throwable e) {
+        errors.add(new Error(e));
+    }
 }

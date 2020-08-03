@@ -70,10 +70,16 @@ public class ElasticSearchSender implements BuildListener, Closeable {
     @Override
     public void close() throws IOException {
         if (logger != null) {
-            logger.close();
+          logger.close();
+          logger = null;
         }
-        logger = null;
-        writer = null;
+        if (writer != null) {
+            try {
+                writer.close();
+            } finally {
+                writer = null;
+            }
+        }
     }
 
     private ElasticSearchWriteAccess getElasticSearchWriter() throws IOException {

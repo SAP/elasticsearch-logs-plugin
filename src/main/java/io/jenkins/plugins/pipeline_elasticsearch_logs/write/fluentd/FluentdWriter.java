@@ -6,14 +6,18 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.fluentd.logger.FluentLogger;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+import org.komamitsu.fluency.BufferFullException;
+import org.komamitsu.fluency.Fluency;
+import org.komamitsu.fluency.RetryableException;
+import org.komamitsu.fluency.fluentd.FluencyBuilderForFluentd;
 
 import hudson.Extension;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
@@ -26,17 +30,17 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
 
     private static final Logger LOGGER = Logger.getLogger(FluentdWriter.class.getName());
 
-    private transient FluentLogger fluentd;
+    private transient Fluency fluentd;
     private transient FluentdErrorHandler errorHandler;
-    private transient boolean configChanged;
 
-    private final static int SYS_LOG_FREQUENCY = 2000; //TODO: 10*1000;
 
     private final static int DEFAULT_TIMEOUT_MILLIS = 3000;
     private final static int DEFAULT_RETRY_MILLIS = 1000;
     private final static int DEFAULT_BUFFER_CAPACITY = 1048576;
+    private final static int DEFAULT_MAX_RETRIES = 30;
+    private final static int DEFAULT_MAX_WAIT_SEC = 30;
+    private final static int DEFAULT_BUFFER_RETENTION_TIME_MILLIS = 1000;
 
-    private String tagPrefix;
     private String tag;
 
     private String host;
@@ -44,19 +48,39 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     private int retryMillis = DEFAULT_RETRY_MILLIS;
     private int timeoutMillis = DEFAULT_TIMEOUT_MILLIS;
     private int bufferCapacity = DEFAULT_BUFFER_CAPACITY;
+    private int maxRetries = DEFAULT_MAX_RETRIES;
+    private int maxWaitSeconds = DEFAULT_MAX_WAIT_SEC;
+    private int bufferRetentionTimeMillis = DEFAULT_BUFFER_RETENTION_TIME_MILLIS;
 
     @DataBoundConstructor
     public FluentdWriter() throws URISyntaxException {
     }
 
-    public String getTagPrefix() {
-        return tagPrefix;
+    public int getBufferRetentionTimeMillis() {
+        return bufferRetentionTimeMillis;
     }
 
     @DataBoundSetter
-    public void setTagPrefix(String tagPrefix) {
-        this.tagPrefix = tagPrefix;
-        this.configChanged = true;
+    public void setBufferRetentionTimeMillis(int bufferRetentionTimeMillis) {
+        this.bufferRetentionTimeMillis = bufferRetentionTimeMillis;
+    }
+
+    public int getMaxRetries() {
+        return maxRetries;
+    }
+
+    @DataBoundSetter
+    public void setMaxRetries(int maxRetries) {
+        this.maxRetries = maxRetries;
+    }
+
+    public int getMaxWaitSeconds() {
+        return maxWaitSeconds;
+    }
+
+    @DataBoundSetter
+    public void setMaxWaitSeconds(int maxWaitSeconds) {
+        this.maxWaitSeconds = maxWaitSeconds;
     }
 
     public String getTag() {
@@ -66,7 +90,6 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     @DataBoundSetter
     public void setTag(String tag) {
         this.tag = tag;
-        this.configChanged = true;
     }
 
     public String getHost() {
@@ -76,7 +99,6 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     @DataBoundSetter
     public void setHost(String host) {
         this.host = host;
-        this.configChanged = true;
     }
 
     public int getPort() {
@@ -87,7 +109,6 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     public void setPort(int port) {
         if(port < 0 || port > 65535) throw new IllegalArgumentException("Port out of range: " + port);
         this.port = port;
-        this.configChanged = true;
     }
 
     public int getRetryMillis() {
@@ -99,7 +120,6 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
         if (retryMillis < 0)
             retryMillis = 0;
         this.retryMillis = retryMillis;
-        this.configChanged = true;
     }
 
     public int getTimeoutMillis() {
@@ -110,7 +130,6 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     public void setTimeoutMillis(int timeoutMillis) {
         if(timeoutMillis < 0) throw new IllegalArgumentException("timeoutMillis less than 0");
         this.timeoutMillis = timeoutMillis;
-        this.configChanged = true;
     }
 
     public int getBufferCapacity() {
@@ -122,7 +141,6 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
         if (bufferCapacity < 0)
             bufferCapacity = DEFAULT_BUFFER_CAPACITY;
         this.bufferCapacity = bufferCapacity;
-        this.configChanged = true;
     }
 
 
@@ -136,87 +154,94 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     }
 
     /**
-     * Logs the given object to Fluentd. This method blocks if Fluentd is not reachable and
-     * throws an IOException after TIMEOUT_MILLIS.
+     * Logs the given object to Fluentd asynchronously
+     * Checks if there have been any data that couldn't be sent after several retries and then fails.
      *
      * @param data The data to post
      * @throws IOException if something failed permanently
      */
     @Override
     public void push(Map<String, Object> data) throws IOException {
-        if(fluentd == null || configChanged) initFluentdLogger();
-        try {
-
-            long timeMarker = System.currentTimeMillis();
-            boolean sent = fluentd.log(tag, data);
-            if(!sent) {
-                //Errors are not reported explicitly. But the latest error should be the reason for (sent == false)
-                Exception lastError = errorHandler.getLastError(timeMarker);
-                throw new IOException("Could not send logs to fluentd", lastError);
+        if(fluentd == null) initFluentdLogger();
+        int count = 0;
+        while (true) {
+            try {
+                fluentd.emit(tag, data);
+                count++;
+                if (count > maxRetries) {
+                    throw new IOException("Not able to emit data after " + maxRetries + " tries.");
+                }
+                break;
             }
+            catch (BufferFullException e) {
+                LOGGER.log(Level.WARNING,"Fluency's buffer is full. Retrying", e);
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }
+        checkForRetryableException();
+    }
 
-            // (sent == true) does not necessarily mean the data has already been sent to fluentd.
-            // To ensure data can be sent we flush the library buffer every time.
-            flushWithRetry();
-
-        } catch (InterruptedException e) {
-            throw new IOException(e);
+    private void checkForRetryableException() throws IOException {
+        RetryableException re = errorHandler.findRetryError();
+        if (re != null) {
+            throw new IOException("Some data couldn't be sent.", re);
         }
     }
 
 
-    private void flushWithRetry() throws InterruptedException, IOException {
-        long start = System.currentTimeMillis();
-        long nextSystemLog = 0;
-        boolean failed = true;
-        while (failed) {
-            long timeMarker = System.currentTimeMillis();
-            fluentd.flush();
-            // Unfortunately flush() does not fail obviously. That's why we get errors indirectly via our ErrorHandler.
-            Exception flushError = errorHandler.getLastError(timeMarker);
-            if (flushError == null) {
-                failed = false;
-            } else {
-                if (nextSystemLog <= System.currentTimeMillis()) {
-                    LOGGER.warning(format(
-                            "Could not flush fluentd library buffer since %s seconds. FluentLogger (%s) %s. Configured host=%s, port=%s.",
-                            ((System.currentTimeMillis() - start) / 1000), fluentd.hashCode(),
-                            (fluentd.isConnected() ? "connected" : "not connected"), host, port));
-                    nextSystemLog = System.currentTimeMillis() + SYS_LOG_FREQUENCY;
-                }
-                Thread.sleep(retryMillis);
-                if (isTimeoutReached(start)) {
-                    throw new IOException(format(
-                            "Could not flush fluentd library buffer since %s seconds. FluentLogger (%s) %s. Configured host=%s, port=%s.",
-                            (timeoutMillis / 1000), fluentd.hashCode(), (fluentd.isConnected() ? "connected" : "not connected"), host,
-                            port));
-                }
 
+    @Override
+    public void close() throws IOException
+    {
+        if (fluentd != null) {
+            try {
+                fluentd.flush();
+                try {
+                    if (!fluentd.waitUntilAllBufferFlushed(maxWaitSeconds)) {
+                        throw new IOException("Not all data could be flushed.");
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                fluentd.close();
+                try {
+                    if (!fluentd.waitUntilFlusherTerminated(maxWaitSeconds)) {
+                        throw new IOException("Flusher not terminated.");
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            } finally {
+                fluentd.clearBackupFiles();
             }
+            checkForRetryableException();
         }
-    }
-
-    private boolean isTimeoutReached(long startMillis) {
-        return System.currentTimeMillis() - startMillis > timeoutMillis * 5;
     }
 
     private void initFluentdLogger() {
-        if(fluentd == null || errorHandler == null || configChanged) {
-            if(fluentd != null) {
-                try {
-                    fluentd.close();
-                } catch (Exception e) {
-                    LOGGER.log(Level.WARNING, "Error closing old FluentLogger", e);
-                }
-            }
-            fluentd = FluentLogger.getLogger(tagPrefix, host, port, timeoutMillis, bufferCapacity);
-            LOGGER.finer(format("Created new FluentLogger(tagprefix=%s, host=%s, port=%s, timeoutMillis=%s, bufferCapacity=%s) hash:%s%s%s",
-                    tagPrefix, host, port, timeoutMillis, bufferCapacity, fluentd.hashCode(),
-                    (configChanged?" (config changed)":""),
-                    (fluentd.isConnected()?" (connected)":" (not connected yet)") ));
-            configChanged = false;
+        if(fluentd == null) {
+            FluencyBuilderForFluentd builder = new FluencyBuilderForFluentd();
+            builder.setAckResponseMode(true);
+            builder.setJvmHeapBufferMode(true);
+            builder.setSenderMaxRetryCount(maxRetries);
+            builder.setConnectionTimeoutMilli(timeoutMillis);
+            builder.setReadTimeoutMilli(timeoutMillis);
+            builder.setWaitUntilBufferFlushed(maxWaitSeconds);
+            builder.setWaitUntilFlusherTerminated(maxWaitSeconds);
+            builder.setBufferChunkInitialSize(bufferCapacity);
+            builder.setBufferChunkRetentionSize(bufferCapacity * 3);
+            builder.setMaxBufferSize(bufferCapacity * 10L);
+            builder.setBufferChunkRetentionTimeMillis(bufferRetentionTimeMillis);
+            builder.setFlushAttemptIntervalMillis(100);
             errorHandler = new FluentdErrorHandler();
-            fluentd.setErrorHandler(errorHandler);
+            builder.setErrorHandler(errorHandler);
+            fluentd = builder.build(host, port);
+            LOGGER.finer(format("Created new Fluency(tag=%s, host=%s, port=%s, timeoutMillis=%s, bufferCapacity=%s) hash:%s",
+                    tag, host, port, timeoutMillis, bufferCapacity, fluentd.hashCode()));
         }
     }
 
@@ -229,7 +254,6 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
         private int port;
         private int retryMillis;
         private String tag;
-        private String tagPrefix;
         private int timeoutMillis;
 
         private MeSupplier(FluentdWriter me) {
@@ -238,7 +262,6 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
             this.port = me.port;
             this.retryMillis = me.retryMillis;
             this.tag = me.tag;
-            this.tagPrefix = me.tagPrefix;
             this.timeoutMillis = me.timeoutMillis;
         }
 
@@ -251,7 +274,6 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
                 accessor.setPort(port);
                 accessor.setRetryMillis(retryMillis);
                 accessor.setTag(tag);
-                accessor.setTagPrefix(tagPrefix);
                 accessor.setTimeoutMillis(timeoutMillis);
                 return accessor;
             } catch (Exception e) {

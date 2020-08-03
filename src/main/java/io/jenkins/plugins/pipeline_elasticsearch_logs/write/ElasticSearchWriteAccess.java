@@ -7,11 +7,12 @@ import java.util.function.Supplier;
 import hudson.ExtensionPoint;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
-import net.sf.json.JSONObject;
 
 public abstract class ElasticSearchWriteAccess extends AbstractDescribableImpl<ElasticSearchWriteAccess> implements ExtensionPoint {
 
     public abstract void push(Map<String, Object> data) throws IOException;
+
+    public abstract void close() throws IOException;
 
     public static abstract class ElasticSearchWriteAccessDescriptor extends Descriptor<ElasticSearchWriteAccess> {
         protected ElasticSearchWriteAccessDescriptor() {

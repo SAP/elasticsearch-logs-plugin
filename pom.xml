@@ -18,6 +18,7 @@
         <java.level>8</java.level>
         <useBeta>true</useBeta>
         <workflow-api-plugin.version>2.40</workflow-api-plugin.version>
+        <fluency.version>2.4.1</fluency.version>
     </properties>
     <name>Pipeline Logging via Elastic Search</name>
     <repositories>
@@ -111,9 +112,14 @@
             <version>1.7.0</version>
         </dependency>
         <dependency>
-          <groupId>org.fluentd</groupId>
-          <artifactId>fluent-logger</artifactId>
-          <version>0.3.4</version>
+        	<groupId>org.komamitsu</groupId>
+        	<artifactId>fluency-core</artifactId>
+        	<version>${fluency.version}</version>
+        </dependency>
+        <dependency>
+        	<groupId>org.komamitsu</groupId>
+        	<artifactId>fluency-fluentd</artifactId>
+        	<version>${fluency.version}</version>
         </dependency>
     </dependencies>
     <dependencyManagement>
@@ -188,6 +194,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>3.7</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.7.30</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

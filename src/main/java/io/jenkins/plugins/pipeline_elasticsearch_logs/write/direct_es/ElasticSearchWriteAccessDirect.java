@@ -341,4 +341,8 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
         return new MeSupplier(this);
     }
 
+    @Override
+    public void close() throws IOException {
+    }
+
 }
