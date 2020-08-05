@@ -23,6 +23,8 @@ The following table lists the fields that are sent for each event and for which 
 | build | The build number  | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | instance | The Jenkins instance  | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | message | The log line without annotations| | | | | ✓ | ✓ |
+| messageId | An unique ID for this message. Split messages have the same ID. | | | | | ✓ | ✓ |
+| messageCount | The counter for split messages | | | | | ✓ | ✓ |
 | flowNodeId | The id of the flow node | |  |  ✓ | ✓ |  | ✓ |
 | step | The name of the step | |  |  ✓ | ✓ |  | ✓ |
 | stageName | The name of the enclosing stage | |  |  ✓ | ✓ |  | ✓ |

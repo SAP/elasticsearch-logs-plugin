@@ -5,7 +5,12 @@ import static java.lang.String.format;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -19,7 +24,11 @@ import org.komamitsu.fluency.Fluency;
 import org.komamitsu.fluency.RetryableException;
 import org.komamitsu.fluency.fluentd.FluencyBuilderForFluentd;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
+
 import hudson.Extension;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.ConsoleNotes;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
 
 /**
@@ -163,26 +172,52 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     @Override
     public void push(Map<String, Object> data) throws IOException {
         if(fluentd == null) initFluentdLogger();
+        if (data.containsKey(ConsoleNotes.MESSAGE_KEY)) {
+            data.put("messageId",UUID.randomUUID().toString());
+            String message = (String) data.get(ConsoleNotes.MESSAGE_KEY);
+            if (message.length() > bufferCapacity * 2) {
+                LOGGER.log(Level.FINER, "Message is too big to be sent in one piece. Will split the message into several smaller chunks");
+                Integer messageCount = 0;
+                for(String m: Splitter.fixedLength(bufferCapacity).split(message)) {
+                    Map<String, Object> d = new HashMap<>();
+                    d.putAll(data);
+                    d.put("messageCount", messageCount++);
+                    d.put(ConsoleNotes.MESSAGE_KEY, m);
+                    emitData(tag,d);
+                }
+            } else {
+                emitData(tag,data);
+            }
+
+        } else {
+            emitData(tag,data);
+        }
+        checkForRetryableException();
+    }
+
+
+    private void emitData(String tag, Map<String, Object> data) throws IOException {
         int count = 0;
+
         while (true) {
+            LOGGER.log(Level.FINEST, "Emitting data: Try {0} Data: {1}", new Object[] {count, data });
             try {
                 fluentd.emit(tag, data);
-                count++;
-                if (count > maxRetries) {
-                    throw new IOException("Not able to emit data after " + maxRetries + " tries.");
-                }
                 break;
-            }
-            catch (BufferFullException e) {
-                LOGGER.log(Level.WARNING,"Fluency's buffer is full. Retrying", e);
+            } catch (BufferFullException e) {
+                LOGGER.log(Level.WARNING, "Fluency's buffer is full. Retrying", e);
                 try {
                     TimeUnit.SECONDS.sleep(1);
                 } catch (InterruptedException e1) {
-                    e1.printStackTrace();
+                    Thread.currentThread().interrupt();
+                    break;
                 }
             }
+            count++;
+            if (count > maxRetries) {
+                throw new IOException("Not able to emit data after " + maxRetries + " tries.");
+            }
         }
-        checkForRetryableException();
     }
 
     private void checkForRetryableException() throws IOException {
@@ -191,8 +226,6 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
             throw new IOException("Some data couldn't be sent.", re);
         }
     }
-
-
 
     @Override
     public void close() throws IOException
