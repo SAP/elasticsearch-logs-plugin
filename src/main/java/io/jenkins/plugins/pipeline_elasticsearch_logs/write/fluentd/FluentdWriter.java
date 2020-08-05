@@ -173,16 +173,20 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     public void push(Map<String, Object> data) throws IOException {
         if(fluentd == null) initFluentdLogger();
         if (data.containsKey(ConsoleNotes.MESSAGE_KEY)) {
-            data.put("messageId",UUID.randomUUID().toString());
             String message = (String) data.get(ConsoleNotes.MESSAGE_KEY);
             if (message.length() > bufferCapacity * 2) {
+                data.put("messageId",UUID.randomUUID().toString());
                 LOGGER.log(Level.FINER, "Message is too big to be sent in one piece. Will split the message into several smaller chunks");
                 Integer messageCount = 0;
                 for(String m: Splitter.fixedLength(bufferCapacity).split(message)) {
                     Map<String, Object> d = new HashMap<>();
                     d.putAll(data);
-                    d.put("messageCount", messageCount++);
+                    d.put("messageCount", messageCount);
                     d.put(ConsoleNotes.MESSAGE_KEY, m);
+                    if (messageCount > 0) {
+                        d.remove(ConsoleNotes.ANNOTATIONS_KEY);
+                    }
+                    messageCount++;
                     emitData(tag,d);
                 }
             } else {

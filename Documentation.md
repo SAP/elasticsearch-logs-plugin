@@ -8,11 +8,11 @@ The following table describes the different event types.
 | flowGraph::buildEnd | Sent once at the end of the build |
 | flowGraph::nodeStart | Sent once at the start of  a flow node |
 | flowGraph::nodeEnd | Sent once at the end of the a flow node |
-| buildMessage | A log line sent from the pipeline execution engine (In Jenkins these are the lines displayed in light grey) |
+| buildMessage | A log line sent from the pipeline execution engine (In Jenkins these are the lines displayed in light grey and other messages like the status at the end or the build cause) |
 | nodeMessage | A log output line sent from the execution of a flow node |
 
 ### Event types
-The following table lists the fields that are sent for each event and for which type of event
+The following table lists the fields that are sent for each event
 
 | Field | description | buildStart | buildEnd | nodeStart | nodeEnd | buildMessage | nodeMessage | 
 |-------|-------------|:----------:|:--------:|:----------:|:-------:| :----------: | :---------: |
@@ -23,7 +23,7 @@ The following table lists the fields that are sent for each event and for which 
 | build | The build number  | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | instance | The Jenkins instance  | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | message | The log line without annotations| | | | | ✓ | ✓ |
-| messageId | An unique ID for this message. Split messages have the same ID. | | | | | ✓ | ✓ |
+| messageId | An unique ID for split messages | | | | | ✓ | ✓ |
 | messageCount | The counter for split messages | | | | | ✓ | ✓ |
 | flowNodeId | The id of the flow node | |  |  ✓ | ✓ |  | ✓ |
 | step | The name of the step | |  |  ✓ | ✓ |  | ✓ |
