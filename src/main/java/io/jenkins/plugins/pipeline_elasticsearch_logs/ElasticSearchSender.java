@@ -70,10 +70,16 @@ public class ElasticSearchSender implements BuildListener, Closeable {
     @Override
     public void close() throws IOException {
         if (logger != null) {
-            logger.close();
+          logger.close();
+          logger = null;
         }
-        logger = null;
-        writer = null;
+        if (writer != null) {
+            try {
+                writer.close();
+            } finally {
+                writer = null;
+            }
+        }
     }
 
     private ElasticSearchWriteAccess getElasticSearchWriter() throws IOException {
@@ -141,10 +147,11 @@ public class ElasticSearchSender implements BuildListener, Closeable {
                 nodeInfo.appendNodeInfo(data);
             }
 
-            String jsonDataString = JSONObject.fromObject(data).toString();
-            if (LOGGER.isLoggable(Level.FINEST))
+            if (LOGGER.isLoggable(Level.FINEST)) {
+                String jsonDataString = JSONObject.fromObject(data).toString();
                 LOGGER.log(Level.FINEST, "Sending data: {0}", jsonDataString);
-            getElasticSearchWriter().push(jsonDataString);
+            }
+            getElasticSearchWriter().push(data);
         }
 
 

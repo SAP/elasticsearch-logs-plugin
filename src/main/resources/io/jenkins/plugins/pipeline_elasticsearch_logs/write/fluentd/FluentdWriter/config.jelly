@@ -1,0 +1,42 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+
+  <f:entry field="host" title="Host">
+    <f:textbox clazz="required"/>
+  </f:entry>
+
+  <f:entry field="port" title="Port">
+    <f:number clazz="required number" min="1" max="65535"/>
+  </f:entry>
+
+  <f:entry field="tag" title="Tag">
+    <f:textbox/>
+  </f:entry>
+
+  <f:entry field="bufferCapacity" title="Buffer Capacity (bytes)">
+    <f:number clazz="number" min="65535" default="1048576" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="timeoutMillis" title="Timeout (ms)">
+    <f:number clazz="number" default="3000" min="0" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="maxRetries" title="Max retries">
+    <f:number clazz="number" default="30" min="0" max="3600"/>
+  </f:entry>
+
+  <f:entry field="retryMillis" title="Retry (ms)">
+    <f:number clazz="number" default="1000" min="0" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="maxWaitSeconds" title="Max Waiting time (s)">
+    <f:number clazz="number" default="30" min="0" max="3600"/>
+  </f:entry>
+  
+  <f:entry field="bufferRetentionTimeMillis" title="Buffer Retention time (ms)">
+    <f:number clazz="number" default="1000" min="0" max="3600"/>
+  </f:entry>
+
+  
+
+</j:jelly>

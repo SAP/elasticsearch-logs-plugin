@@ -123,7 +123,7 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous {
             data.put(ERROR_MESSAGE, errorMessage);
         }
 
-        writer.push(JSONObject.fromObject(data).toString());
+        writer.push(data);
     }
 
     private void sendNodeEnd(BlockEndNode<?> node) throws IOException {
@@ -140,14 +140,14 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous {
             data.put(ERROR_MESSAGE, errorMessage);
         }
 
-        writer.push(JSONObject.fromObject(data).toString());
+        writer.push(data);
     }
 
     private void sendNodeStart(FlowNode node) throws IOException {
         Map<String, Object> data = createData(node);
 
         data.put(EVENT_TYPE, getEventType(node));
-        writer.push(JSONObject.fromObject(data).toString());
+        writer.push(data);
     }
 
     private long getDuration(FlowNode startNode, FlowNode endNode) {
