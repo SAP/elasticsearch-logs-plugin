@@ -56,7 +56,3 @@ Most relevant rules:
 - Implement a reader from Elastic Search
 - Improve http connection handling
 
-### License
-
-Copyright (c) 2019 SAP SE or an SAP affiliate company. All rights reserved.
-This project is licensed under "Apache Software License, v. 2" except as noted otherwise in the LICENSE file.
