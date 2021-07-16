@@ -1,3 +1,5 @@
+[![REUSE status](https://api.reuse.software/badge/github.com/SAP/elasticsearch-logs-plugin)](https://api.reuse.software/info/github.com/SAP/elasticsearch-logs-plugin)
+
 <h1> :exclamation: This is not ready for productive usage</h1>
 
 Configuration of the plugin may change without further notice in an incompatible way!
