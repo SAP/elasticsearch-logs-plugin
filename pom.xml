@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>3.49</version>
+        <version>4.40</version>
         <relativePath />
     </parent>
     <groupId>io.jenkins.plugins</groupId>
@@ -14,9 +14,8 @@
     <version>0.10.1</version>
     <packaging>hpi</packaging>
     <properties>
-        <jenkins.version>2.176.4</jenkins.version>
+        <jenkins.version>2.319.1</jenkins.version>
         <useBeta>true</useBeta>
-        <java.level>8</java.level>
 
         <workflow-api.version>2.40</workflow-api.version>
         <fluency.version>2.6.4</fluency.version>
@@ -30,6 +29,7 @@
         <pipeline-model-definition.version>1.7.0</pipeline-model-definition.version>
         <pipeline-stage-tags-metadata.version>1.7.0</pipeline-stage-tags-metadata.version>
         <jackson2-api.version>2.11.1</jackson2-api.version>
+        <jsr305.version>3.0.2</jsr305.version>
 
         <workflow-support.version>3.4</workflow-support.version>
         <workflow-step-api.version>2.22</workflow-step-api.version>
@@ -152,6 +152,11 @@
         	<groupId>org.jenkins-ci.plugins</groupId>
         	<artifactId>jackson2-api</artifactId>
         	<version>${jackson2-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>${jsr305.version}</version>
         </dependency>
     </dependencies>
     <dependencyManagement>
