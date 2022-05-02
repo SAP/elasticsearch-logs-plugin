@@ -45,7 +45,7 @@
         <workflow-scm-step.version>2.11</workflow-scm-step.version>
         <ssh-credentials.version>1.17.3</ssh-credentials.version>
         <commons-lang3.version>3.7</commons-lang3.version>
-        <slf4j-api.version>1.7.30</slf4j-api.version>
+        <slf4j-api.version>1.7.36</slf4j-api.version>
     </properties>
     <name>Pipeline Logging via Elastic Search</name>
     <repositories>
