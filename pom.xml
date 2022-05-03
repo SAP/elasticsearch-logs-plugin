@@ -14,6 +14,8 @@
     <version>0.11.0</version>
     <packaging>hpi</packaging>
     <properties>
+        <!-- Adapt the jenkins.tools.bom artifact ID in the dependencyManagement section
+             if the Jenkins core version is changed -->
         <jenkins.version>2.319.1</jenkins.version>
         <useBeta>true</useBeta>
 
@@ -22,6 +24,7 @@
         <fluency.version>2.6.4</fluency.version>
         <jsr305.version>3.0.2</jsr305.version>
 
+        <bom-2.319.x.version>1342.v729ca_3818e88</bom-2.319.x.version>
         <slf4j-api.version>1.7.36</slf4j-api.version>
     </properties>
     <name>Pipeline Logging via Elastic Search</name>
@@ -131,8 +134,7 @@
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
                 <artifactId>bom-2.319.x</artifactId>
-                <!-- Latest version goes here -->
-                <version>1342.v729ca_3818e88</version>
+                <version>${bom-2.319.x.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
