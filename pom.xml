@@ -11,40 +11,17 @@
     </parent>
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>pipeline-elasticsearch-logs</artifactId>
-    <version>0.10.1</version>
+    <version>0.11.0</version>
     <packaging>hpi</packaging>
     <properties>
         <jenkins.version>2.319.1</jenkins.version>
         <useBeta>true</useBeta>
 
-        <workflow-api.version>2.40</workflow-api.version>
-        <fluency.version>2.6.4</fluency.version>
-        <workflow-job.version>2.39</workflow-job.version>
-        <workflow-basic-steps.version>2.20</workflow-basic-steps.version>
-        <workflow-durable-task-step.version>2.35</workflow-durable-task-step.version>
         <mock-slave.version>1.14</mock-slave.version>
-        <pipeline-stage-step.version>2.3</pipeline-stage-step.version>
-        <instance-identity.version>2.2</instance-identity.version>
         <unique-id.version>2.2.0</unique-id.version>
-        <pipeline-model-definition.version>1.7.0</pipeline-model-definition.version>
-        <pipeline-stage-tags-metadata.version>1.7.0</pipeline-stage-tags-metadata.version>
-        <jackson2-api.version>2.11.1</jackson2-api.version>
+        <fluency.version>2.6.4</fluency.version>
         <jsr305.version>3.0.2</jsr305.version>
 
-        <workflow-support.version>3.4</workflow-support.version>
-        <workflow-step-api.version>2.22</workflow-step-api.version>
-        <structs.version>1.20</structs.version>
-        <symbol-annotation.version>1.20</symbol-annotation.version>
-        <scm-api.version>2.6.3</scm-api.version>
-        <credentials.version>2.3.7</credentials.version>
-        <script-security.version>1.75</script-security.version>
-        <apache-httpcomponents-client-4-api.version>4.5.10-2.0</apache-httpcomponents-client-4-api.version>
-        <httpcore-nio.version>4.4.11</httpcore-nio.version>
-        <mailer.version>1.32</mailer.version>
-        <workflow-cps.version>2.80</workflow-cps.version>
-        <workflow-scm-step.version>2.11</workflow-scm-step.version>
-        <ssh-credentials.version>1.17.3</ssh-credentials.version>
-        <commons-lang3.version>3.7</commons-lang3.version>
         <slf4j-api.version>1.7.36</slf4j-api.version>
     </properties>
     <name>Pipeline Logging via Elastic Search</name>
@@ -64,30 +41,25 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-api</artifactId>
-            <version>${workflow-api.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-api</artifactId>
-            <version>${workflow-api.version}</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-job</artifactId>
-            <version>${workflow-job.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-basic-steps</artifactId>
-            <version>${workflow-basic-steps.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-durable-task-step</artifactId>
-            <version>${workflow-durable-task-step.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -102,7 +74,6 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>pipeline-stage-step</artifactId>
-            <version>${pipeline-stage-step.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -115,7 +86,6 @@
         <dependency>
             <groupId>org.jenkins-ci.modules</groupId>
             <artifactId>instance-identity</artifactId>
-            <version>${instance-identity.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -130,13 +100,11 @@
         <dependency>
             <groupId>org.jenkinsci.plugins</groupId>
             <artifactId>pipeline-model-definition</artifactId>
-            <version>${pipeline-model-definition.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkinsci.plugins</groupId>
             <artifactId>pipeline-stage-tags-metadata</artifactId>
-            <version>${pipeline-stage-tags-metadata.version}</version>
         </dependency>
         <dependency>
         	<groupId>org.komamitsu</groupId>
@@ -151,7 +119,6 @@
         <dependency>
         	<groupId>org.jenkins-ci.plugins</groupId>
         	<artifactId>jackson2-api</artifactId>
-        	<version>${jackson2-api.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
@@ -162,76 +129,14 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.jenkins-ci.plugins.workflow</groupId>
-                <artifactId>workflow-support</artifactId>
-                <version>${workflow-support.version}</version>
+                <groupId>io.jenkins.tools.bom</groupId>
+                <artifactId>bom-2.319.x</artifactId>
+                <!-- Latest version goes here -->
+                <version>1342.v729ca_3818e88</version>
+                <scope>import</scope>
+                <type>pom</type>
             </dependency>
-            <dependency>
-                <groupId>org.jenkins-ci.plugins.workflow</groupId>
-                <artifactId>workflow-step-api</artifactId>
-                <version>${workflow-step-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jenkins-ci.plugins</groupId>
-                <artifactId>structs</artifactId>
-                <version>${structs.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jenkins-ci</groupId>
-                <artifactId>symbol-annotation</artifactId>
-                <version>${symbol-annotation.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jenkins-ci.plugins</groupId>
-                <artifactId>scm-api</artifactId>
-                <version>${scm-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jenkins-ci.plugins</groupId>
-                <artifactId>credentials</artifactId>
-                <version>${credentials.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jenkins-ci.plugins</groupId>
-                <artifactId>script-security</artifactId>
-                <version>${script-security.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.jenkins-ci.plugins</groupId>
-                <artifactId>apache-httpcomponents-client-4-api</artifactId>
-                <version>${apache-httpcomponents-client-4-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpcore-nio</artifactId>
-                <version>${httpcore-nio.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jenkins-ci.plugins</groupId>
-                <artifactId>mailer</artifactId>
-                <version>${mailer.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jenkins-ci.plugins.workflow</groupId>
-                <artifactId>workflow-cps</artifactId>
-                <version>${workflow-cps.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jenkins-ci.plugins.workflow</groupId>
-                <artifactId>workflow-scm-step</artifactId>
-                <version>${workflow-scm-step.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jenkins-ci.plugins</groupId>
-                <artifactId>ssh-credentials</artifactId>
-                <version>${ssh-credentials.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>${commons-lang3.version}</version>
-            </dependency>
+            <!-- Dependency added to fulfil upper bound dependency enforcer rule -->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
