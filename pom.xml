@@ -17,8 +17,8 @@
         <jenkins.version>2.319.1</jenkins.version>
         <useBeta>true</useBeta>
 
-        <mock-slave.version>1.14</mock-slave.version>
-        <unique-id.version>2.2.0</unique-id.version>
+        <mock-slave.version>109.vac7845f10470</mock-slave.version>
+        <unique-id.version>2.2.1</unique-id.version>
         <fluency.version>2.6.4</fluency.version>
         <jsr305.version>3.0.2</jsr305.version>
 
