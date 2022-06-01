@@ -16,7 +16,7 @@
     <properties>
         <!-- Adapt the jenkins.tools.bom artifact ID in the dependencyManagement section
              if the Jenkins core version is changed -->
-        <jenkins.version>2.319.1</jenkins.version>
+        <jenkins.version>2.332.3</jenkins.version>
         <useBeta>true</useBeta>
 
         <mock-slave.version>109.vac7845f10470</mock-slave.version>
