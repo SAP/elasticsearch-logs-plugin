@@ -137,8 +137,8 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.319.x</artifactId>
-                <version>${bom-2.319.x.version}</version>
+                <artifactId>bom-2.332.x</artifactId>
+                <version>${bom-2.332.x.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
