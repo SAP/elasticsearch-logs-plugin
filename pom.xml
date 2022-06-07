@@ -14,8 +14,11 @@
     <version>0.11.0</version>
     <packaging>hpi</packaging>
     <properties>
-        <!-- Adapt the jenkins.tools.bom artifact ID in the dependencyManagement section
-             if the Jenkins core version is changed -->
+        <!-- If the "jenkins.version" is changed you also need to adjust:
+            - the major and minor version in the "<bom-#.###.x.version>" tag a few lines below (keep "x" as patch version)
+            - in the dependencyManagement section the "io.jenkins.tools.bom:bom-#.###.x" artifactId and version property name.
+            See also https://github.com/jenkinsci/bom#usage and https://www.jenkins.io/doc/developer/plugin-development/dependency-management/#jenkins-plugin-bom
+        -->
         <jenkins.version>2.332.3</jenkins.version>
         <useBeta>true</useBeta>
 
