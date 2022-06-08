@@ -17,14 +17,6 @@
   },
     {
     "eventType": "buildMessage",
-    "message": "Running in Durability level: MAX_SURVIVABILITY",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
     "message": "[Pipeline] Start of Pipeline",
     "annotations": "/.*/",
     "timestamp": "/.*/",
@@ -187,7 +179,7 @@
     "predecessors": ["7"],
     "displayName": "Bind credentials to variables : End",
     "result": "FAILURE",
-    "errorMessage": "doesNotExist",
+    "errorMessage": "Could not find credentials entry with ID 'doesNotExist'",
     "stageId": "6",
     "stageName": "S1",
     "duration": "/.*/",
@@ -214,7 +206,7 @@
     "predecessors": ["8"],
     "displayName": "Stage : Body : End",
     "result": "FAILURE",
-    "errorMessage": "doesNotExist",
+    "errorMessage": "Could not find credentials entry with ID 'doesNotExist'",
     "duration": "/.*/",
     "agent": "",
     "timestamp": "/.*/",
@@ -239,7 +231,7 @@
     "predecessors": ["9"],
     "displayName": "Stage : End",
     "result": "FAILURE",
-    "errorMessage": "doesNotExist",
+    "errorMessage": "Could not find credentials entry with ID 'doesNotExist'",
     "duration": "/.*/",
     "agent": "",
     "timestamp": "/.*/",
@@ -316,7 +308,7 @@
     "predecessors": ["12"],
     "displayName": "Stage : Body : End",
     "result": "NOT_BUILT",
-    "errorMessage": "doesNotExist",
+    "errorMessage": "Could not find credentials entry with ID 'doesNotExist'",
     "duration": "/.*/",
     "agent": "",
     "timestamp": "/.*/",
@@ -341,7 +333,7 @@
     "predecessors": ["13"],
     "displayName": "Stage : End",
     "result": "FAILURE",
-    "errorMessage": "doesNotExist",
+    "errorMessage": "Could not find credentials entry with ID 'doesNotExist'",
     "duration": "/.*/",
     "agent": "",
     "timestamp": "/.*/",
@@ -418,7 +410,7 @@
     "predecessors": ["16"],
     "displayName": "Stage : Body : End",
     "result": "NOT_BUILT",
-    "errorMessage": "doesNotExist",
+    "errorMessage": "Could not find credentials entry with ID 'doesNotExist'",
     "duration": "/.*/",
     "agent": "",
     "timestamp": "/.*/",
@@ -443,7 +435,7 @@
     "predecessors": ["17"],
     "displayName": "Stage : End",
     "result": "FAILURE",
-    "errorMessage": "doesNotExist",
+    "errorMessage": "Could not find credentials entry with ID 'doesNotExist'",
     "duration": "/.*/",
     "agent": "",
     "timestamp": "/.*/",
@@ -468,7 +460,7 @@
     "predecessors": ["18"],
     "displayName": "Allocate node : Body : End",
     "result": "FAILURE",
-    "errorMessage": "doesNotExist",
+    "errorMessage": "Could not find credentials entry with ID 'doesNotExist'",
     "duration": "/.*/",
     "agent": "",
     "timestamp": "/.*/",
@@ -493,7 +485,7 @@
     "predecessors": ["19"],
     "displayName": "Allocate node : End",
     "result": "FAILURE",
-    "errorMessage": "doesNotExist",
+    "errorMessage": "Could not find credentials entry with ID 'doesNotExist'",
     "duration": "/.*/",
     "timestamp": "/.*/",
     "timestampMillis": "/.*/",
@@ -507,7 +499,7 @@
     "predecessors": ["20"],
     "displayName": "End of Pipeline",
     "result": "FAILURE",
-    "errorMessage": "doesNotExist",
+    "errorMessage": "Could not find credentials entry with ID 'doesNotExist'",
     "duration": "/.*/",
     "timestamp": "/.*/",
     "timestampMillis": "/.*/",
@@ -516,687 +508,7 @@
   },
     {
     "eventType": "buildMessage",
-    "message": "org.jenkinsci.plugins.credentialsbinding.impl.CredentialNotFoundException: doesNotExist",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
-    "message": "/.*at .*/",
+    "message": "ERROR: Could not find credentials entry with ID 'doesNotExist'",
     "timestamp": "/.*/",
     "timestampMillis": "/.*/",
     "runId": "/.*/",
