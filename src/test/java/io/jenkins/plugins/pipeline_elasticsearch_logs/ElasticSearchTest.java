@@ -57,30 +57,29 @@ public class ElasticSearchTest {
         project.setDefinition(new CpsFlowDefinition("node { echo message: 'hello' }", true));
         jenkinsRule.buildAndAssertSuccess(project);
 
-        assertEquals(22, elasticSearchLoggedLines.size());
+        assertEquals(21, elasticSearchLoggedLines.size());
 
         assertLogLine(0, "buildStart");
         assertLogLine(1, "buildMessage", "Started");
-        assertLogLine(2, "buildMessage", "Running in Durability level: MAX_SURVIVABILITY");
-        assertLogLine(3, "buildMessage", "[Pipeline] Start of Pipeline");
-        assertLogLine(4, "flowGraph::flowStart");
-        assertLogLine(5, "buildMessage", "[Pipeline] node");
-        assertLogLine(6, "flowGraph::nodeStart");
-        // skip 7
-        assertLogLine(8, "buildMessage", "[Pipeline] {");
-        assertLogLine(9, "flowGraph::nodeStart");
-        assertLogLine(10, "buildMessage", "[Pipeline] echo");
-        assertLogLine(11, "flowGraph::atomNodeStart");
-        assertLogLine(12, "nodeMessage", "hello");
-        assertLogLine(13, "buildMessage", "[Pipeline] }");
-        assertLogLine(14, "flowGraph::atomNodeEnd");
-        assertLogLine(15, "buildMessage", "[Pipeline] // node");
-        assertLogLine(16, "flowGraph::nodeEnd");
-        assertLogLine(17, "buildMessage", "[Pipeline] End of Pipeline");
-        assertLogLine(18, "flowGraph::nodeEnd");
-        assertLogLine(19, "flowGraph::flowEnd");
-        assertLogLine(20, "buildMessage", "Finished: SUCCESS");
-        assertLogLine(21, "buildEnd");
+        assertLogLine(2, "buildMessage", "[Pipeline] Start of Pipeline");
+        assertLogLine(3, "flowGraph::flowStart");
+        assertLogLine(4, "buildMessage", "[Pipeline] node");
+        assertLogLine(5, "flowGraph::nodeStart");
+        // skip 6
+        assertLogLine(7, "buildMessage", "[Pipeline] {");
+        assertLogLine(8, "flowGraph::nodeStart");
+        assertLogLine(9, "buildMessage", "[Pipeline] echo");
+        assertLogLine(10, "flowGraph::atomNodeStart");
+        assertLogLine(11, "nodeMessage", "hello");
+        assertLogLine(12, "buildMessage", "[Pipeline] }");
+        assertLogLine(13, "flowGraph::atomNodeEnd");
+        assertLogLine(14, "buildMessage", "[Pipeline] // node");
+        assertLogLine(15, "flowGraph::nodeEnd");
+        assertLogLine(16, "buildMessage", "[Pipeline] End of Pipeline");
+        assertLogLine(17, "flowGraph::nodeEnd");
+        assertLogLine(18, "flowGraph::flowEnd");
+        assertLogLine(19, "buildMessage", "Finished: SUCCESS");
+        assertLogLine(20, "buildEnd");
     }
 
     private void assertLogLine(int lineIndex, String eventType) {

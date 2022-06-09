@@ -1,8 +1,7 @@
 Started by user SYSTEM
-Running in Durability level: MAX_SURVIVABILITY
 [Pipeline] Start of Pipeline
 [Pipeline] node
-Running on Jenkins in 
+Running on Jenkins in
 [Pipeline] {
 [Pipeline] stage
 [Pipeline] { (Stage 1)

@@ -17,14 +17,6 @@
   },
     {
     "eventType": "buildMessage",
-    "message": "Running in Durability level: MAX_SURVIVABILITY",
-    "timestamp": "/.*/",
-    "timestampMillis": "/.*/",
-    "runId": "/.*/",
-    "uid": "/.*/"
-  },
-    {
-    "eventType": "buildMessage",
     "message": "[Pipeline] Start of Pipeline",
     "annotations": "/.*/",
     "timestamp": "/.*/",

@@ -1,6 +1,6 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs.write.direct_es;
 
-import static com.google.common.collect.Ranges.closedOpen;
+import static com.google.common.collect.Range.closedOpen;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.Utils.logExceptionAndReraiseWithTruncatedDetails;
 
 import com.cloudbees.plugins.credentials.CredentialsProvider;
