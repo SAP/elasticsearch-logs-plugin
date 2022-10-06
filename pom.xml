@@ -24,7 +24,7 @@
 
         <mock-slave.version>109.vac7845f10470</mock-slave.version>
         <unique-id.version>2.2.1</unique-id.version>
-        <fluency.version>2.6.4</fluency.version>
+        <fluency.version>2.7.0</fluency.version>
         <jsr305.version>3.0.2</jsr305.version>
 
         <!-- Latest releases see: https://github.com/jenkinsci/bom/releases -->
