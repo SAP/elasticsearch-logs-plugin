@@ -28,7 +28,7 @@
         <jsr305.version>3.0.2</jsr305.version>
 
         <!-- Latest releases see: https://github.com/jenkinsci/bom/releases -->
-        <bom-2.332.x.version>1409.v7659b_c072f18</bom-2.332.x.version>
+        <bom-2.332.x.version>1654.vcb_69d035fa_20</bom-2.332.x.version>
         <slf4j-api.version>1.7.36</slf4j-api.version>
     </properties>
     <name>Pipeline Logging via Elastic Search</name>
