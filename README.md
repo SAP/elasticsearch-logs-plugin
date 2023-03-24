@@ -54,3 +54,4 @@ Most relevant rules:
 - Implement a reader from Elastic Search
 - Improve http connection handling
 
+Testing our SAP voter pipeline.
