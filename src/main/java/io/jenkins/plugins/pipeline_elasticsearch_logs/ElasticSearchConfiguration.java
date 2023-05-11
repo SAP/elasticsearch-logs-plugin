@@ -19,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -82,8 +83,9 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
     @DataBoundConstructor
     public ElasticSearchConfiguration(String url) throws URISyntaxException {
-        this.url = url;
-        new URI(url);
+        // Configuration as Code can return null instead of an empty string
+        this.url = Objects.toString(url, "");
+        new URI(this.url);
     }
 
     public RunIdProvider getRunIdProvider() {
