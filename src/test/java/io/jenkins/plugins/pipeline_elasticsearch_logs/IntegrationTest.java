@@ -1,6 +1,6 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
-import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchConfiguration.CONNECTION_TIMEOUT_DEFAULT;
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.write.direct_es.ElasticSearchWriteAccessDirect.CONNECTION_TIMEOUT_DEFAULT;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.AssertionUtils.assertMatchEntries;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.AssertionUtils.assertMatchLines;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.LogUtils.removeAnnotations;
@@ -59,7 +59,7 @@ public class IntegrationTest {
     @Rule
     public LoggerRule logs = new LoggerRule().record(Logger.getLogger(""),
             Level.WARNING);
-    
+
     @Before
     public void before() {
     }
@@ -141,7 +141,7 @@ public class IntegrationTest {
 
         JSONArray expectedJsonLog = getExpectedTestJsonLog();
         assertMatchEntries(expectedJsonLog, mockWriter.getEntries());
-        
+
         String expectedLog = getExpectedTestLog();
         String log = removeAnnotations(build.getLogText());
         assertMatchLines(expectedLog, log);
@@ -150,14 +150,14 @@ public class IntegrationTest {
     @Test
     public void testPipelinePushLogsWithConnectionIssues() throws Exception {
         // SETUP
-        ElasticSearchWriteAccess elasticSearchAccess = new ElasticSearchWriteAccessDirect(new URI("http://wrongurl.does.not.exist"), null, null, CONNECTION_TIMEOUT_DEFAULT, null);
+        ElasticSearchWriteAccess elasticSearchAccess = new ElasticSearchWriteAccessDirect("http://wrongurl.does.not.exist", null, null, CONNECTION_TIMEOUT_DEFAULT, null);
         configureElasticsearchPlugin(true, false, elasticSearchAccess);
 
         WorkflowJob project = j.createProject(WorkflowJob.class);
         project.setDefinition(new CpsFlowDefinition(getTestPipeline(), true));
         WorkflowRun build;
         logs.capture(9999);
-        
+
         // EXERCISE
         project.scheduleBuild(new Cause.UserIdCause());
         while ((build = project.getLastBuild()) == null || build.getResult() == null) {
@@ -179,7 +179,7 @@ public class IntegrationTest {
         Assert.assertNotNull("The full log entry does not contain the cause (has to)", logEntryWithFullInfos.getThrown());
 
         String errorId = message.substring(expectedPrefix.length(), message.length()-1).trim();
-        
+
         //Stripped log entry without sensitive information
         String expectedMessage = "Could not push log to Elasticsearch - Search Jenkins log for ErrorID '" + errorId + "'";
         LogRecord logEntryStripped = findNext(expectedMessage, logEntries);
@@ -253,7 +253,7 @@ public class IntegrationTest {
         private ElasticSearchWriteAccess mockWriter;
 
         public TestConfig(String url, ElasticSearchWriteAccess mockWriter) throws URISyntaxException {
-            super(url);
+            super();
             this.mockWriter = mockWriter;
         }
 

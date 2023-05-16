@@ -106,7 +106,7 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
 	private transient HttpClientContext context;
 
 
-    static final int CONNECTION_TIMEOUT_DEFAULT = 10000;
+    public static final int CONNECTION_TIMEOUT_DEFAULT = 10000;
 
     public String getUrl() {
         return url;
@@ -162,10 +162,11 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
     /*
      * For tests only
      */
-    public ElasticSearchWriteAccessDirect(URI uri, String user, String password, int connectionTimeout, byte[] trustStoreBytes) {
+    public ElasticSearchWriteAccessDirect(String url, String user, String password, int connectionTimeout, byte[] trustStoreBytes) {
         this.username = user;
         this.password = password;
-        this.uri = uri;
+        this.url = url;
+        this.uri = URI.create(url);
         setConnectionTimeoutMillis(connectionTimeout);
         this.trustStoreBytes = trustStoreBytes == null ? null : trustStoreBytes.clone();
     }
@@ -366,7 +367,7 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
 
     private static class MeSupplier implements Supplier<ElasticSearchWriteAccess>, Serializable {
 
-        private URI uri;
+        private String url;
 
         @CheckForNull
         private String username;
@@ -380,7 +381,7 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
         private byte[] trustStoreBytes;
 
         private MeSupplier(ElasticSearchWriteAccessDirect me){
-            this.uri = me.uri;
+            this.url = me.url;
             this.username = me.username;
             this.password = me.password;
             this.connectionTimeout = me.connectionTimeout;
@@ -390,7 +391,7 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
         @Override
         public ElasticSearchWriteAccess get() {
             try {
-                return new ElasticSearchWriteAccessDirect(uri, username, password, connectionTimeout, trustStoreBytes);
+                return new ElasticSearchWriteAccessDirect(url, username, password, connectionTimeout, trustStoreBytes);
             } catch (Exception e) {
                 throw new RuntimeException("Could not create ElasticSearchWriteAccessDirect", e);
             }
@@ -406,6 +407,14 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
 
     @Override
     public void close() throws IOException {
+    }
+
+    public String[] getIndices() {
+        String path = uri.getPath();
+        while (path.startsWith("/"))
+            path = path.substring(1);
+        String[] splitPath = path.split("/");
+        return new String[] { splitPath[0] };
     }
 
 }

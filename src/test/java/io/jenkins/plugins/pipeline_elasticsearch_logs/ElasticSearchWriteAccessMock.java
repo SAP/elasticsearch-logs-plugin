@@ -1,6 +1,6 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
-import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchConfiguration.CONNECTION_TIMEOUT_DEFAULT;
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.write.direct_es.ElasticSearchWriteAccessDirect.CONNECTION_TIMEOUT_DEFAULT;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.JSONUtils.prettyPrint;
 
 import java.io.IOException;
@@ -24,7 +24,7 @@ public class ElasticSearchWriteAccessMock extends ElasticSearchWriteAccessDirect
     private boolean failConnection = false;
 
     public ElasticSearchWriteAccessMock(boolean printToLog) throws URISyntaxException {
-        super(new URI("http://localhost:9200/jenkins/_doc"), "test", "test", CONNECTION_TIMEOUT_DEFAULT, null);
+        super("http://localhost:9200/jenkins/_doc", "test", "test", CONNECTION_TIMEOUT_DEFAULT, null);
         this.printToLog = printToLog;
     }
 
