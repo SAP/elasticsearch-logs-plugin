@@ -14,8 +14,5 @@
     <f:entry >
       <f:dropdownDescriptorSelector title="RunID Provider" field="runIdProvider"/>
     </f:entry>
-    <f:entry field="connectionTimeoutMillis" title="Connection Timeout (ms)">
-      <f:number clazz="number" min="0" max="2147483647" default="10000"/>
-    </f:entry>
   </f:advanced>
 </j:jelly>

@@ -10,6 +10,9 @@
   <f:entry field="certificateId" title="SSL Certificate">
     <c:select/>
   </f:entry>
+    <f:entry field="connectionTimeoutMillis" title="Connection Timeout (ms)">
+      <f:number clazz="number" min="0" max="2147483647" default="10000"/>
+    </f:entry>
     <f:nested>
       <f:validateButton with="url,credentialsId,certificateId" title="${%Test Connection to Elastic Search}" method="validateConnection"/>
     </f:nested>

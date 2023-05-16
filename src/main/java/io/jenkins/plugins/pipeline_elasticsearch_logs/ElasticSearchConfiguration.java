@@ -61,11 +61,6 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
     private transient boolean ssl;
 
-    private String certificateId;
-
-    @CheckForNull
-    private String credentialsId;
-
     private Boolean saveAnnotations = true;
 
     private Boolean writeAnnotationsToLogFile = true;
@@ -74,18 +69,10 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
     private ElasticSearchWriteAccess elasticsearchWriteAccess;
 
-    private String url;
 
-    static final int CONNECTION_TIMEOUT_DEFAULT = 10000;
-
-    @CheckForNull
-    private Integer connectionTimeoutMillis;
 
     @DataBoundConstructor
-    public ElasticSearchConfiguration(String url) throws URISyntaxException {
-        // Configuration as Code can return null instead of an empty string
-        this.url = Objects.toString(url, "");
-        new URI(this.url);
+    public ElasticSearchConfiguration() throws URISyntaxException {
     }
 
     public RunIdProvider getRunIdProvider() {
@@ -106,43 +93,6 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         this.elasticsearchWriteAccess = elasticsearchWriteAccess;
     }
 
-    protected Object readResolve() {
-        if (saveAnnotations == null) {
-            saveAnnotations = true;
-        }
-        if (writeAnnotationsToLogFile == null) {
-            writeAnnotationsToLogFile = true;
-        }
-        if (runIdProvider == null) {
-            runIdProvider = new DefaultRunIdProvider("");
-        }
-        setConnectionTimeoutMillis(connectionTimeoutMillis);
-        if (url == null) {
-            String protocol = "http";
-            if (ssl) {
-                protocol = "https";
-            }
-            url = protocol + "://" + host + ":" + port + "/" + key;
-        }
-
-        return this;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    @Nonnull
-    public Integer getConnectionTimeoutMillis() {
-        //Ensure correct value - just in case something went wrong
-        return ensureCorrectConnectionTimeoutMillis(connectionTimeoutMillis);
-    }
-
-    @DataBoundSetter
-    public void setConnectionTimeoutMillis(@CheckForNull Integer connectionTimeoutMillis) {
-        this.connectionTimeoutMillis = ensureCorrectConnectionTimeoutMillis(connectionTimeoutMillis);
-    }
-
     public boolean isSaveAnnotations() {
         return saveAnnotations;
     }
@@ -161,95 +111,6 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         this.writeAnnotationsToLogFile = writeAnnotationsToLogFile;
     }
 
-    public String getCertificateId() {
-        return certificateId;
-    }
-
-    @DataBoundSetter
-    public void setCertificateId(String certificateId) {
-        this.certificateId = certificateId;
-    }
-
-    @CheckForNull
-    public String getCredentialsId() {
-        return credentialsId;
-    }
-
-    @DataBoundSetter
-    public void setCredentialsId(String credentialsId) {
-        this.credentialsId = credentialsId;
-    }
-
-    @CheckForNull
-    private StandardUsernamePasswordCredentials getCredentials() {
-        if (credentialsId == null) {
-            return null;
-        }
-        return getCredentials(credentialsId);
-    }
-
-    @CheckForNull
-    private static StandardUsernamePasswordCredentials getCredentials(@Nonnull String id) {
-        StandardUsernamePasswordCredentials credential = null;
-        List<StandardUsernamePasswordCredentials> credentials = CredentialsProvider
-                .lookupCredentials(StandardUsernamePasswordCredentials.class, Jenkins.get(), ACL.SYSTEM, Collections.emptyList());
-        IdMatcher matcher = new IdMatcher(id);
-        for (StandardUsernamePasswordCredentials c : credentials) {
-            if (matcher.matches(c)) {
-                credential = c;
-            }
-        }
-        return credential;
-    }
-
-    @CheckForNull
-    private static StandardCertificateCredentials getCertificateCredentials(@Nonnull String id) {
-        StandardCertificateCredentials credential = null;
-        List<StandardCertificateCredentials> credentials = CredentialsProvider.lookupCredentials(StandardCertificateCredentials.class,
-                Jenkins.get(), ACL.SYSTEM, Collections.emptyList());
-        IdMatcher matcher = new IdMatcher(id);
-        for (StandardCertificateCredentials c : credentials) {
-            if (matcher.matches(c)) {
-                credential = c;
-            }
-        }
-        return credential;
-    }
-
-    private KeyStore getCustomKeyStore() {
-        KeyStore customKeyStore = null;
-
-        if (!StringUtils.isBlank(certificateId)) {
-            StandardCertificateCredentials certificateCredentials = getCertificateCredentials(certificateId);
-            if (certificateCredentials != null) {
-                customKeyStore = certificateCredentials.getKeyStore();
-            }
-        }
-        return customKeyStore;
-    }
-
-    private boolean isSsl() {
-        URI uri = URI.create(url);
-        String scheme = uri.getScheme();
-        return "https".equals(scheme);
-    }
-
-    public byte[] getKeyStoreBytes() throws IOException {
-        KeyStore keyStore = getCustomKeyStore();
-        if (isSsl() && keyStore != null) {
-            ByteArrayOutputStream b = new ByteArrayOutputStream(2048);
-            try {
-                keyStore.store(b, "".toCharArray());
-                return b.toByteArray();
-            } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
-                LOGGER.log(Level.WARNING, "Could not read keystore", e);
-                if (e instanceof IOException) throw (IOException) e;
-                throw new IOException("Could not read keystore", e);
-            }
-        }
-        return null;
-    }
-
     /**
      * Returns a serializable representation of the plugin configuration with credentials resolved.
      * Reason: on remote side credentials cannot be accessed by credentialsId, same for keystore.
@@ -259,23 +120,9 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
      * @throws IOException
      */
     public ElasticSearchRunConfiguration getRunConfiguration(Run<?, ?> run) throws IOException {
-        String username = null;
-        String password = null;
-        StandardUsernamePasswordCredentials credentials = getCredentials();
-        if (credentials != null) {
-            username = credentials.getUsername();
-            password = Secret.toString(credentials.getPassword());
-        }
 
-        URI uri = null;
-        try {
-            uri = new URI(url);
-        } catch (URISyntaxException e) {
-            throw new IOException(e);
-        }
-
-        return new ElasticSearchRunConfiguration(uri, username, password, isSaveAnnotations(), getUniqueRunId(run),
-                getRunIdProvider().getRunId(run), getWriteAccessFactory(), getConnectionTimeoutMillis(), isWriteAnnotationsToLogFile());
+        return new ElasticSearchRunConfiguration(isSaveAnnotations(), getUniqueRunId(run),
+                getRunIdProvider().getRunId(run), getWriteAccessFactory(), isWriteAnnotationsToLogFile());
     }
 
     // Can be overwritten in tests
@@ -295,59 +142,9 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         return runId;
     }
 
-    @Nonnull
-    public static Integer ensureCorrectConnectionTimeoutMillis(@CheckForNull Integer value) {
-        if (value == null || value < 0) {
-            return CONNECTION_TIMEOUT_DEFAULT;
-        }
-        return value;
-    }
-
     @Extension
     @Symbol("elasticsearch")
     public static class DescriptorImpl extends Descriptor<ElasticSearchConfiguration> {
-
-        public static ListBoxModel doFillCredentialsIdItems(@QueryParameter String credentialsId) {
-            StandardUsernameListBoxModel model = new StandardUsernameListBoxModel();
-
-            model.includeEmptyValue().includeAs(ACL.SYSTEM, (Item) null, StandardUsernamePasswordCredentials.class, Collections.emptyList())
-                    .includeCurrentValue(credentialsId);
-
-            return model;
-        }
-
-        public static ListBoxModel doFillCertificateIdItems(@QueryParameter String certificateId) {
-            StandardListBoxModel model = new StandardListBoxModel();
-            model.includeEmptyValue().includeAs(ACL.SYSTEM, (Item) null, StandardCertificateCredentials.class)
-                    .includeCurrentValue(certificateId);
-
-            return model;
-        }
-
-        public FormValidation doCheckConnectionTimeoutMillis(@QueryParameter("value") Integer value) {
-            int newValue = ensureCorrectConnectionTimeoutMillis(value);
-            if(value == null || newValue != value) {
-                return FormValidation.warning("Illegal value - default " + newValue + " is used instead.");
-            }
-            if(value == 0) return FormValidation.ok("This means no connection timeout is used");
-            return FormValidation.ok();
-        }
-
-        public FormValidation doCheckUrl(@QueryParameter("value") String value) {
-            if (StringUtils.isBlank(value)) {
-                return FormValidation.warning("URL must not be empty");
-            }
-            try {
-                URL url = new URL(value);
-                if (!url.getProtocol().equals("http") && !url.getProtocol().equals("https")) {
-                    return FormValidation.error("Only http/https are allowed protocols");
-                }
-
-            } catch (MalformedURLException e) {
-                return FormValidation.error("URL is not well formed");
-            }
-            return FormValidation.ok();
-        }
 
         public FormValidation doValidateConnection(@QueryParameter(fixEmpty = true) String url,
                 @QueryParameter(fixEmpty = true) String credentialsId, @QueryParameter(fixEmpty = true) String certificateId) {
@@ -356,3 +153,5 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     }
 
 }
+
+

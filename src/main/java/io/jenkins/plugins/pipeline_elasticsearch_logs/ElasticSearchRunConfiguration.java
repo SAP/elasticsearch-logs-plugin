@@ -36,12 +36,6 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final String username;
-
-    private final String password;
-
-    private final URI uri;
-
     private final boolean saveAnnotations;
 
     private final boolean writeAnnotationsToLogFile;
@@ -52,13 +46,10 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     private final String runIdJsonString;
 
-    public ElasticSearchRunConfiguration(URI uri, String username, String password, boolean saveAnnotations,
-            String uid, JSONObject runId, Supplier<ElasticSearchWriteAccess> writeAccessFactory, int connectionTimeoutMillis,
+    public ElasticSearchRunConfiguration( boolean saveAnnotations,
+            String uid, JSONObject runId, Supplier<ElasticSearchWriteAccess> writeAccessFactory,
             boolean writeAnnotationsToLogFile) {
         super();
-        this.uri = uri;
-        this.username = username;
-        this.password = password;
         this.runIdJsonString = runId.toString();
         this.uid = uid;
         this.writeAccessFactory = writeAccessFactory;
@@ -78,18 +69,6 @@ public class ElasticSearchRunConfiguration implements Serializable {
         return writeAnnotationsToLogFile;
     }
 
-    public URI getUri() {
-        return uri;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
     public Map<String, Object> createData() {
         Map<String, Object> data = new LinkedHashMap<>();
         Date date = new Date();
@@ -104,12 +83,13 @@ public class ElasticSearchRunConfiguration implements Serializable {
         return writeAccessFactory.get();
     }
 
+    /*TODO:MOVE
     public String[] getIndices() {
         String path = uri.getPath();
         while (path.startsWith("/"))
             path = path.substring(1);
         String[] splitPath = path.split("/");
         return new String[] { splitPath[0] };
-    }
+    }*/
 
 }
