@@ -3,10 +3,12 @@ package io.jenkins.plugins.pipeline_elasticsearch_logs.write.direct_es;
 import static com.google.common.collect.Range.closedOpen;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.Utils.logExceptionAndReraiseWithTruncatedDetails;
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardCertificateCredentials;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernameListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.matchers.IdMatcher;
 import com.google.common.collect.Range;
 
 import java.io.ByteArrayInputStream;
@@ -26,7 +28,9 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,6 +41,8 @@ import javax.annotation.Nonnull;
 import hudson.model.Item;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.Secret;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.http.HttpHost;
@@ -97,14 +103,12 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
     @CheckForNull
     private byte[] trustStoreBytes;
 
-
     private transient KeyStore trustKeyStore;
 
     @CheckForNull
     private transient CloseableHttpClient client;
 
 	private transient HttpClientContext context;
-
 
     public static final int CONNECTION_TIMEOUT_DEFAULT = 10000;
 
@@ -135,11 +139,6 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
     @CheckForNull
     private Integer connectionTimeoutMillis;
 
-    @DataBoundConstructor
-    public ElasticSearchWriteAccessDirect() throws URISyntaxException {
-    }
-
-
     public String getCertificateId() {
         return certificateId;
     }
@@ -158,6 +157,89 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
     public void setCredentialsId(String credentialsId) {
         this.credentialsId = credentialsId;
     }
+
+    @CheckForNull
+    private static StandardUsernamePasswordCredentials getCredentials(@Nonnull String id) {
+        StandardUsernamePasswordCredentials credential = null;
+        List<StandardUsernamePasswordCredentials> credentials = CredentialsProvider
+            .lookupCredentials(StandardUsernamePasswordCredentials.class, Jenkins.get(), ACL.SYSTEM, Collections.emptyList());
+        IdMatcher matcher = new IdMatcher(id);
+        for (StandardUsernamePasswordCredentials c : credentials) {
+            if (matcher.matches(c)) {
+                credential = c;
+            }
+        }
+        return credential;
+    }
+
+    @CheckForNull
+    private static StandardCertificateCredentials getCertificateCredentials(@Nonnull String id) {
+        StandardCertificateCredentials credential = null;
+        List<StandardCertificateCredentials> credentials = CredentialsProvider.lookupCredentials(StandardCertificateCredentials.class,
+            Jenkins.get(), ACL.SYSTEM, Collections.emptyList());
+        IdMatcher matcher = new IdMatcher(id);
+        for (StandardCertificateCredentials c : credentials) {
+            if (matcher.matches(c)) {
+                credential = c;
+            }
+        }
+        return credential;
+    }
+
+
+    private boolean isSsl() {
+        URI uri = URI.create(url);
+        String scheme = uri.getScheme();
+        return "https".equals(scheme);
+    }
+
+    private KeyStore getCustomKeyStore() {
+        KeyStore customKeyStore = null;
+
+        if (!StringUtils.isBlank(certificateId)) {
+            StandardCertificateCredentials certificateCredentials = getCertificateCredentials(certificateId);
+            if (certificateCredentials != null) {
+                customKeyStore = certificateCredentials.getKeyStore();
+            }
+        }
+        return customKeyStore;
+    }
+    public byte[] getKeyStoreBytes() throws IOException {
+        KeyStore keyStore = getCustomKeyStore();
+        if (isSsl() && keyStore != null) {
+            ByteArrayOutputStream b = new ByteArrayOutputStream(2048);
+            try {
+                keyStore.store(b, "".toCharArray());
+                return b.toByteArray();
+            } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
+                LOGGER.log(Level.WARNING, "Could not read keystore", e);
+                if (e instanceof IOException) throw (IOException) e;
+                throw new IOException("Could not read keystore", e);
+            }
+        }
+        return null;
+    }
+
+    @DataBoundConstructor
+    public ElasticSearchWriteAccessDirect(String url) throws URISyntaxException {
+
+        this.url = Objects.toString(url, "");
+        URI uri = null;
+        try {
+            uri = new URI(url);
+        } catch (URISyntaxException e) {
+            throw new URISyntaxException(this.url,e.toString()); //todo?
+        }
+
+        StandardUsernamePasswordCredentials credentials = getCredentials(credentialsId);
+        if(credentials != null) {
+            this.username = credentials.getUsername();
+            this.password = credentials.getPassword().getPlainText();
+        }
+
+        this.connectionTimeout = CONNECTION_TIMEOUT_DEFAULT;
+    }
+
 
     /*
      * For tests only
@@ -380,12 +462,21 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
         @CheckForNull
         private byte[] trustStoreBytes;
 
-        private MeSupplier(ElasticSearchWriteAccessDirect me){
+        private MeSupplier(ElasticSearchWriteAccessDirect me) throws IOException {
             this.url = me.url;
             this.username = me.username;
             this.password = me.password;
-            this.connectionTimeout = me.connectionTimeout;
-            this.trustStoreBytes = me.trustStoreBytes;
+            this.connectionTimeout = me.getConnectionTimeoutMillis();
+            this.trustStoreBytes = me.getKeyStoreBytes();
+
+            String credentialsId = me.getCredentialsId();
+            if (credentialsId != null) {
+                StandardUsernamePasswordCredentials credentials = getCredentials(credentialsId);
+                if (credentials != null) {
+                    this.username = credentials.getUsername();
+                    this.password = credentials.getPassword().getPlainText();
+                }
+            }
         }
 
         @Override
@@ -399,11 +490,9 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
     }
 
     @Override
-    public Supplier<ElasticSearchWriteAccess> getSupplier() {
+    public Supplier<ElasticSearchWriteAccess> getSupplier() throws IOException {
         return new MeSupplier(this);
     }
-
-
 
     @Override
     public void close() throws IOException {
