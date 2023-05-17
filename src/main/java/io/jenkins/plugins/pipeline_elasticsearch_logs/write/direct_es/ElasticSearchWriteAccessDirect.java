@@ -231,10 +231,12 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
             throw new URISyntaxException(this.url,e.toString()); //todo?
         }
 
-        StandardUsernamePasswordCredentials credentials = getCredentials(credentialsId);
-        if(credentials != null) {
-            this.username = credentials.getUsername();
-            this.password = credentials.getPassword().getPlainText();
+        if (credentialsId != null) {
+            StandardUsernamePasswordCredentials credentials = getCredentials(credentialsId);
+            if (credentials != null) {
+                this.username = credentials.getUsername();
+                this.password = credentials.getPassword().getPlainText();
+            }
         }
 
         this.connectionTimeout = CONNECTION_TIMEOUT_DEFAULT;
@@ -295,13 +297,6 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
                 .includeCurrentValue(certificateId);
 
             return model;
-        }
-
-        public FormValidation doCheckCertificateId(@QueryParameter String certificateId) {
-            if (certificateId.isEmpty()){
-                return FormValidation.error("Certificate must be set");
-            }
-            return FormValidation.ok();
         }
 
         public FormValidation doCheckConnectionTimeoutMillis(@QueryParameter("value") Integer value) {
@@ -439,7 +434,7 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
                 stream.print("HTTP error code: ");
                 stream.println(response.getStatusLine().getStatusCode());
                 stream.print("URI: ");
-           //     stream.println(uri.toString());
+                stream.println(uri.toString());
                 stream.println("RESPONSE: " + response.toString());
                 response.getEntity().writeTo(stream);
             } catch (IOException e) {
