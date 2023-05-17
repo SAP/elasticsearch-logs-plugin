@@ -273,7 +273,6 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
             return "Direct Elasticsearch Writer";
         }
 
-
         public static ListBoxModel doFillCredentialsIdItems(@QueryParameter String credentialsId) {
             StandardUsernameListBoxModel model = new StandardUsernameListBoxModel();
 
@@ -283,12 +282,26 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
             return model;
         }
 
+        public FormValidation doCheckCredentialsId(@QueryParameter String credentialsId) {
+            if (credentialsId.isEmpty()){
+                return FormValidation.error("Credential must be set");
+            }
+            return FormValidation.ok();
+        }
+
         public static ListBoxModel doFillCertificateIdItems(@QueryParameter String certificateId) {
             StandardListBoxModel model = new StandardListBoxModel();
             model.includeEmptyValue().includeAs(ACL.SYSTEM, (Item) null, StandardCertificateCredentials.class)
                 .includeCurrentValue(certificateId);
 
             return model;
+        }
+
+        public FormValidation doCheckCertificateId(@QueryParameter String certificateId) {
+            if (certificateId.isEmpty()){
+                return FormValidation.error("Certificate must be set");
+            }
+            return FormValidation.ok();
         }
 
         public FormValidation doCheckConnectionTimeoutMillis(@QueryParameter("value") Integer value) {
@@ -302,7 +315,7 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
 
         public FormValidation doCheckUrl(@QueryParameter("value") String value) {
             if (StringUtils.isBlank(value)) {
-                return FormValidation.warning("URL must not be empty");
+                return FormValidation.error("URL must not be empty");
             }
             try {
                 URL url = new URL(value);
@@ -366,7 +379,6 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
         return client;
     }
 
-
     @Restricted(NoExternalUse.class)
     public String testConnection() throws URISyntaxException, IOException {
         URI testUri = new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), null, null, null);
@@ -388,8 +400,6 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
 
         return "";
     }
-
-
 
         /**
          * Posts the given Map to elastic search.

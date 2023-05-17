@@ -145,11 +145,6 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     @Extension
     @Symbol("elasticsearch")
     public static class DescriptorImpl extends Descriptor<ElasticSearchConfiguration> {
-
-        public FormValidation doValidateConnection(@QueryParameter(fixEmpty = true) String url,
-                @QueryParameter(fixEmpty = true) String credentialsId, @QueryParameter(fixEmpty = true) String certificateId) {
-            return FormValidation.ok("Success");
-        }
     }
 
 }
