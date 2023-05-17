@@ -461,6 +461,8 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
 
         private String url;
 
+        private URI uri;
+
         @CheckForNull
         private String username;
 
@@ -474,6 +476,7 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
 
         private MeSupplier(ElasticSearchWriteAccessDirect me) throws IOException {
             this.url = me.url;
+            this.uri = me.uri;
             this.username = me.username;
             this.password = me.password;
             this.connectionTimeout = me.getConnectionTimeoutMillis();

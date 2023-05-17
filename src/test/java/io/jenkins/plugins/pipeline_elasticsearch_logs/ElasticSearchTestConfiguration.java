@@ -17,14 +17,15 @@ class ElasticSearchTestConfiguration extends ElasticSearchConfiguration {
     private transient Consumer<Map<String, Object>> receiver;
 
     ElasticSearchTestConfiguration(Consumer<Map<String, Object>> receiver) throws URISyntaxException {
-        super(); //"http://host:123/index/_doc"
+        super();
         this.receiver = receiver;
         setRunIdProvider(new DefaultRunIdProvider("testInstance"));
     }
 
     @Override
     protected Supplier<ElasticSearchWriteAccess> getWriteAccessFactory() {
-        return () -> new ElasticSearchWriteAccessDirect(null, null, null, CONNECTION_TIMEOUT_DEFAULT, null) {
+        //todo: No url will cause a nullpointer exception
+        return () -> new ElasticSearchWriteAccessDirect("http://host:123/index/_doc", null, null, CONNECTION_TIMEOUT_DEFAULT, null) {
             @Override
             public void push(Map<String, Object> data) throws IOException {
                 receiver.accept(data);
