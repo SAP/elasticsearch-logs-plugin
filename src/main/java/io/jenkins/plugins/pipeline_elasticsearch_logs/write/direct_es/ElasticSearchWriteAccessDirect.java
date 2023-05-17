@@ -323,6 +323,11 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
             }
             return FormValidation.ok();
         }
+
+        public FormValidation doValidateConnection(@QueryParameter(fixEmpty = true) String url,
+                                                   @QueryParameter(fixEmpty = true) String credentialsId, @QueryParameter(fixEmpty = true) String certificateId) {
+            return FormValidation.ok("Success");
+        }
     }
 
 
