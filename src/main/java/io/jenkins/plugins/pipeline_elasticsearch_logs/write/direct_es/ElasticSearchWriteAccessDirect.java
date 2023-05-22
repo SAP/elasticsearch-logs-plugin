@@ -188,6 +188,10 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
 
 
     private boolean isSsl() {
+
+        if (url == null){
+            return false;
+        }
         URI uri = URI.create(url);
         String scheme = uri.getScheme();
         return "https".equals(scheme);
@@ -410,12 +414,12 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
         @Override
         public void push(Map<String, Object> data) throws IOException {
             String dataString = JSONObject.fromObject(data).toString();
-            //HttpPost post = getHttpPost(dataString);
+            HttpPost post = getHttpPost(dataString);
 
             CloseableHttpResponse response = null;
             try {
-                //     CloseableHttpClient httpClient = getClient();
-                //    response = httpClient.execute(post, context);
+                    CloseableHttpClient httpClient = getClient();
+                    response = httpClient.execute(post, context);
                 if (!SUCCESS_CODES.contains(response.getStatusLine().getStatusCode())) {
                     String errorMessage = this.getErrorMessage(response);
                     throw new IOException(errorMessage);
