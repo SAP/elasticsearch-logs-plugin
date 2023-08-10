@@ -52,9 +52,11 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     private final String runIdJsonString;
 
+    private final int splitMessagesLongerThan;
+
     public ElasticSearchRunConfiguration(URI uri, String username, String password, boolean saveAnnotations,
             String uid, JSONObject runId, Supplier<ElasticSearchWriteAccess> writeAccessFactory, int connectionTimeoutMillis,
-            boolean writeAnnotationsToLogFile) {
+            int splitMessagesLongerThan, boolean writeAnnotationsToLogFile) {
         super();
         this.uri = uri;
         this.username = username;
@@ -62,6 +64,7 @@ public class ElasticSearchRunConfiguration implements Serializable {
         this.runIdJsonString = runId.toString();
         this.uid = uid;
         this.writeAccessFactory = writeAccessFactory;
+        this.splitMessagesLongerThan = splitMessagesLongerThan;
         this.saveAnnotations = saveAnnotations;
         this.writeAnnotationsToLogFile = writeAnnotationsToLogFile;
     }
@@ -88,6 +91,10 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     public String getPassword() {
         return password;
+    }
+
+    public int getSplitMessagesLongerThan() {
+        return splitMessagesLongerThan;
     }
 
     public Map<String, Object> createData() {

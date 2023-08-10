@@ -66,6 +66,8 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     @CheckForNull
     private String credentialsId;
 
+    private transient int splitMessagesLongerThan;
+
     private Boolean saveAnnotations = true;
 
     private Boolean writeAnnotationsToLogFile = true;
@@ -107,6 +109,9 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     }
 
     protected Object readResolve() {
+        if (splitMessagesLongerThan <= 0) {
+            splitMessagesLongerThan = 2000
+        }
         if (saveAnnotations == null) {
             saveAnnotations = true;
         }
@@ -141,6 +146,15 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     @DataBoundSetter
     public void setConnectionTimeoutMillis(@CheckForNull Integer connectionTimeoutMillis) {
         this.connectionTimeoutMillis = ensureCorrectConnectionTimeoutMillis(connectionTimeoutMillis);
+    }
+
+    public int getSplitMessagesLongerThan() {
+        return splitMessagesLongerThan;
+    }
+
+    @DataBoundSetter
+    public void setSplitMessagesLongerThan(int chars) {
+        this.splitMessagesLongerThan = chars;
     }
 
     public boolean isSaveAnnotations() {
@@ -274,8 +288,18 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
             throw new IOException(e);
         }
 
-        return new ElasticSearchRunConfiguration(uri, username, password, isSaveAnnotations(), getUniqueRunId(run),
-                getRunIdProvider().getRunId(run), getWriteAccessFactory(), getConnectionTimeoutMillis(), isWriteAnnotationsToLogFile());
+        return new ElasticSearchRunConfiguration(
+            uri,
+            username,
+            password,
+            isSaveAnnotations(),
+            getUniqueRunId(run),
+            getRunIdProvider().getRunId(run),
+            getWriteAccessFactory(),
+            getConnectionTimeoutMillis(),
+            getSplitMessagesLongerThan(),
+            isWriteAnnotationsToLogFile()
+        );
     }
 
     // Can be overwritten in tests
