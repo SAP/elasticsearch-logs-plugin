@@ -110,7 +110,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
     protected Object readResolve() {
         if (splitMessagesLongerThan <= 0) {
-            splitMessagesLongerThan = 2000
+            splitMessagesLongerThan = 2000;
         }
         if (saveAnnotations == null) {
             saveAnnotations = true;

@@ -162,7 +162,7 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
 
     @DataBoundSetter
     public void setMaxBufferSize(int bytes) {
-        this.maxBufferSize = bytes
+        this.maxBufferSize = bytes;
     }
 
     public int getFlushAttemptIntervalMillis() {
@@ -171,7 +171,7 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
 
     @DataBoundSetter
     public void setFlushAttemptIntervalMillis(int millis) {
-        this.flushAttemptIntervalMillis = millis
+        this.flushAttemptIntervalMillis = millis;
     }
 
     public int getEmitMaxRetriesIfBufferFull() {

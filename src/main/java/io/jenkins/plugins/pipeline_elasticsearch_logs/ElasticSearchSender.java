@@ -187,7 +187,7 @@ public class ElasticSearchSender implements BuildListener, Closeable {
                 chunks.append(data);
             }
 
-            return chunks
+            return chunks;
         }
 
         @Override
