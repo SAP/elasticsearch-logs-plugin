@@ -55,7 +55,7 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     private int maxWaitSecondsUntilBufferFlushed = 30;
     private int maxWaitSecondsUntilFlusherTerminated = 30;
     private int bufferChunkInitialSize = 1 * 1024 * 1024;
-    private int bufferChunkRetentionSize = 1 * 1024 * 1024;
+    private int bufferChunkRetentionSize = (1 * 1024 * 1024) + 1;
     private int bufferChunkRetentionTimeMillis = 1000;
     private int maxBufferSize = 10 * 1024 * 1024;
     private int flushAttemptIntervalMillis = 500;
