@@ -57,8 +57,8 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     private int bufferChunkInitialSize = 1 * 1024 * 1024;
     private int bufferChunkRetentionSize = (1 * 1024 * 1024) + 1;
     private int bufferChunkRetentionTimeMillis = 1000;
-    private int maxBufferSize = 10 * 1024 * 1024;
     private int flushAttemptIntervalMillis = 500;
+    private long maxBufferSize = 10 * 1024 * 1024L;
 
     private int emitMaxRetriesIfBufferFull = -1; // forever
 
@@ -156,12 +156,12 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
         this.bufferChunkRetentionTimeMillis = millis;
     }
 
-    public int getMaxBufferSize() {
+    public long getMaxBufferSize() {
         return maxBufferSize;
     }
 
     @DataBoundSetter
-    public void setMaxBufferSize(int bytes) {
+    public void setMaxBufferSize(long bytes) {
         this.maxBufferSize = bytes;
     }
 
@@ -341,8 +341,8 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
         private int bufferChunkInitialSize;
         private int bufferChunkRetentionSize;
         private int bufferChunkRetentionTimeMillis;
-        private int maxBufferSize;
         private int flushAttemptIntervalMillis;
+        private long maxBufferSize;
 
         private int emitMaxRetriesIfBufferFull;
 
