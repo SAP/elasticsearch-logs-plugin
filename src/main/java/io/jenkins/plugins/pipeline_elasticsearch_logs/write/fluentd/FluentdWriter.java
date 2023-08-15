@@ -120,7 +120,7 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
         this.maxWaitSecondsUntilFlusherTerminated = seconds;
     }
 
-    public int getBufferInitialSize() {
+    public int getBufferChunkInitialSize() {
         return bufferChunkInitialSize;
     }
 
