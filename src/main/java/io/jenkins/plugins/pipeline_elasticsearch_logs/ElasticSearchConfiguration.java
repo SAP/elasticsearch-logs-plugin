@@ -296,7 +296,6 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
             getUniqueRunId(run),
             getRunIdProvider().getRunId(run),
             getWriteAccessFactory(),
-            getConnectionTimeoutMillis(),
             getSplitMessagesLongerThan(),
             isWriteAnnotationsToLogFile()
         );
