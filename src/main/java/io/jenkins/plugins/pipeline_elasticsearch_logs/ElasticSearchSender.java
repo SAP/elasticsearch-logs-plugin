@@ -169,6 +169,8 @@ public class ElasticSearchSender implements BuildListener, Closeable {
             if (data.containsKey(ConsoleNotes.MESSAGE_KEY)) {
                 String message = (String) data.get(ConsoleNotes.MESSAGE_KEY);
                 int maxLength = config.getSplitMessagesLongerThan();
+                LOGGER.log(Level.INFO, "message: {0}", message);
+                LOGGER.log(Level.INFO, "maxLength: {0}", maxLength);
                 if (message.length() > maxLength) {
                     String messageId = UUID.randomUUID().toString();
                     Integer messageCount = 0;
