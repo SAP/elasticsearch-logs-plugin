@@ -98,6 +98,7 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
     public ElasticSearchWriteAccessDirect() throws URISyntaxException {
         ElasticSearchConfiguration config = ElasticSearchGlobalConfiguration.get().getElasticSearch();
         if(config != null) {
+            config.readResolve();
             String credentialsId = config.getCredentialsId();
             if(credentialsId != null) {
                 StandardUsernamePasswordCredentials credentials = getCredentials(credentialsId);
