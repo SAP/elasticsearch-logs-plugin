@@ -8,6 +8,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.List;
+import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,7 +37,7 @@ public class ElasticSearchSender implements BuildListener, Closeable {
 
     private static final long serialVersionUID = 1;
 
-    private transient @CheckForNull PrintStream logger;
+    private transient @CheckForNull PrintStream outputStreamLogger;
     private final @CheckForNull NodeInfo nodeInfo;
 
     protected transient ElasticSearchWriteAccess writer;
@@ -65,17 +67,17 @@ public class ElasticSearchSender implements BuildListener, Closeable {
 
     @Override
     public PrintStream getLogger() {
-        if (logger == null) {
-            logger = getWrappedLogger(out);
+        if (outputStreamLogger == null) {
+            outputStreamLogger = getWrappedLogger(out);
         }
-        return logger;
+        return outputStreamLogger;
     }
 
     @Override
     public void close() throws IOException {
-        if (logger != null) {
-          logger.close();
-          logger = null;
+        if (outputStreamLogger != null) {
+          outputStreamLogger.close();
+          outputStreamLogger = null;
         }
         if (writer != null) {
             try {
@@ -168,7 +170,7 @@ public class ElasticSearchSender implements BuildListener, Closeable {
                 String message = (String) data.get(ConsoleNotes.MESSAGE_KEY);
                 int maxLength = config.getSplitMessagesLongerThan();
                 if (message.length() > maxLength) {
-                    messageId = UUID.randomUUID().toString();
+                    String messageId = UUID.randomUUID().toString();
                     Integer messageCount = 0;
                     for (String part: Splitter.fixedLength(maxLength).split(message)) {
                         Map<String, Object> chunk = new HashMap<>(data);
@@ -178,14 +180,14 @@ public class ElasticSearchSender implements BuildListener, Closeable {
                         chunk.put("messageId", messageId);
                         chunk.put("messageCount", messageCount);
                         chunk.put(ConsoleNotes.MESSAGE_KEY, part);
-                        chunks.append(chunk);
+                        chunks.add(chunk);
                         messageCount++;
                     }
                 }
             }
 
             if (chunks.size() == 0) {
-                chunks.append(data);
+                chunks.add(data);
             }
 
             return chunks;

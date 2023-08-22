@@ -5,12 +5,7 @@ import static java.lang.String.format;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -24,11 +19,7 @@ import org.komamitsu.fluency.Fluency;
 import org.komamitsu.fluency.RetryableException;
 import org.komamitsu.fluency.fluentd.FluencyBuilderForFluentd;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
-
 import hudson.Extension;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.ConsoleNotes;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
 
 /**
@@ -57,8 +48,8 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     private int bufferChunkInitialSize = 1 * 1024 * 1024;
     private int bufferChunkRetentionSize = (1 * 1024 * 1024) + 1;
     private int bufferChunkRetentionTimeMillis = 1000;
-    private int maxBufferSize = 10 * 1024 * 1024;
     private int flushAttemptIntervalMillis = 500;
+    private long maxBufferSize = 10 * 1024 * 1024L;
 
     private int emitMaxRetriesIfBufferFull = -1; // forever
 
@@ -129,7 +120,7 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
         this.maxWaitSecondsUntilFlusherTerminated = seconds;
     }
 
-    public int getBufferInitialSize() {
+    public int getBufferChunkInitialSize() {
         return bufferChunkInitialSize;
     }
 
@@ -156,12 +147,12 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
         this.bufferChunkRetentionTimeMillis = millis;
     }
 
-    public int getMaxBufferSize() {
+    public long getMaxBufferSize() {
         return maxBufferSize;
     }
 
     @DataBoundSetter
-    public void setMaxBufferSize(int bytes) {
+    public void setMaxBufferSize(long bytes) {
         this.maxBufferSize = bytes;
     }
 
@@ -341,8 +332,8 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
         private int bufferChunkInitialSize;
         private int bufferChunkRetentionSize;
         private int bufferChunkRetentionTimeMillis;
-        private int maxBufferSize;
         private int flushAttemptIntervalMillis;
+        private long maxBufferSize;
 
         private int emitMaxRetriesIfBufferFull;
 

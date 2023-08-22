@@ -108,7 +108,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         this.elasticsearchWriteAccess = elasticsearchWriteAccess;
     }
 
-    protected Object readResolve() {
+    public Object readResolve() {
         if (splitMessagesLongerThan <= 0) {
             splitMessagesLongerThan = 2000;
         }
@@ -296,7 +296,6 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
             getUniqueRunId(run),
             getRunIdProvider().getRunId(run),
             getWriteAccessFactory(),
-            getConnectionTimeoutMillis(),
             getSplitMessagesLongerThan(),
             isWriteAnnotationsToLogFile()
         );
