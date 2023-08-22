@@ -13,7 +13,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -262,12 +261,8 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
     }
 
     private String getErrorMessage(CloseableHttpResponse response) {
-        ByteArrayOutputStream byteStream = null;
-        PrintStream stream = null;
-        try {
-            byteStream = new ByteArrayOutputStream();
-            stream = new PrintStream(byteStream, true, StandardCharsets.UTF_8.name());
-
+        try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            PrintStream stream = new PrintStream(byteStream, true, StandardCharsets.UTF_8.name())) {
             try {
                 stream.print("HTTP error code: ");
                 stream.println(response.getStatusLine().getStatusCode());
@@ -280,12 +275,8 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
             }
             stream.flush();
             return byteStream.toString(StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
+        } catch (IOException e) {
             return ExceptionUtils.getStackTrace(e);
-        } finally {
-            if (stream != null) {
-                stream.close();
-            }
         }
     }
 
