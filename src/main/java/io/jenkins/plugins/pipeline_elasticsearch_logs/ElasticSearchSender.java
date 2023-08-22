@@ -37,7 +37,7 @@ public class ElasticSearchSender implements BuildListener, Closeable {
 
     private static final long serialVersionUID = 1;
 
-    private transient @CheckForNull PrintStream logger;
+    private transient @CheckForNull PrintStream outputStreamLogger;
     private final @CheckForNull NodeInfo nodeInfo;
 
     protected transient ElasticSearchWriteAccess writer;
@@ -67,17 +67,17 @@ public class ElasticSearchSender implements BuildListener, Closeable {
 
     @Override
     public PrintStream getLogger() {
-        if (logger == null) {
-            logger = getWrappedLogger(out);
+        if (outputStreamLogger == null) {
+            outputStreamLogger = getWrappedLogger(out);
         }
-        return logger;
+        return outputStreamLogger;
     }
 
     @Override
     public void close() throws IOException {
-        if (logger != null) {
-          logger.close();
-          logger = null;
+        if (outputStreamLogger != null) {
+          outputStreamLogger.close();
+          outputStreamLogger = null;
         }
         if (writer != null) {
             try {
