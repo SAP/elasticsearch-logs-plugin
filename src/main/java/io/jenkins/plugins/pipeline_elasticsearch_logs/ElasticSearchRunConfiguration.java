@@ -46,7 +46,7 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     private final boolean writeAnnotationsToLogFile;
 
-    private final String uid;
+    private final String uniqueId;
 
     private Supplier<ElasticSearchWriteAccess> writeAccessFactory;
 
@@ -55,22 +55,22 @@ public class ElasticSearchRunConfiguration implements Serializable {
     private final int splitMessagesLongerThan;
 
     public ElasticSearchRunConfiguration(URI uri, String username, String password, boolean saveAnnotations,
-            String uid, JSONObject runId, Supplier<ElasticSearchWriteAccess> writeAccessFactory,
+            String uniqueId, JSONObject runId, Supplier<ElasticSearchWriteAccess> writeAccessFactory,
             int splitMessagesLongerThan, boolean writeAnnotationsToLogFile) {
         super();
         this.uri = uri;
         this.username = username;
         this.password = password;
         this.runIdJsonString = runId.toString();
-        this.uid = uid;
+        this.uniqueId = uniqueId;
         this.writeAccessFactory = writeAccessFactory;
         this.splitMessagesLongerThan = splitMessagesLongerThan;
         this.saveAnnotations = saveAnnotations;
         this.writeAnnotationsToLogFile = writeAnnotationsToLogFile;
     }
 
-    public String getUid() {
-        return uid;
+    public String getUniqueId() {
+        return uniqueId;
     }
 
     public boolean isSaveAnnotations() {
@@ -103,7 +103,7 @@ public class ElasticSearchRunConfiguration implements Serializable {
         data.put(TIMESTAMP, ZonedDateTime.now(ZoneOffset.UTC).format(UTC_MILLIS));
         data.put(TIMESTAMP_MILLIS, date.getTime());
         data.put(RUN_ID, JSONObject.fromObject(runIdJsonString));
-        data.put(UID, uid);
+        data.put(UID, uniqueId);
         return data;
     }
 
