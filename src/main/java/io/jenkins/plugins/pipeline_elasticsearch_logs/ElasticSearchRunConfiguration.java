@@ -48,7 +48,7 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     private final String uniqueId;
 
-    private Supplier<ElasticSearchWriteAccess> writeAccessFactory;
+    private transient Supplier<ElasticSearchWriteAccess> writeAccessFactory;
 
     private final String runIdJsonString;
 
