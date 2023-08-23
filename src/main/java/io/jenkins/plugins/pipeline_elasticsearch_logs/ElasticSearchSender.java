@@ -7,6 +7,10 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,6 +18,8 @@ import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 import org.jenkinsci.remoting.SerializableOnlyOverRemoting;
+
+import com.google.common.base.Splitter;
 
 import hudson.CloseProofOutputStream;
 import hudson.console.LineTransformationOutputStream;
@@ -31,7 +37,7 @@ public class ElasticSearchSender implements BuildListener, Closeable {
 
     private static final long serialVersionUID = 1;
 
-    private transient @CheckForNull PrintStream logger;
+    private transient @CheckForNull PrintStream outputStreamLogger;
     private final @CheckForNull NodeInfo nodeInfo;
 
     protected transient ElasticSearchWriteAccess writer;
@@ -61,17 +67,17 @@ public class ElasticSearchSender implements BuildListener, Closeable {
 
     @Override
     public PrintStream getLogger() {
-        if (logger == null) {
-            logger = getWrappedLogger(out);
+        if (outputStreamLogger == null) {
+            outputStreamLogger = getWrappedLogger(out);
         }
-        return logger;
+        return outputStreamLogger;
     }
 
     @Override
     public void close() throws IOException {
-        if (logger != null) {
-          logger.close();
-          logger = null;
+        if (outputStreamLogger != null) {
+          outputStreamLogger.close();
+          outputStreamLogger = null;
         }
         if (writer != null) {
             try {
@@ -141,19 +147,51 @@ public class ElasticSearchSender implements BuildListener, Closeable {
         protected void eol(byte[] b, int len) throws IOException {
             Map<String, Object> data = config.createData();
 
-            ConsoleNotes.parse(b, len, data, config.isSaveAnnotations());
             data.put(ElasticSearchGraphListener.EVENT_TYPE, eventPrefix + EVENT_TYPE_MESSAGE);
             if (nodeInfo != null) {
                 nodeInfo.appendNodeInfo(data);
             }
 
-            if (LOGGER.isLoggable(Level.FINEST)) {
-                String jsonDataString = JSONObject.fromObject(data).toString();
-                LOGGER.log(Level.FINEST, "Sending data: {0}", jsonDataString);
+            ConsoleNotes.parse(b, len, data, config.isSaveAnnotations());
+
+            for (Map<String, Object> chunk: split(data)) {
+                if (LOGGER.isLoggable(Level.FINEST)) {
+                    String jsonDataString = JSONObject.fromObject(chunk).toString();
+                    LOGGER.log(Level.FINEST, "Sending data: {0}", jsonDataString);
+                }
+                getElasticSearchWriter().push(chunk);
             }
-            getElasticSearchWriter().push(data);
         }
 
+        protected List<Map<String, Object>> split(Map<String, Object> data) {
+            List<Map<String, Object>> chunks = new ArrayList<>();
+
+            if (data.containsKey(ConsoleNotes.MESSAGE_KEY)) {
+                String message = (String) data.get(ConsoleNotes.MESSAGE_KEY);
+                int maxLength = config.getSplitMessagesLongerThan();
+                if (message.length() > maxLength) {
+                    String messageId = UUID.randomUUID().toString();
+                    Integer messageCount = 0;
+                    for (String part: Splitter.fixedLength(maxLength).split(message)) {
+                        Map<String, Object> chunk = new HashMap<>(data);
+                        if (messageCount > 0) {
+                            chunk.remove(ConsoleNotes.ANNOTATIONS_KEY);
+                        }
+                        chunk.put("messageId", messageId);
+                        chunk.put("messageCount", messageCount);
+                        chunk.put(ConsoleNotes.MESSAGE_KEY, part);
+                        chunks.add(chunk);
+                        messageCount++;
+                    }
+                }
+            }
+
+            if (chunks.size() == 0) {
+                chunks.add(data);
+            }
+
+            return chunks;
+        }
 
         @Override
         public void close() throws IOException {

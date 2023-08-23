@@ -5,12 +5,7 @@ import static java.lang.String.format;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -24,11 +19,7 @@ import org.komamitsu.fluency.Fluency;
 import org.komamitsu.fluency.RetryableException;
 import org.komamitsu.fluency.fluentd.FluencyBuilderForFluentd;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
-
 import hudson.Extension;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.ConsoleNotes;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
 
 /**
@@ -42,54 +33,145 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     private transient Fluency fluentd;
     private transient FluentdErrorHandler errorHandler;
 
-
-    private final static int DEFAULT_TIMEOUT_MILLIS = 3000;
-    private final static int DEFAULT_RETRY_MILLIS = 1000;
-    private final static int DEFAULT_BUFFER_CAPACITY = 1048576;
-    private final static int DEFAULT_MAX_RETRIES = 30;
-    private final static int DEFAULT_MAX_WAIT_SEC = 30;
-    private final static int DEFAULT_BUFFER_RETENTION_TIME_MILLIS = 1000;
-
     private String tag;
-
     private String host;
     private int port;
-    private int retryMillis = DEFAULT_RETRY_MILLIS;
-    private int timeoutMillis = DEFAULT_TIMEOUT_MILLIS;
-    private int bufferCapacity = DEFAULT_BUFFER_CAPACITY;
-    private int maxRetries = DEFAULT_MAX_RETRIES;
-    private int maxWaitSeconds = DEFAULT_MAX_WAIT_SEC;
-    private int bufferRetentionTimeMillis = DEFAULT_BUFFER_RETENTION_TIME_MILLIS;
+
+    private Integer senderBaseRetryIntervalMillis;
+    private Integer senderMaxRetryIntervalMillis;
+    private Integer senderMaxRetryCount;
+    private Integer connectionTimeoutMillis;
+    private Integer readTimeoutMillis;
+
+    private int maxWaitSecondsUntilBufferFlushed = 30;
+    private int maxWaitSecondsUntilFlusherTerminated = 30;
+    private int bufferChunkInitialSize = 1 * 1024 * 1024;
+    private int bufferChunkRetentionSize = (1 * 1024 * 1024) + 1;
+    private int bufferChunkRetentionTimeMillis = 1000;
+    private int flushAttemptIntervalMillis = 500;
+    private long maxBufferSize = 10 * 1024 * 1024L;
+
+    private int emitMaxRetriesIfBufferFull = -1; // forever
 
     @DataBoundConstructor
     public FluentdWriter() throws URISyntaxException {
     }
 
-    public int getBufferRetentionTimeMillis() {
-        return bufferRetentionTimeMillis;
+    public Integer getSenderBaseRetryIntervalMillis() {
+        return senderBaseRetryIntervalMillis;
     }
 
     @DataBoundSetter
-    public void setBufferRetentionTimeMillis(int bufferRetentionTimeMillis) {
-        this.bufferRetentionTimeMillis = bufferRetentionTimeMillis;
+    public void setSenderBaseRetryIntervalMillis(int millis) {
+        this.senderBaseRetryIntervalMillis = millis;
     }
 
-    public int getMaxRetries() {
-        return maxRetries;
-    }
-
-    @DataBoundSetter
-    public void setMaxRetries(int maxRetries) {
-        this.maxRetries = maxRetries;
-    }
-
-    public int getMaxWaitSeconds() {
-        return maxWaitSeconds;
+    public Integer getSenderMaxRetryIntervalMillis() {
+        return senderMaxRetryIntervalMillis;
     }
 
     @DataBoundSetter
-    public void setMaxWaitSeconds(int maxWaitSeconds) {
-        this.maxWaitSeconds = maxWaitSeconds;
+    public void setSenderMaxRetryIntervalMillis(int millis) {
+        this.senderMaxRetryIntervalMillis = millis;
+    }
+
+    public Integer getSenderMaxRetryCount() {
+        return senderMaxRetryCount;
+    }
+
+    @DataBoundSetter
+    public void setSenderMaxRetryCount(int count) {
+        this.senderMaxRetryCount = count;
+    }
+
+    public Integer getConnectionTimeoutMillis() {
+        return connectionTimeoutMillis;
+    }
+
+    @DataBoundSetter
+    public void setConnectionTimeoutMillis(int millis) {
+        this.connectionTimeoutMillis = millis;
+    }
+
+    public Integer getReadTimeoutMillis() {
+        return readTimeoutMillis;
+    }
+
+    @DataBoundSetter
+    public void setReadTimeoutMillis(int millis) {
+        this.readTimeoutMillis = millis;
+    }
+
+    public int getMaxWaitSecondsUntilBufferFlushed() {
+        return maxWaitSecondsUntilBufferFlushed;
+    }
+
+    @DataBoundSetter
+    public void setMaxWaitSecondsUntilBufferFlushed(int seconds) {
+        this.maxWaitSecondsUntilBufferFlushed = seconds;
+    }
+
+    public int getMaxWaitSecondsUntilFlusherTerminated() {
+        return maxWaitSecondsUntilFlusherTerminated;
+    }
+
+    @DataBoundSetter
+    public void setMaxWaitSecondsUntilFlusherTerminated(int seconds) {
+        this.maxWaitSecondsUntilFlusherTerminated = seconds;
+    }
+
+    public int getBufferChunkInitialSize() {
+        return bufferChunkInitialSize;
+    }
+
+    @DataBoundSetter
+    public void setBufferChunkInitialSize(int bytes) {
+        this.bufferChunkInitialSize = bytes;
+    }
+
+    public int getBufferChunkRetentionSize() {
+        return bufferChunkRetentionSize;
+    }
+
+    @DataBoundSetter
+    public void setBufferChunkRetentionSize(int bytes) {
+        this.bufferChunkRetentionSize = bytes;
+    }
+
+    public int getBufferChunkRetentionTimeMillis() {
+        return bufferChunkRetentionTimeMillis;
+    }
+
+    @DataBoundSetter
+    public void setBufferChunkRetentionTimeMillis(int millis) {
+        this.bufferChunkRetentionTimeMillis = millis;
+    }
+
+    public long getMaxBufferSize() {
+        return maxBufferSize;
+    }
+
+    @DataBoundSetter
+    public void setMaxBufferSize(long bytes) {
+        this.maxBufferSize = bytes;
+    }
+
+    public int getFlushAttemptIntervalMillis() {
+        return flushAttemptIntervalMillis;
+    }
+
+    @DataBoundSetter
+    public void setFlushAttemptIntervalMillis(int millis) {
+        this.flushAttemptIntervalMillis = millis;
+    }
+
+    public int getEmitMaxRetriesIfBufferFull() {
+        return emitMaxRetriesIfBufferFull;
+    }
+
+    @DataBoundSetter
+    public void setEmitMaxRetriesIfBufferFull(int count) {
+        this.emitMaxRetriesIfBufferFull = count;
     }
 
     public String getTag() {
@@ -120,39 +202,6 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
         this.port = port;
     }
 
-    public int getRetryMillis() {
-        return retryMillis;
-    }
-
-    @DataBoundSetter
-    public void setRetryMillis(int retryMillis) {
-        if (retryMillis < 0)
-            retryMillis = 0;
-        this.retryMillis = retryMillis;
-    }
-
-    public int getTimeoutMillis() {
-        return timeoutMillis;
-    }
-
-    @DataBoundSetter
-    public void setTimeoutMillis(int timeoutMillis) {
-        if(timeoutMillis < 0) throw new IllegalArgumentException("timeoutMillis less than 0");
-        this.timeoutMillis = timeoutMillis;
-    }
-
-    public int getBufferCapacity() {
-        return bufferCapacity;
-    }
-
-    @DataBoundSetter
-    public void setBufferCapacity(int bufferCapacity) {
-        if (bufferCapacity < 0)
-            bufferCapacity = DEFAULT_BUFFER_CAPACITY;
-        this.bufferCapacity = bufferCapacity;
-    }
-
-
     @Extension
     @Symbol("fluentd")
     public static class DescriptorImpl extends ElasticSearchWriteAccessDescriptor {
@@ -171,34 +220,11 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
      */
     @Override
     public void push(Map<String, Object> data) throws IOException {
-        if(fluentd == null) initFluentdLogger();
-        if (data.containsKey(ConsoleNotes.MESSAGE_KEY)) {
-            String message = (String) data.get(ConsoleNotes.MESSAGE_KEY);
-            if (message.length() > bufferCapacity * 2) {
-                data.put("messageId",UUID.randomUUID().toString());
-                LOGGER.log(Level.FINER, "Message is too big to be sent in one piece. Will split the message into several smaller chunks");
-                Integer messageCount = 0;
-                for(String m: Splitter.fixedLength(bufferCapacity).split(message)) {
-                    Map<String, Object> d = new HashMap<>();
-                    d.putAll(data);
-                    d.put("messageCount", messageCount);
-                    d.put(ConsoleNotes.MESSAGE_KEY, m);
-                    if (messageCount > 0) {
-                        d.remove(ConsoleNotes.ANNOTATIONS_KEY);
-                    }
-                    messageCount++;
-                    emitData(tag,d);
-                }
-            } else {
-                emitData(tag,data);
-            }
-
-        } else {
-            emitData(tag,data);
-        }
+        if (fluentd == null)
+          initFluentdLogger();
+        emitData(tag, data);
         checkForRetryableException();
     }
-
 
     private void emitData(String tag, Map<String, Object> data) throws IOException {
         int count = 0;
@@ -218,8 +244,8 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
                 }
             }
             count++;
-            if (count > maxRetries) {
-                throw new IOException("Not able to emit data after " + maxRetries + " tries.");
+            if (emitMaxRetriesIfBufferFull >= 0 && count > emitMaxRetriesIfBufferFull) {
+                throw new IOException("Not able to emit data after " + count + " tries.");
             }
         }
     }
@@ -238,7 +264,7 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
             try {
                 fluentd.flush();
                 try {
-                    if (!fluentd.waitUntilAllBufferFlushed(maxWaitSeconds)) {
+                    if (!fluentd.waitUntilAllBufferFlushed(maxWaitSecondsUntilBufferFlushed)) {
                         throw new IOException("Not all data could be flushed.");
                     }
                 } catch (InterruptedException e) {
@@ -246,7 +272,7 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
                 }
                 fluentd.close();
                 try {
-                    if (!fluentd.waitUntilFlusherTerminated(maxWaitSeconds)) {
+                    if (!fluentd.waitUntilFlusherTerminated(maxWaitSecondsUntilFlusherTerminated)) {
                         throw new IOException("Flusher not terminated.");
                     }
                 } catch (InterruptedException e) {
@@ -262,23 +288,28 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     private void initFluentdLogger() {
         if(fluentd == null) {
             FluencyBuilderForFluentd builder = new FluencyBuilderForFluentd();
+
             builder.setAckResponseMode(true);
+            builder.setSenderBaseRetryIntervalMillis(senderBaseRetryIntervalMillis);
+            builder.setSenderMaxRetryIntervalMillis(senderMaxRetryIntervalMillis);
+            builder.setSenderMaxRetryCount(senderMaxRetryCount);
+            builder.setConnectionTimeoutMilli(connectionTimeoutMillis);
+            builder.setReadTimeoutMilli(readTimeoutMillis);
+
             builder.setJvmHeapBufferMode(true);
-            builder.setSenderMaxRetryCount(maxRetries);
-            builder.setConnectionTimeoutMilli(timeoutMillis);
-            builder.setReadTimeoutMilli(timeoutMillis);
-            builder.setWaitUntilBufferFlushed(maxWaitSeconds);
-            builder.setWaitUntilFlusherTerminated(maxWaitSeconds);
-            builder.setBufferChunkInitialSize(bufferCapacity);
-            builder.setBufferChunkRetentionSize(bufferCapacity * 3);
-            builder.setMaxBufferSize(bufferCapacity * 10L);
-            builder.setBufferChunkRetentionTimeMillis(bufferRetentionTimeMillis);
-            builder.setFlushAttemptIntervalMillis(100);
+            builder.setWaitUntilBufferFlushed(maxWaitSecondsUntilBufferFlushed);
+            builder.setWaitUntilFlusherTerminated(maxWaitSecondsUntilFlusherTerminated);
+            builder.setBufferChunkInitialSize(bufferChunkInitialSize);
+            builder.setBufferChunkRetentionSize(bufferChunkRetentionSize);
+            builder.setMaxBufferSize(maxBufferSize);
+            builder.setBufferChunkRetentionTimeMillis(bufferChunkRetentionTimeMillis);
+            builder.setFlushAttemptIntervalMillis(flushAttemptIntervalMillis);
+
             errorHandler = new FluentdErrorHandler();
             builder.setErrorHandler(errorHandler);
             fluentd = builder.build(host, port);
-            LOGGER.finer(format("Created new Fluency(tag=%s, host=%s, port=%s, timeoutMillis=%s, bufferCapacity=%s) hash:%s",
-                    tag, host, port, timeoutMillis, bufferCapacity, fluentd.hashCode()));
+            LOGGER.finer(format("Created new %s, host=%s, port=%s, hashCode=%s",
+                    fluentd, host, port, fluentd.hashCode()));
         }
     }
 
@@ -286,32 +317,73 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
 
         private static final long serialVersionUID = 1L;
 
-        private int bufferCapacity;
         private String host;
         private int port;
-        private int retryMillis;
         private String tag;
-        private int timeoutMillis;
+
+        private Integer senderBaseRetryIntervalMillis;
+        private Integer senderMaxRetryIntervalMillis;
+        private Integer senderMaxRetryCount;
+        private Integer connectionTimeoutMillis;
+        private Integer readTimeoutMillis;
+
+        private int maxWaitSecondsUntilBufferFlushed;
+        private int maxWaitSecondsUntilFlusherTerminated;
+        private int bufferChunkInitialSize;
+        private int bufferChunkRetentionSize;
+        private int bufferChunkRetentionTimeMillis;
+        private int flushAttemptIntervalMillis;
+        private long maxBufferSize;
+
+        private int emitMaxRetriesIfBufferFull;
 
         private MeSupplier(FluentdWriter me) {
-            this.bufferCapacity = me.bufferCapacity;
             this.host = me.host;
             this.port = me.port;
-            this.retryMillis = me.retryMillis;
             this.tag = me.tag;
-            this.timeoutMillis = me.timeoutMillis;
+
+            this.senderBaseRetryIntervalMillis = me.senderBaseRetryIntervalMillis;
+            this.senderMaxRetryIntervalMillis = me.senderMaxRetryIntervalMillis;
+            this.senderMaxRetryCount = me.senderMaxRetryCount;
+            this.connectionTimeoutMillis = me.connectionTimeoutMillis;
+            this.readTimeoutMillis = me.readTimeoutMillis;
+
+            this.maxWaitSecondsUntilBufferFlushed = me.maxWaitSecondsUntilBufferFlushed;
+            this.maxWaitSecondsUntilFlusherTerminated = me.maxWaitSecondsUntilFlusherTerminated;
+            this.bufferChunkInitialSize = me.bufferChunkInitialSize;
+            this.bufferChunkRetentionSize = me.bufferChunkRetentionSize;
+            this.bufferChunkRetentionTimeMillis = me.bufferChunkRetentionTimeMillis;
+            this.maxBufferSize = me.maxBufferSize;
+            this.flushAttemptIntervalMillis = me.flushAttemptIntervalMillis;
+
+            this.emitMaxRetriesIfBufferFull = me.emitMaxRetriesIfBufferFull;
         }
 
         @Override
         public ElasticSearchWriteAccess get() {
             try {
                 FluentdWriter accessor = new FluentdWriter();
-                accessor.setBufferCapacity(bufferCapacity);
+
                 accessor.setHost(host);
                 accessor.setPort(port);
-                accessor.setRetryMillis(retryMillis);
                 accessor.setTag(tag);
-                accessor.setTimeoutMillis(timeoutMillis);
+
+                accessor.setSenderBaseRetryIntervalMillis(senderBaseRetryIntervalMillis);
+                accessor.setSenderMaxRetryIntervalMillis(senderMaxRetryIntervalMillis);
+                accessor.setSenderMaxRetryCount(senderMaxRetryCount);
+                accessor.setConnectionTimeoutMillis(connectionTimeoutMillis);
+                accessor.setReadTimeoutMillis(readTimeoutMillis);
+
+                accessor.setMaxWaitSecondsUntilBufferFlushed(maxWaitSecondsUntilBufferFlushed);
+                accessor.setMaxWaitSecondsUntilFlusherTerminated(maxWaitSecondsUntilFlusherTerminated);
+                accessor.setBufferChunkInitialSize(bufferChunkInitialSize);
+                accessor.setBufferChunkRetentionSize(bufferChunkRetentionSize);
+                accessor.setBufferChunkRetentionTimeMillis(bufferChunkRetentionTimeMillis);
+                accessor.setMaxBufferSize(maxBufferSize);
+                accessor.setFlushAttemptIntervalMillis(flushAttemptIntervalMillis);
+
+                accessor.setEmitMaxRetriesIfBufferFull(emitMaxRetriesIfBufferFull);
+
                 return accessor;
             } catch (Exception e) {
                 throw new RuntimeException("Could not create ElasticSearchWriteAccessorFluentd", e);
@@ -323,5 +395,4 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     public Supplier<ElasticSearchWriteAccess> getSupplier() {
         return new MeSupplier(this);
     }
-
 }

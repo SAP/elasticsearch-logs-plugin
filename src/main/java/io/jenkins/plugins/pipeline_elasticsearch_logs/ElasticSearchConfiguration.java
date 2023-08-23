@@ -52,6 +52,7 @@ import jenkins.model.Jenkins;
 
 public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticSearchConfiguration> {
     private static final transient Logger LOGGER = Logger.getLogger(ElasticSearchConfiguration.class.getName());
+    private final int SPLIT_MESSAGES_LONGER_THAN = 2000;
 
     private transient String host;
 
@@ -65,6 +66,8 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
     @CheckForNull
     private String credentialsId;
+
+    private transient int splitMessagesLongerThan;
 
     private Boolean saveAnnotations = true;
 
@@ -106,7 +109,10 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         this.elasticsearchWriteAccess = elasticsearchWriteAccess;
     }
 
-    protected Object readResolve() {
+    public Object readResolve() {
+        if (splitMessagesLongerThan <= 0) {
+            splitMessagesLongerThan = SPLIT_MESSAGES_LONGER_THAN;
+        }
         if (saveAnnotations == null) {
             saveAnnotations = true;
         }
@@ -141,6 +147,15 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     @DataBoundSetter
     public void setConnectionTimeoutMillis(@CheckForNull Integer connectionTimeoutMillis) {
         this.connectionTimeoutMillis = ensureCorrectConnectionTimeoutMillis(connectionTimeoutMillis);
+    }
+
+    public int getSplitMessagesLongerThan() {
+        return splitMessagesLongerThan;
+    }
+
+    @DataBoundSetter
+    public void setSplitMessagesLongerThan(int chars) {
+        this.splitMessagesLongerThan = chars;
     }
 
     public boolean isSaveAnnotations() {
@@ -274,8 +289,17 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
             throw new IOException(e);
         }
 
-        return new ElasticSearchRunConfiguration(uri, username, password, isSaveAnnotations(), getUniqueRunId(run),
-                getRunIdProvider().getRunId(run), getWriteAccessFactory(), getConnectionTimeoutMillis(), isWriteAnnotationsToLogFile());
+        return new ElasticSearchRunConfiguration(
+            uri,
+            username,
+            password,
+            isSaveAnnotations(),
+            getUniqueRunId(run),
+            getRunIdProvider().getRunId(run),
+            getWriteAccessFactory(),
+            getSplitMessagesLongerThan(),
+            isWriteAnnotationsToLogFile()
+        );
     }
 
     // Can be overwritten in tests
