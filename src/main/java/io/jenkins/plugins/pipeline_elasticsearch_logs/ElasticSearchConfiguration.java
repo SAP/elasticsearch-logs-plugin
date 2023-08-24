@@ -52,7 +52,7 @@ import jenkins.model.Jenkins;
 
 public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticSearchConfiguration> {
     private static final transient Logger LOGGER = Logger.getLogger(ElasticSearchConfiguration.class.getName());
-    private final int SPLIT_MESSAGES_LONGER_THAN = 2000;
+    private static final int SPLIT_MESSAGES_LONGER_THAN = 2000;
 
     private transient String host;
 
@@ -67,7 +67,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     @CheckForNull
     private String credentialsId;
 
-    private transient int splitMessagesLongerThan;
+    private transient int splitMessagesLongerThan = SPLIT_MESSAGES_LONGER_THAN;
 
     private Boolean saveAnnotations = true;
 
