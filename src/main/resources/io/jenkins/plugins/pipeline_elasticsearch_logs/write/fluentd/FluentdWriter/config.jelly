@@ -13,30 +13,39 @@
     <f:textbox/>
   </f:entry>
 
-  <f:entry field="bufferCapacity" title="Buffer Capacity (bytes)">
+  <f:entry field="senderBaseRetryIntervalMillis" title="Base retry interval in sending the events (ms)">
+    <f:number clazz="number" min="0" default="1000" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="senderMaxRetryIntervalMillis" title="Max retry interval in sending the events (ms)">
+    <f:number clazz="number" min="0" default="1000" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="senderMaxRetryCount" title="Max number of retries">
+    <f:number clazz="number" min="0" default="3600" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="connectionTimeoutMillis" title="Socket Connection timeout (ms)">
+    <f:number clazz="number" min="0" default="3000" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="readTimeoutMillis" title="Socket read timeout (ms)">
+    <f:number clazz="number" min="0" default="3600000" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="bufferChunkInitialSize" title="Buffer initial size (bytes)">
     <f:number clazz="number" min="65535" default="1048576" max="2147483647"/>
   </f:entry>
 
-  <f:entry field="timeoutMillis" title="Timeout (ms)">
-    <f:number clazz="number" default="3000" min="0" max="2147483647"/>
+  <f:entry field="bufferChunkRetentionSize" title="Buffer retention size (bytes)">
+    <f:number clazz="number" min="65535" default="1048577" max="2147483647"/>
   </f:entry>
 
-  <f:entry field="maxRetries" title="Max retries">
-    <f:number clazz="number" default="30" min="0" max="3600"/>
+  <f:entry field="bufferChunkRetentionTimeMillis" title="Buffer Retention time (ms)">
+    <f:number clazz="number" min="0" default="1000" max="2147483647"/>
   </f:entry>
 
-  <f:entry field="retryMillis" title="Retry (ms)">
-    <f:number clazz="number" default="1000" min="0" max="2147483647"/>
+  <f:entry field="maxBufferSize" title="Max Buffer size (bytes)">
+    <f:number clazz="number" min="65535" default="10485760" max="2147483647"/>
   </f:entry>
-
-  <f:entry field="maxWaitSeconds" title="Max Waiting time (s)">
-    <f:number clazz="number" default="30" min="0" max="3600"/>
-  </f:entry>
-  
-  <f:entry field="bufferRetentionTimeMillis" title="Buffer Retention time (ms)">
-    <f:number clazz="number" default="1000" min="0" max="3600"/>
-  </f:entry>
-
-  
-
 </j:jelly>
