@@ -53,7 +53,6 @@ public class ElasticSearchGlobalConfiguration extends GlobalConfiguration {
         if (config == null) {
             return null;
         }
-        config.readResolve();
         return config.getRunConfiguration(run);
     }
 }

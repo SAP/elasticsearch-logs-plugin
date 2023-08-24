@@ -20,6 +20,7 @@ import org.komamitsu.fluency.RetryableException;
 import org.komamitsu.fluency.fluentd.FluencyBuilderForFluentd;
 
 import hudson.Extension;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.SerializableSupplier;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
 
 /**
@@ -313,7 +314,7 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
         }
     }
 
-    private static class MeSupplier implements Supplier<ElasticSearchWriteAccess>, Serializable {
+    private static class MeSupplier implements SerializableSupplier<ElasticSearchWriteAccess>, Serializable {
 
         private static final long serialVersionUID = 1L;
 
@@ -392,7 +393,7 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     }
 
     @Override
-    public Supplier<ElasticSearchWriteAccess> getSupplier() {
+    public SerializableSupplier<ElasticSearchWriteAccess> getSupplier() {
         return new MeSupplier(this);
     }
 }

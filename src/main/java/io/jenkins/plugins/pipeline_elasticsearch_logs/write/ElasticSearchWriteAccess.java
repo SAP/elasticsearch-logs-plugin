@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import hudson.ExtensionPoint;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.SerializableSupplier;
 
 public abstract class ElasticSearchWriteAccess extends AbstractDescribableImpl<ElasticSearchWriteAccess> implements ExtensionPoint {
 
@@ -24,6 +25,6 @@ public abstract class ElasticSearchWriteAccess extends AbstractDescribableImpl<E
      * of this object at a later point in time.
      * @return
      */
-    public abstract Supplier<ElasticSearchWriteAccess> getSupplier() throws IOException;
+    public abstract SerializableSupplier<ElasticSearchWriteAccess> getSupplier() throws IOException;
 
 }

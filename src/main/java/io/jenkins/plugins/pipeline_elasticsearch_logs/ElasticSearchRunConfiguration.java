@@ -48,14 +48,14 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     private final String uniqueId;
 
-    private transient Supplier<ElasticSearchWriteAccess> writeAccessFactory;
+    private final SerializableSupplier<ElasticSearchWriteAccess> writeAccessFactory;
 
     private final String runIdJsonString;
 
     private final int splitMessagesLongerThan;
 
     public ElasticSearchRunConfiguration(URI uri, String username, String password, boolean saveAnnotations,
-            String uniqueId, JSONObject runId, Supplier<ElasticSearchWriteAccess> writeAccessFactory,
+            String uniqueId, JSONObject runId, SerializableSupplier<ElasticSearchWriteAccess> writeAccessFactory,
             int splitMessagesLongerThan, boolean writeAnnotationsToLogFile) {
         super();
         this.uri = uri;

@@ -60,6 +60,7 @@ import hudson.security.ACL;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchConfiguration;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchGlobalConfiguration;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.SSLHelper;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.SerializableSupplier;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -97,7 +98,6 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
     public ElasticSearchWriteAccessDirect() throws URISyntaxException {
         ElasticSearchConfiguration config = ElasticSearchGlobalConfiguration.get().getElasticSearch();
         if(config != null) {
-            config.readResolve();
             String credentialsId = config.getCredentialsId();
             if(credentialsId != null) {
                 StandardUsernamePasswordCredentials credentials = getCredentials(credentialsId);
@@ -281,7 +281,7 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
     }
 
 
-    private static class MeSupplier implements Supplier<ElasticSearchWriteAccess>, Serializable {
+    private static class MeSupplier implements SerializableSupplier<ElasticSearchWriteAccess>, Serializable {
 
         private final URI uri;
 
@@ -329,7 +329,7 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
     }
 
     @Override
-    public Supplier<ElasticSearchWriteAccess> getSupplier() throws IOException {
+    public SerializableSupplier<ElasticSearchWriteAccess> getSupplier() throws IOException {
         return new MeSupplier(this);
     }
 
