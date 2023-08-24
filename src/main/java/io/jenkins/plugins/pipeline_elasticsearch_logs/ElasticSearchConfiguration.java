@@ -305,7 +305,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     // Can be overwritten in tests
     @CheckForNull
     @Restricted(NoExternalUse.class)
-    protected Supplier<ElasticSearchWriteAccess> getWriteAccessFactory() throws IOException {
+    protected SerializableSupplier<ElasticSearchWriteAccess> getWriteAccessFactory() throws IOException {
         return elasticsearchWriteAccess.getSupplier();
     }
 

@@ -258,7 +258,7 @@ public class IntegrationTest {
         }
 
         @Override
-        protected Supplier<ElasticSearchWriteAccess> getWriteAccessFactory() {
+        protected SerializableSupplier<ElasticSearchWriteAccess> getWriteAccessFactory() {
             return () -> mockWriter;
         }
     }
