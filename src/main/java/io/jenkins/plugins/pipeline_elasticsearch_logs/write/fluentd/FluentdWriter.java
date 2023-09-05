@@ -17,6 +17,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.komamitsu.fluency.BufferFullException;
 import org.komamitsu.fluency.Fluency;
+import org.komamitsu.fluency.EventTime;
 import org.komamitsu.fluency.RetryableException;
 import org.komamitsu.fluency.fluentd.FluencyBuilderForFluentd;
 
