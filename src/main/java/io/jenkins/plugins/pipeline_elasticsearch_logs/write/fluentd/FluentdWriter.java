@@ -237,7 +237,8 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
                 Instant instant = Instant.parse(data.get("timestamp"));
                 long epochSeconds = instant.getEpochSecond();
                 long nanoSeconds = instant.getNano();
-                fluentd.emit(tag, EventTime(epochSeconds, nanoSeconds), data);
+                EventTime eventTime = EventTime.fromEpoch(epochSeconds, nanoSeconds);
+                fluentd.emit(tag, eventTime, data);
                 break;
             } catch (BufferFullException e) {
                 LOGGER.log(Level.WARNING, "Fluency's buffer is full. Retrying", e);
