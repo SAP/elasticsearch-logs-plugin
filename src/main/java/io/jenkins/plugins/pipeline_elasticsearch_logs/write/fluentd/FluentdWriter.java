@@ -234,7 +234,7 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
         while (true) {
             LOGGER.log(Level.FINEST, "Emitting data: Try {0} Data: {1}", new Object[] {count, data });
             try {
-                Instant instant = Instant.parse(data.get(TIMESTAMP));
+                Instant instant = Instant.parse(data.get("timestamp"));
                 fluentd.emit(tag, EventTime(instant.getEpochSecond(), instant.getNano()), data);
                 break;
             } catch (BufferFullException e) {
