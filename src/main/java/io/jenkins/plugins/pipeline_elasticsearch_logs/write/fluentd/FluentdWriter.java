@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -233,7 +234,8 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
         while (true) {
             LOGGER.log(Level.FINEST, "Emitting data: Try {0} Data: {1}", new Object[] {count, data });
             try {
-                fluentd.emit(tag, data);
+                Instant instant = Instant.parse(data.get(TIMESTAMP));
+                fluentd.emit(tag, EventTime(instant.getEpochSecond(), instant.getNano()), data);
                 break;
             } catch (BufferFullException e) {
                 LOGGER.log(Level.WARNING, "Fluency's buffer is full. Retrying", e);

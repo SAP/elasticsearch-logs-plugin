@@ -3,7 +3,8 @@ package io.jenkins.plugins.pipeline_elasticsearch_logs;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.ZoneOffset;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -32,7 +33,7 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     private static final String TIMESTAMP = "timestamp";
 
-    private static final DateTimeFormatter UTC_MILLIS = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
+    private static final DateTimeFormatter UTC_NANOS = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSX");
 
     private static final long serialVersionUID = 1L;
 
@@ -100,8 +101,9 @@ public class ElasticSearchRunConfiguration implements Serializable {
     public Map<String, Object> createData() {
         Map<String, Object> data = new LinkedHashMap<>();
         Date date = new Date();
-        data.put(TIMESTAMP, ZonedDateTime.now(ZoneOffset.UTC).format(UTC_MILLIS));
-        data.put(TIMESTAMP_MILLIS, date.getTime());
+        ZonedDateTime zdt = Instant.now().atZone(ZoneId.of("UTC"));
+        data.put(TIMESTAMP, zdt.format(UTC_NANOS));
+        data.put(TIMESTAMP_MILLIS, zdt.toInstant().toEpochMilli());
         data.put(RUN_ID, JSONObject.fromObject(runIdJsonString));
         data.put(UID, uniqueId);
         return data;
