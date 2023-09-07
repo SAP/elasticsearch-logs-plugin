@@ -33,7 +33,7 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     private static final String TIMESTAMP = "timestamp";
 
-    private static final DateTimeFormatter UTC_NANOS = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSX");
+    private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSX");
 
     private static final long serialVersionUID = 1L;
 
