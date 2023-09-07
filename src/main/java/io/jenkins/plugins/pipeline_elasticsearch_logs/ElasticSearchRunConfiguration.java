@@ -5,7 +5,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -102,7 +101,7 @@ public class ElasticSearchRunConfiguration implements Serializable {
         Map<String, Object> data = new LinkedHashMap<>();
         Date date = new Date();
         Instant now = Instant.now();
-        data.put(TIMESTAMP, now.atZone(ZoneId.of("UTC")).format(UTC_NANOS));
+        data.put(TIMESTAMP, now.atZone(ZoneId.of("UTC")).format(TIMESTAMP_FORMAT));
         data.put(TIMESTAMP_MILLIS, now.toEpochMilli());
         data.put(RUN_ID, JSONObject.fromObject(runIdJsonString));
         data.put(UID, uniqueId);
