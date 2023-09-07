@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchFieldNames.*;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
 import net.sf.json.JSONObject;
 
@@ -24,15 +25,6 @@ import net.sf.json.JSONObject;
  */
 @Restricted(NoExternalUse.class)
 public class ElasticSearchRunConfiguration implements Serializable {
-    private static final String UID = "uid";
-
-    private static final String RUN_ID = "runId";
-
-    private static final String TIMESTAMP_MILLIS = "timestampMillis";
-
-    private static final String TIMESTAMP = "timestamp";
-
-    private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSX");
 
     private static final long serialVersionUID = 1L;
 

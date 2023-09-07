@@ -24,6 +24,7 @@ import org.komamitsu.fluency.fluentd.FluencyBuilderForFluentd;
 import hudson.Extension;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.SerializableSupplier;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchFieldNames.*;
 
 /**
  * Post data to Fluentd.
@@ -235,7 +236,7 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
         while (true) {
             LOGGER.log(Level.FINEST, "Emitting data: Try {0} Data: {1}", new Object[] {count, data });
             try {
-                Instant instant = Instant.parse((String) data.get("timestamp"));
+                Instant instant = Instant.parse((String) data.get(TIMESTAMP));
                 long epochSeconds = instant.getEpochSecond();
                 long nanoSeconds = instant.getNano();
                 EventTime eventTime = EventTime.fromEpoch(epochSeconds, nanoSeconds);
