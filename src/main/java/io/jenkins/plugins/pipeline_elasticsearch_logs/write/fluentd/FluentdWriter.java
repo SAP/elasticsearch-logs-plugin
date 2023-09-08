@@ -230,17 +230,20 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
         checkForRetryableException();
     }
 
+    private EventTime getEventTime(Map<String, Object> data) {
+        Instant instant = Instant.parse((String) data.get(TIMESTAMP));
+        long epochSeconds = instant.getEpochSecond();
+        long nanoSeconds = instant.getNano();
+        return EventTime.fromEpoch(epochSeconds, nanoSeconds);
+    }
+
     private void emitData(String tag, Map<String, Object> data) throws IOException {
         int count = 0;
 
         while (true) {
             LOGGER.log(Level.FINEST, "Emitting data: Try {0} Data: {1}", new Object[] {count, data });
             try {
-                Instant instant = Instant.parse((String) data.get(TIMESTAMP));
-                long epochSeconds = instant.getEpochSecond();
-                long nanoSeconds = instant.getNano();
-                EventTime eventTime = EventTime.fromEpoch(epochSeconds, nanoSeconds);
-                fluentd.emit(tag, eventTime, data);
+                fluentd.emit(tag, getEventTime(data), data);
                 break;
             } catch (BufferFullException e) {
                 LOGGER.log(Level.WARNING, "Fluency's buffer is full. Retrying", e);
