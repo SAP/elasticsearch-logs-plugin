@@ -8,9 +8,9 @@ public final class ElasticSearchFieldNames {
     // No need to instantiate the class, its constructor can be hidden
   }
 
-  private static final String UID = "uid";
-  private static final String RUN_ID = "runId";
-  private static final String TIMESTAMP_MILLIS = "timestampMillis";
-  private static final String TIMESTAMP = "timestamp";
-  private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSX");
+  public static final String UID = "uid";
+  public static final String RUN_ID = "runId";
+  public static final String TIMESTAMP_MILLIS = "timestampMillis";
+  public static final String TIMESTAMP = "timestamp";
+  public static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSSSSX");
 }
