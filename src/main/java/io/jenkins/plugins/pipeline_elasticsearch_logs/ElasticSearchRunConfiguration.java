@@ -3,8 +3,8 @@ package io.jenkins.plugins.pipeline_elasticsearch_logs;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchFieldNames.*;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
 import net.sf.json.JSONObject;
 
@@ -24,15 +25,6 @@ import net.sf.json.JSONObject;
  */
 @Restricted(NoExternalUse.class)
 public class ElasticSearchRunConfiguration implements Serializable {
-    private static final String UID = "uid";
-
-    private static final String RUN_ID = "runId";
-
-    private static final String TIMESTAMP_MILLIS = "timestampMillis";
-
-    private static final String TIMESTAMP = "timestamp";
-
-    private static final DateTimeFormatter UTC_MILLIS = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
 
     private static final long serialVersionUID = 1L;
 
@@ -100,8 +92,9 @@ public class ElasticSearchRunConfiguration implements Serializable {
     public Map<String, Object> createData() {
         Map<String, Object> data = new LinkedHashMap<>();
         Date date = new Date();
-        data.put(TIMESTAMP, ZonedDateTime.now(ZoneOffset.UTC).format(UTC_MILLIS));
-        data.put(TIMESTAMP_MILLIS, date.getTime());
+        Instant now = Instant.now();
+        data.put(TIMESTAMP, now.atZone(ZoneId.of("UTC")).format(TIMESTAMP_FORMAT));
+        data.put(TIMESTAMP_MILLIS, now.toEpochMilli());
         data.put(RUN_ID, JSONObject.fromObject(runIdJsonString));
         data.put(UID, uniqueId);
         return data;

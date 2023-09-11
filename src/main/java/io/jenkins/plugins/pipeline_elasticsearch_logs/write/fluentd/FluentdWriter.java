@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -16,12 +17,14 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.komamitsu.fluency.BufferFullException;
 import org.komamitsu.fluency.Fluency;
+import org.komamitsu.fluency.EventTime;
 import org.komamitsu.fluency.RetryableException;
 import org.komamitsu.fluency.fluentd.FluencyBuilderForFluentd;
 
 import hudson.Extension;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.SerializableSupplier;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchFieldNames.*;
 
 /**
  * Post data to Fluentd.
@@ -227,13 +230,20 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
         checkForRetryableException();
     }
 
+    private EventTime getEventTime(Map<String, Object> data) {
+        Instant instant = Instant.parse((String) data.get(TIMESTAMP));
+        long epochSeconds = instant.getEpochSecond();
+        long nanoSeconds = instant.getNano();
+        return EventTime.fromEpoch(epochSeconds, nanoSeconds);
+    }
+
     private void emitData(String tag, Map<String, Object> data) throws IOException {
         int count = 0;
 
         while (true) {
             LOGGER.log(Level.FINEST, "Emitting data: Try {0} Data: {1}", new Object[] {count, data });
             try {
-                fluentd.emit(tag, data);
+                fluentd.emit(tag, getEventTime(data), data);
                 break;
             } catch (BufferFullException e) {
                 LOGGER.log(Level.WARNING, "Fluency's buffer is full. Retrying", e);
