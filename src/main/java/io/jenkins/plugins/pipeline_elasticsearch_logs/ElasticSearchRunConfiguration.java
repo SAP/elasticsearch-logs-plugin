@@ -91,7 +91,6 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     public Map<String, Object> createData() {
         Map<String, Object> data = new LinkedHashMap<>();
-        Date date = new Date();
         Instant now = Instant.now();
         data.put(TIMESTAMP, now.atZone(ZoneId.of("UTC")).format(TIMESTAMP_FORMAT));
         data.put(TIMESTAMP_MILLIS, now.toEpochMilli());
