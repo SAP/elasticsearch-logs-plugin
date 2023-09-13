@@ -11,7 +11,6 @@ import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.listeners.RunListener;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
-import net.sf.json.JSONObject;
 
 @Extension
 public class ElasticSearchRunListener extends RunListener<Run<?, ?>> {

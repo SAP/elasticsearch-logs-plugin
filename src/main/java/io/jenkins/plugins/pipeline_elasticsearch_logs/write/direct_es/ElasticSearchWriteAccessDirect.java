@@ -3,16 +3,10 @@ package io.jenkins.plugins.pipeline_elasticsearch_logs.write.direct_es;
 import static com.google.common.collect.Range.closedOpen;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.Utils.logExceptionAndReraiseWithTruncatedDetails;
 
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
-import com.cloudbees.plugins.credentials.matchers.IdMatcher;
-import com.google.common.collect.Range;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -24,7 +18,6 @@ import java.security.cert.CertificateException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,6 +47,11 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.matchers.IdMatcher;
+import com.google.common.collect.Range;
 
 import hudson.Extension;
 import hudson.security.ACL;
@@ -281,7 +279,7 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
     }
 
 
-    private static class MeSupplier implements SerializableSupplier<ElasticSearchWriteAccess>, Serializable {
+    private static class MeSupplier implements SerializableSupplier<ElasticSearchWriteAccess> {
 
         private final URI uri;
 

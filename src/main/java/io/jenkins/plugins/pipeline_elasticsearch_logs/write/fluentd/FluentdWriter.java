@@ -3,12 +3,10 @@ package io.jenkins.plugins.pipeline_elasticsearch_logs.write.fluentd;
 import static java.lang.String.format;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -324,7 +322,7 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
         }
     }
 
-    private static class MeSupplier implements SerializableSupplier<ElasticSearchWriteAccess>, Serializable {
+    private static class MeSupplier implements SerializableSupplier<ElasticSearchWriteAccess> {
 
         private static final long serialVersionUID = 1L;
 

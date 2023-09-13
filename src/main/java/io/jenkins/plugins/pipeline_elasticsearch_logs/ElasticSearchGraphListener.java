@@ -23,7 +23,6 @@ import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
 import hudson.model.Result;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
 import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 public class ElasticSearchGraphListener implements GraphListener.Synchronous {
     private static final String FLOW_GRAPH_ATOM_NODE_END = "flowGraph::atomNodeEnd";

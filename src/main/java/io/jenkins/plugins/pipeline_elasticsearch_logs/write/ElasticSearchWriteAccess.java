@@ -2,7 +2,6 @@ package io.jenkins.plugins.pipeline_elasticsearch_logs.write;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import hudson.ExtensionPoint;
 import hudson.model.AbstractDescribableImpl;
