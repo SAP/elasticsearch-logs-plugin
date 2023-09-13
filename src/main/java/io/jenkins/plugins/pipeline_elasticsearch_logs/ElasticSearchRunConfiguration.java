@@ -102,12 +102,4 @@ public class ElasticSearchRunConfiguration implements Serializable {
         return writeAccessFactory.get();
     }
 
-    public String[] getIndices() {
-        String path = uri.getPath();
-        while (path.startsWith("/"))
-            path = path.substring(1);
-        String[] splitPath = path.split("/");
-        return new String[] { splitPath[0] };
-    }
-
 }

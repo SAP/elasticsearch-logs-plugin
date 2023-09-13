@@ -53,14 +53,6 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     private static final transient Logger LOGGER = Logger.getLogger(ElasticSearchConfiguration.class.getName());
     private static final int SPLIT_MESSAGES_LONGER_THAN = 2000;
 
-    private transient String host;
-
-    private transient int port;
-
-    private transient String key;
-
-    private transient boolean ssl;
-
     private String certificateId;
 
     @CheckForNull
@@ -122,13 +114,6 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
             runIdProvider = new DefaultRunIdProvider("");
         }
         setConnectionTimeoutMillis(connectionTimeoutMillis);
-        if (url == null) {
-            String protocol = "http";
-            if (ssl) {
-                protocol = "https";
-            }
-            url = protocol + "://" + host + ":" + port + "/" + key;
-        }
 
         return this;
     }
