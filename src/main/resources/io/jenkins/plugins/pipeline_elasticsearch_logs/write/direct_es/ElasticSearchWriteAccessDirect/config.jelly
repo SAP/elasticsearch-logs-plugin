@@ -1,0 +1,24 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
+  <f:entry field="indexUrl" title="Elasticsearch Index URL">
+    <f:textbox/>
+  </f:entry>
+  <f:entry field="authCredentialsId" title="Elasticsearch Credential">
+    <c:select/>
+  </f:entry>
+  <f:entry field="trustStoreCredentialsId" title="TLS Trust Store Credential">
+    <c:select/>
+  </f:entry>
+  <f:nested>
+    <f:validateButton with="indexUrl,authCredentialsId,trustStoreCredentialsId" title="${%Test Connection to Elasticsearch}" method="validateConnection"/>
+  </f:nested>
+  <f:entry field="connectTimeoutMillis" title="Connect Timeout (ms)">
+    <f:number clazz="number" min="0" max="2147483647"/>
+  </f:entry>
+  <f:entry field="requestTimeoutMillis" title="Request Timeout (ms)">
+    <f:number clazz="number" min="0" max="2147483647"/>
+  </f:entry>
+  <f:entry field="socketTimeoutMillis" title="Socket Timeout (ms)">
+    <f:number clazz="number" min="0" max="2147483647"/>
+  </f:entry>
+</j:jelly>

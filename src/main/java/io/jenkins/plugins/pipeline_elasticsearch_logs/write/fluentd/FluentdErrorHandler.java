@@ -8,7 +8,7 @@ import org.komamitsu.fluency.RetryableException;
 import org.komamitsu.fluency.ingester.sender.ErrorHandler;
 
 
-public class FluentdErrorHandler implements ErrorHandler {
+class FluentdErrorHandler implements ErrorHandler {
 
     private List<Error> errors = Collections.synchronizedList(new ArrayList<>());
 

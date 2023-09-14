@@ -1,19 +1,21 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchFieldNames.RUN_ID;
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchFieldNames.TIMESTAMP;
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchFieldNames.TIMESTAMP_FORMAT;
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchFieldNames.TIMESTAMP_MILLIS;
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchFieldNames.UID;
+
 import java.io.Serializable;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
-import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchFieldNames.*;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
 import net.sf.json.JSONObject;
 
@@ -27,12 +29,6 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final String username;
-
-    private final String password;
-
-    private final URI uri;
-
     private final boolean saveAnnotations;
 
     private final boolean writeAnnotationsToLogFile;
@@ -45,13 +41,15 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     private final int splitMessagesLongerThan;
 
-    public ElasticSearchRunConfiguration(URI uri, String username, String password, boolean saveAnnotations,
-            String uniqueId, JSONObject runId, SerializableSupplier<ElasticSearchWriteAccess> writeAccessFactory,
-            int splitMessagesLongerThan, boolean writeAnnotationsToLogFile) {
+    public ElasticSearchRunConfiguration(
+        boolean saveAnnotations,
+        String uniqueId,
+        JSONObject runId,
+        SerializableSupplier<ElasticSearchWriteAccess> writeAccessFactory,
+        int splitMessagesLongerThan,
+        boolean writeAnnotationsToLogFile
+    ) {
         super();
-        this.uri = uri;
-        this.username = username;
-        this.password = password;
         this.runIdJsonString = runId.toString();
         this.uniqueId = uniqueId;
         this.writeAccessFactory = writeAccessFactory;
@@ -72,18 +70,6 @@ public class ElasticSearchRunConfiguration implements Serializable {
         return writeAnnotationsToLogFile;
     }
 
-    public URI getUri() {
-        return uri;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
     public int getSplitMessagesLongerThan() {
         return splitMessagesLongerThan;
     }
@@ -101,5 +87,4 @@ public class ElasticSearchRunConfiguration implements Serializable {
     public ElasticSearchWriteAccess createWriteAccess() throws URISyntaxException {
         return writeAccessFactory.get();
     }
-
 }
