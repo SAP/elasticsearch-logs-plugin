@@ -441,13 +441,16 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
 
     @Restricted(NoExternalUse.class)
     public String testConnection() throws URISyntaxException, IOException {
-        URI testUri = new URI(indexUrl.getScheme(), indexUrl.getUserInfo(), indexUrl.getHost(), indexUrl.getPort(), null, null, null);
+        // The Elasticsearch base URL is not necessarily on the root path
+        // Better: Remove the last two segments from the index URL path
+        URI testUri = new URI(indexUrl.getScheme(), null, indexUrl.getHost(), indexUrl.getPort(), null, null, null);
         HttpGet request = new HttpGet(testUri);
 
         CloseableHttpResponse response = null;
         try {
             CloseableHttpClient httpClient = getHttpClient();
             response = httpClient.execute(request, httpClientContext);
+            // With the given credential a GET may not be authorized
             if (!SUCCESS_CODES.contains(response.getStatusLine().getStatusCode())) {
                 String errorMessage = this.getErrorMessage(response);
                 throw new IOException(errorMessage);
