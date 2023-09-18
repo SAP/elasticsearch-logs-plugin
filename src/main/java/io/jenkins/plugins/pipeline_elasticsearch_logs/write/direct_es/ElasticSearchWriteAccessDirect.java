@@ -359,6 +359,7 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
             @QueryParameter(fixEmpty = true) String authCredentialsId,
             @QueryParameter(fixEmpty = true) String trustStoreCredentialsId
         ) {
+            // TODO Implement a validation
             return FormValidation.ok("Success");
         }
     }
