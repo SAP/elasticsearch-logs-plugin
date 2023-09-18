@@ -8,6 +8,7 @@ import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.uniqueid.IdStore;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
+import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import hudson.Extension;
@@ -17,6 +18,7 @@ import hudson.model.Run;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.DefaultRunIdProvider;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.RunIdProvider;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
+import jakarta.annotation.PostConstruct;
 
 public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticSearchConfiguration> {
 
@@ -24,13 +26,17 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
     private int splitMessagesLongerThan = DEFAULT_SPLIT_MESSAGES_LONGER_THAN;
 
-    private Boolean saveAnnotations = true;
+    private boolean saveAnnotations = true;
 
-    private Boolean writeAnnotationsToLogFile = true;
+    private boolean writeAnnotationsToLogFile = true;
 
-    private RunIdProvider runIdProvider;
+    private RunIdProvider runIdProvider = new DefaultRunIdProvider("");
 
     private ElasticSearchWriteAccess elasticsearchWriteAccess;
+
+    @DataBoundConstructor
+    public ElasticSearchConfiguration() {
+    }
 
     public RunIdProvider getRunIdProvider() {
         return runIdProvider;
@@ -77,21 +83,12 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         this.writeAnnotationsToLogFile = writeAnnotationsToLogFile;
     }
 
-    // TODO This class is not serializable, so why do we need this?
-    public Object readResolve() {
-        if (splitMessagesLongerThan <= 0) {
-            splitMessagesLongerThan = DEFAULT_SPLIT_MESSAGES_LONGER_THAN;
-        }
-        if (saveAnnotations == null) {
-            saveAnnotations = true;
-        }
-        if (writeAnnotationsToLogFile == null) {
-            writeAnnotationsToLogFile = true;
-        }
-        if (runIdProvider == null) {
-            runIdProvider = new DefaultRunIdProvider("");
-        }
-        return this;
+    @PostConstruct
+    protected void init() {
+        if (runIdProvider == null)
+            throw new RuntimeException("runIdProvider must be set");
+        if (elasticsearchWriteAccess == null)
+            throw new RuntimeException("elasticsearchWriteAccess must be set");
     }
 
     /**
