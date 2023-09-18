@@ -596,6 +596,9 @@ public class ElasticSearchWriteAccessDirect extends ElasticSearchWriteAccess {
                     firstException = ex;
                 }
             }
+            finally {
+                this.httpClient = null;
+            }
         }
 
         if (firstException != null) {
