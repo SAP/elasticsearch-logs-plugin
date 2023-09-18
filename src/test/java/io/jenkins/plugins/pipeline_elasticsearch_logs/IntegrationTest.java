@@ -237,27 +237,13 @@ public class IntegrationTest {
 
         ElasticSearchConfiguration config = null;
         if (activate) {
-            config = new TestConfig(mockWriter);
+            config = new ElasticSearchConfiguration();
+            config.setElasticsearchWriteAccess(mockWriter);
             config.setRunIdProvider(new DefaultRunIdProvider("test_instance"));
         }
 
         globalConfig.setElasticSearch(config);
         globalConfig.save();
-    }
-
-    private static class TestConfig extends ElasticSearchConfiguration {
-
-        private ElasticSearchWriteAccess mockWriter;
-
-        public TestConfig(ElasticSearchWriteAccess mockWriter) throws URISyntaxException {
-            super();
-            this.mockWriter = mockWriter;
-        }
-
-        @Override
-        protected SerializableSupplier<ElasticSearchWriteAccess> getWriteAccessFactory() {
-            return () -> mockWriter;
-        }
     }
 
 }

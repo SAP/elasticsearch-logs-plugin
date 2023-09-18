@@ -1,20 +1,12 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
-import java.io.IOException;
-
-import javax.annotation.CheckForNull;
-
 import org.jenkinsci.Symbol;
-import org.jenkinsci.plugins.uniqueid.IdStore;
-import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import hudson.Extension;
 import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
-import hudson.model.Run;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.DefaultRunIdProvider;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.RunIdProvider;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
@@ -90,42 +82,6 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
             throw new RuntimeException("runIdProvider must be set");
         if (elasticsearchWriteAccess == null)
             throw new RuntimeException("elasticsearchWriteAccess must be set");
-    }
-
-    /**
-     * Returns a serializable representation of the plugin configuration with credentials resolved.
-     * Reason: on remote side credentials cannot be accessed by credentialsId, same for keystore.
-     * That's why the values are transfered to remote.
-     *
-     * @return the ElasticSearchSerializableConfiguration
-     * @throws IOException
-     */
-    public ElasticSearchRunConfiguration getRunConfiguration(Run<?, ?> run) throws IOException {
-        return new ElasticSearchRunConfiguration(
-            isSaveAnnotations(),
-            getUniqueRunId(run),
-            getRunIdProvider().getRunId(run),
-            getWriteAccessFactory(),
-            getSplitMessagesLongerThan(),
-            isWriteAnnotationsToLogFile()
-        );
-    }
-
-    // Can be overwritten in tests
-    @CheckForNull
-    @Restricted(NoExternalUse.class)
-    protected SerializableSupplier<ElasticSearchWriteAccess> getWriteAccessFactory() throws IOException {
-        return elasticsearchWriteAccess.getSupplier();
-    }
-
-    public static String getUniqueRunId(Run<?, ?> run) {
-        String runId = IdStore.getId(run);
-        if (runId == null) {
-            IdStore.makeId(run);
-            runId = IdStore.getId(run);
-        }
-
-        return runId;
     }
 
     @Extension

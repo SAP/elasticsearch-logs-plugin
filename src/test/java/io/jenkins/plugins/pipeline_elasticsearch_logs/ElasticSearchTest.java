@@ -17,6 +17,7 @@ import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.SleepBuilder;
 
 import hudson.model.FreeStyleProject;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.DefaultRunIdProvider;
 
 public class ElasticSearchTest {
     @Rule
@@ -25,7 +26,12 @@ public class ElasticSearchTest {
 
     @Before
     public void setup() throws Exception {
-        ElasticSearchGlobalConfiguration.get().setElasticSearch(new ElasticSearchTestConfiguration(m -> elasticSearchLoggedLines.add(m)));
+        ElasticSearchConfiguration config = new ElasticSearchConfiguration();
+        config.setElasticsearchWriteAccess(
+            new TestWriteAccess(eventData -> elasticSearchLoggedLines.add(eventData))
+        );
+        config.setRunIdProvider(new DefaultRunIdProvider("testInstance"));
+        ElasticSearchGlobalConfiguration.get().setElasticSearch(config);
     }
 
     @After

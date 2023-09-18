@@ -24,7 +24,7 @@ public class ElasticSearchFlowExecutionListener extends FlowExecutionListener {
             Queue.Executable exec = execution.getOwner().getExecutable();
             if (exec instanceof WorkflowRun) {
 
-                ElasticSearchRunConfiguration config = ElasticSearchGlobalConfiguration.getRunConfiguration((WorkflowRun) exec);
+                ElasticSearchRunConfiguration config = ElasticSearchRunConfiguration.get((WorkflowRun) exec);
 
                 if (config == null) {
                     return;

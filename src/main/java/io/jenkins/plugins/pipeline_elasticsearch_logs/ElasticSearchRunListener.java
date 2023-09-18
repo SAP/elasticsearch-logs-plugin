@@ -18,7 +18,7 @@ public class ElasticSearchRunListener extends RunListener<Run<?, ?>> {
     @Override
     public void onFinalized(Run<?, ?> run) {
         try {
-            ElasticSearchRunConfiguration config = ElasticSearchGlobalConfiguration.getRunConfiguration(run);
+            ElasticSearchRunConfiguration config = ElasticSearchRunConfiguration.get(run);
             if (config == null) {
                 return;
             }
@@ -36,8 +36,12 @@ public class ElasticSearchRunListener extends RunListener<Run<?, ?>> {
                 data.put("duration", run.getDuration());
             }
             writer.push(data);
-        } catch (IOException | URISyntaxException e) {
+        }
+        catch (IOException | URISyntaxException e) {
             LOGGER.log(Level.SEVERE, "Failed to get Executable of FlowExecution.");
+        }
+        finally {
+            ElasticSearchRunConfiguration.release(run);
         }
     }
 
@@ -47,8 +51,7 @@ public class ElasticSearchRunListener extends RunListener<Run<?, ?>> {
     public void onInitialize(Run<?, ?> run) {
 
         try {
-            ElasticSearchRunConfiguration config = ElasticSearchGlobalConfiguration.getRunConfiguration(run);
-
+            ElasticSearchRunConfiguration config = ElasticSearchRunConfiguration.get(run);
             if (config == null) {
                 return;
             }
@@ -58,9 +61,9 @@ public class ElasticSearchRunListener extends RunListener<Run<?, ?>> {
 
             data.put("eventType", "buildStart");
             writer.push(data);
-        } catch (IOException | URISyntaxException e) {
+        }
+        catch (IOException | URISyntaxException e) {
             LOGGER.log(Level.SEVERE, "Failed to get Executable of FlowExecution.", e);
         }
-
     }
 }

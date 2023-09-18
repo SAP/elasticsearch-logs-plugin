@@ -1,16 +1,11 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
-import java.io.IOException;
-
 import javax.annotation.CheckForNull;
 
 import org.jenkinsci.Symbol;
-import org.kohsuke.accmod.Restricted;
-import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.stapler.StaplerRequest;
 
 import hudson.Extension;
-import hudson.model.Run;
 import jenkins.model.GlobalConfiguration;
 import net.sf.json.JSONObject;
 
@@ -44,15 +39,5 @@ public class ElasticSearchGlobalConfiguration extends GlobalConfiguration {
 
     public static ElasticSearchGlobalConfiguration get() {
         return GlobalConfiguration.all().getInstance(ElasticSearchGlobalConfiguration.class);
-    }
-
-    @CheckForNull
-    @Restricted(NoExternalUse.class)
-    public static ElasticSearchRunConfiguration getRunConfiguration(Run<?, ?> run) throws IOException {
-        ElasticSearchConfiguration config = ElasticSearchGlobalConfiguration.get().getElasticSearch();
-        if (config == null) {
-            return null;
-        }
-        return config.getRunConfiguration(run);
     }
 }
