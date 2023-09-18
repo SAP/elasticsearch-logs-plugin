@@ -13,55 +13,55 @@
     <f:textbox/>
   </f:entry>
 
-  <f:entry field="senderBaseRetryIntervalMillis" title="Base retry interval in sending the events (ms)">
-    <f:number clazz="number" min="0" default="1000" max="2147483647"/>
+  <f:entry field="senderBaseRetryIntervalMillis" title="Base Retry Interval in Sending the Events (ms)">
+    <f:number clazz="number" min="0" max="2147483647"/>
   </f:entry>
 
-  <f:entry field="senderMaxRetryIntervalMillis" title="Max retry interval in sending the events (ms)">
-    <f:number clazz="number" min="0" default="1000" max="2147483647"/>
+  <f:entry field="senderMaxRetryIntervalMillis" title="Max Retry Interval in Sending the Events (ms)">
+    <f:number clazz="number" min="0" max="2147483647"/>
   </f:entry>
 
-  <f:entry field="senderMaxRetryCount" title="Max number of retries">
-    <f:number clazz="number" min="0" default="3600" max="2147483647"/>
+  <f:entry field="senderMaxRetryCount" title="Max Number of Retries">
+    <f:number clazz="number" min="0" max="2147483647"/>
   </f:entry>
 
-  <f:entry field="connectionTimeoutMillis" title="Socket Connection timeout (ms)">
-    <f:number clazz="number" min="0" default="3000" max="2147483647"/>
+  <f:entry field="connectionTimeoutMillis" title="Socket Connection Timeout (ms)">
+    <f:number clazz="number" min="0" max="2147483647"/>
   </f:entry>
 
-  <f:entry field="readTimeoutMillis" title="Socket read timeout (ms)">
-    <f:number clazz="number" min="0" default="3600000" max="2147483647"/>
+  <f:entry field="readTimeoutMillis" title="Socket Read Timeout (ms)">
+    <f:number clazz="number" min="0" max="2147483647"/>
   </f:entry>
 
-  <f:entry field="bufferChunkInitialSize" title="Buffer initial size (bytes)">
-    <f:number clazz="number" min="65535" default="1048576" max="2147483647"/>
+  <f:entry field="bufferChunkInitialSize" title="Buffer Chunk Initial Size (bytes)">
+    <f:number clazz="number" min="65535" default="${descriptor.defaultBufferChunkInitialSize()}" max="2147483647"/>
   </f:entry>
 
-  <f:entry field="bufferChunkRetentionSize" title="Buffer retention size (bytes)">
-    <f:number clazz="number" min="65535" default="1048577" max="2147483647"/>
+  <f:entry field="bufferChunkRetentionSize" title="Buffer Chunk Retention Size (bytes)">
+    <f:number clazz="number" min="65535" default="${descriptor.defaultBufferChunkRetentionSize()}" max="2147483647"/>
   </f:entry>
 
-  <f:entry field="bufferChunkRetentionTimeMillis" title="Buffer Retention time (ms)">
-    <f:number clazz="number" min="0" default="1000" max="2147483647"/>
+  <f:entry field="bufferChunkRetentionTimeMillis" title="Buffer Chunk Retention Time (ms)">
+    <f:number clazz="number" min="0" default="${descriptor.defaultBufferChunkRetentionTimeMillis()}" max="2147483647"/>
   </f:entry>
 
   <f:entry field="flushAttemptIntervalMillis" title="Buffer Flush Attempt Interval (ms)">
-    <f:number clazz="number" min="1" default="500" max="2147483647"/>
+    <f:number clazz="number" min="1" default="${descriptor.defaultFlushAttemptIntervalMillis()}" max="2147483647"/>
   </f:entry>
 
   <f:entry field="maxBufferSize" title="Max Buffer size (bytes)">
-    <f:number clazz="number" min="65535" default="10485760" max="2147483647"/>
+    <f:number clazz="number" min="65535" default="${descriptor.defaultMaxBufferSize()}" max="2147483647"/>
   </f:entry>
 
   <f:entry field="emitMaxRetriesIfBufferFull" title="Max number of retries if the buffer is full">
-    <f:number clazz="number" min="-1" default="-1" max="2147483647"/>
+    <f:number clazz="number" min="-1" default="${descriptor.defaultEmitMaxRetriesIfBufferFull()}" max="2147483647"/>
   </f:entry>
 
   <f:entry field="maxWaitSecondsUntilBufferFlushed" title="Max time (seconds) to wait for flushing the buffers when closing">
-    <f:number clazz="number" min="0" default="30" max="2147483647"/>
+    <f:number clazz="number" min="0" default="${descriptor.defaultMaxWaitSecondsUntilBufferFlushed()}" max="2147483647"/>
   </f:entry>
 
   <f:entry field="maxWaitSecondsUntilFlusherTerminated" title="Max time (seconds) to wait for the flusher thread to terminate when closing">
-    <f:number clazz="number" min="0" default="30" max="2147483647"/>
+    <f:number clazz="number" min="0" default="${descriptor.defaultMaxWaitSecondsUntilFlusherTerminated()}" max="2147483647"/>
   </f:entry>
 </j:jelly>

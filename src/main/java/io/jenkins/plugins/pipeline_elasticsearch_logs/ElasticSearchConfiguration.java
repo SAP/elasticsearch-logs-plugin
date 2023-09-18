@@ -22,17 +22,18 @@ import jakarta.annotation.PostConstruct;
 
 public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticSearchConfiguration> {
 
-    private static final int DEFAULT_SPLIT_MESSAGES_LONGER_THAN = 2000;
+    private static final boolean DEFAULT_SAVE_ANNOTATIONS = true;
+    private boolean saveAnnotations = DEFAULT_SAVE_ANNOTATIONS;
 
-    private int splitMessagesLongerThan = DEFAULT_SPLIT_MESSAGES_LONGER_THAN;
-
-    private boolean saveAnnotations = true;
-
-    private boolean writeAnnotationsToLogFile = true;
+    private static final boolean DEFAULT_WRITE_ANNOTATIONS_TO_LOG_FILE = true;
+    private boolean writeAnnotationsToLogFile = DEFAULT_WRITE_ANNOTATIONS_TO_LOG_FILE;
 
     private RunIdProvider runIdProvider = new DefaultRunIdProvider("");
 
     private ElasticSearchWriteAccess elasticsearchWriteAccess;
+
+    private static final int DEFAULT_SPLIT_MESSAGES_LONGER_THAN = 2000;
+    private int splitMessagesLongerThan = DEFAULT_SPLIT_MESSAGES_LONGER_THAN;
 
     @DataBoundConstructor
     public ElasticSearchConfiguration() {
@@ -130,5 +131,17 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     @Extension
     @Symbol("elasticsearch")
     public static class DescriptorImpl extends Descriptor<ElasticSearchConfiguration> {
+
+        public boolean defaultSaveAnnotations() {
+            return DEFAULT_SAVE_ANNOTATIONS;
+        }
+
+        public boolean defaultWriteAnnotationsToLogFile() {
+            return DEFAULT_WRITE_ANNOTATIONS_TO_LOG_FILE;
+        }
+
+        public int defaultSplitMessagesLongerThan() {
+            return DEFAULT_SPLIT_MESSAGES_LONGER_THAN;
+        }
     }
 }

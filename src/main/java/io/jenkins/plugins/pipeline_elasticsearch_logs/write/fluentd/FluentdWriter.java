@@ -45,15 +45,29 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     private Integer connectionTimeoutMillis;
     private Integer readTimeoutMillis;
 
-    private int maxWaitSecondsUntilBufferFlushed = 30;
-    private int maxWaitSecondsUntilFlusherTerminated = 30;
-    private int bufferChunkInitialSize = 1 * 1024 * 1024;
-    private int bufferChunkRetentionSize = (1 * 1024 * 1024) + 1;
-    private int bufferChunkRetentionTimeMillis = 1000;
-    private int flushAttemptIntervalMillis = 500;
-    private long maxBufferSize = 10 * 1024 * 1024L;
+    private static final int DEFAULT_MAX_WAIT_SECONDS_UNTIL_BUFFER_FLUSHED = 30;
+    private int maxWaitSecondsUntilBufferFlushed = DEFAULT_MAX_WAIT_SECONDS_UNTIL_BUFFER_FLUSHED;
 
-    private int emitMaxRetriesIfBufferFull = -1; // forever
+    private static final int DEFAULT_MAX_WAIT_SECONDS_UNTIL_FLUSHER_TERMINATED = 30;
+    private int maxWaitSecondsUntilFlusherTerminated = DEFAULT_MAX_WAIT_SECONDS_UNTIL_FLUSHER_TERMINATED;
+
+    private static final int DEFAULT_BUFFER_CHUNK_INITIAL_SIZE = 1 * 1024 * 1024;
+    private int bufferChunkInitialSize = DEFAULT_BUFFER_CHUNK_INITIAL_SIZE;
+
+    private static final int DEFAULT_BUFFER_CHUNK_RETENTION_SIZE = (1 * 1024 * 1024) + 1;
+    private int bufferChunkRetentionSize = DEFAULT_BUFFER_CHUNK_RETENTION_SIZE;
+
+    private static final int DEFAULT_BUFFER_CHUNK_RETENTION_TIME_MILLIS = 1000;
+    private int bufferChunkRetentionTimeMillis = DEFAULT_BUFFER_CHUNK_RETENTION_TIME_MILLIS;
+
+    private static final int DEFAULT_FLUSH_ATTEMPT_INTERVAL_MILLIS = 500;
+    private int flushAttemptIntervalMillis = DEFAULT_FLUSH_ATTEMPT_INTERVAL_MILLIS;
+
+    private static final long DEFAULT_MAX_BUFFER_SIZE = 10 * 1024 * 1024L;
+    private long maxBufferSize = DEFAULT_MAX_BUFFER_SIZE;
+
+    private static final int DEFAULT_EMIT_MAX_RETRIES_IF_BUFFER_FULL = -1; // forever
+    private int emitMaxRetriesIfBufferFull = DEFAULT_EMIT_MAX_RETRIES_IF_BUFFER_FULL;
 
     @DataBoundConstructor
     public FluentdWriter() throws URISyntaxException {
@@ -64,7 +78,7 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     }
 
     @DataBoundSetter
-    public void setSenderBaseRetryIntervalMillis(int millis) {
+    public void setSenderBaseRetryIntervalMillis(Integer millis) {
         this.senderBaseRetryIntervalMillis = millis;
     }
 
@@ -73,7 +87,7 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     }
 
     @DataBoundSetter
-    public void setSenderMaxRetryIntervalMillis(int millis) {
+    public void setSenderMaxRetryIntervalMillis(Integer millis) {
         this.senderMaxRetryIntervalMillis = millis;
     }
 
@@ -82,7 +96,7 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     }
 
     @DataBoundSetter
-    public void setSenderMaxRetryCount(int count) {
+    public void setSenderMaxRetryCount(Integer count) {
         this.senderMaxRetryCount = count;
     }
 
@@ -91,7 +105,7 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     }
 
     @DataBoundSetter
-    public void setConnectionTimeoutMillis(int millis) {
+    public void setConnectionTimeoutMillis(Integer millis) {
         this.connectionTimeoutMillis = millis;
     }
 
@@ -100,7 +114,7 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
     }
 
     @DataBoundSetter
-    public void setReadTimeoutMillis(int millis) {
+    public void setReadTimeoutMillis(Integer millis) {
         this.readTimeoutMillis = millis;
     }
 
@@ -210,6 +224,38 @@ public class FluentdWriter extends ElasticSearchWriteAccess {
         @Override
         public String getDisplayName() {
             return "Fluentd Writer";
+        }
+
+        public int defaultMaxWaitSecondsUntilBufferFlushed() {
+            return DEFAULT_MAX_WAIT_SECONDS_UNTIL_BUFFER_FLUSHED;
+        }
+
+        public int defaultMaxWaitSecondsUntilFlusherTerminated() {
+            return DEFAULT_MAX_WAIT_SECONDS_UNTIL_FLUSHER_TERMINATED;
+        }
+
+        public int defaultBufferChunkInitialSize() {
+            return DEFAULT_BUFFER_CHUNK_INITIAL_SIZE;
+        }
+
+        public int defaultBufferChunkRetentionSize() {
+            return DEFAULT_BUFFER_CHUNK_RETENTION_SIZE;
+        }
+
+        public int defaultBufferChunkRetentionTimeMillis() {
+            return DEFAULT_BUFFER_CHUNK_RETENTION_TIME_MILLIS;
+        }
+
+        public int defaultFlushAttemptIntervalMillis() {
+            return DEFAULT_FLUSH_ATTEMPT_INTERVAL_MILLIS;
+        }
+
+        public long defaultMaxBufferSize() {
+            return DEFAULT_MAX_BUFFER_SIZE;
+        }
+
+        public int defaultEmitMaxRetriesIfBufferFull() {
+            return DEFAULT_EMIT_MAX_RETRIES_IF_BUFFER_FULL;
         }
     }
 
