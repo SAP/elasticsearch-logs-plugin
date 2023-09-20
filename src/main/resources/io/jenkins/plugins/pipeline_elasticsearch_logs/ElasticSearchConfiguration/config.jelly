@@ -2,7 +2,7 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
   <f:entry >
-    <f:dropdownDescriptorSelector title="Write Access Implementation" field="elasticsearchWriteAccess"/>
+    <f:dropdownDescriptorSelector title="Event Writer Implementation" field="eventWriterConfig" default="${descriptor.defaultEventWriterConfig()}"/>
   </f:entry>
   <f:advanced>
     <f:entry field="saveAnnotations" title="Save Annotations">

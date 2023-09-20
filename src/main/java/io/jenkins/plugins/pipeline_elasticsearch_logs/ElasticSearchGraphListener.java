@@ -1,7 +1,6 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -21,10 +20,12 @@ import org.jenkinsci.plugins.workflow.graph.FlowStartNode;
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException;
 
 import hudson.model.Result;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriter;
 import net.sf.json.JSONArray;
 
-public class ElasticSearchGraphListener implements GraphListener.Synchronous {
+public class ElasticSearchGraphListener
+    implements GraphListener.Synchronous, AutoCloseable
+{
     private static final String FLOW_GRAPH_ATOM_NODE_END = "flowGraph::atomNodeEnd";
 
     private static final String FLOW_GRAPH_NODE_END = "flowGraph::nodeEnd";
@@ -51,20 +52,22 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous {
 
     private static final Logger LOGGER = Logger.getLogger(ElasticSearchGraphListener.class.getName());
 
-    private final ElasticSearchWriteAccess writer;
+    private final EventWriter writer;
     private final ElasticSearchRunConfiguration config;
 
+    private volatile boolean isClosed = false;
+
     public ElasticSearchGraphListener(ElasticSearchRunConfiguration config) throws IOException {
-        try {
-            writer = config.createWriteAccess();
-        } catch (URISyntaxException e) {
-            throw new IOException(e);
-        }
         this.config = config;
+        this.writer = config.createEventWriter();
     }
 
     @Override
     public void onNewHead(FlowNode node) {
+        if (this.isClosed) {
+            return;
+        }
+
         try {
             // We cannot send StepEndNodes directly since information is missing, like an ErrorAction (see example below).
             // There might be more cases which need to be considered like this. Almost all parents change compared to their initial state
@@ -88,7 +91,7 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous {
                 sendNodeEnd((FlowEndNode) node);
             }
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Failed to push data to Elastic Search", e);
+            LOGGER.log(Level.SEVERE, "Failed to push data to Elasticsearch", e);
         }
     }
 
@@ -204,4 +207,13 @@ public class ElasticSearchGraphListener implements GraphListener.Synchronous {
         return Result.SUCCESS.toString();
     }
 
+    @Override
+    public synchronized void close() throws Exception {
+        if (this.isClosed) {
+            throw new IllegalStateException("object is closed already");
+        }
+
+        this.isClosed = true;
+        this.writer.close();
+    }
 }

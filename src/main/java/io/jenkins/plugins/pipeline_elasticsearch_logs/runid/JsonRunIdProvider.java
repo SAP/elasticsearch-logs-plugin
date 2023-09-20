@@ -12,7 +12,6 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.Run;
 import hudson.util.LogTaskListener;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchConfiguration;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.utils.RunUtils;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;

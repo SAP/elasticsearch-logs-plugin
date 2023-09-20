@@ -9,7 +9,6 @@ import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchFieldN
 import java.io.IOException;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.HashMap;
@@ -19,12 +18,14 @@ import java.util.Map;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
+import org.jenkinsci.remoting.SerializableOnlyOverRemoting;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 import hudson.model.Run;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.utils.RunUtils;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriter;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterRunConfig;
 import net.sf.json.JSONObject;
 
 /**
@@ -36,16 +37,16 @@ import net.sf.json.JSONObject;
  * instance is returned, i.e. instances are cached. This ensures that the
  * configuration used for processing a run stays unchanged even if the plugin
  * configuration is changed in parallel. In addition, all config consumers
- * processing the same run implicitly use the same instance of the
- * ElasticSearchWriteAccess factory, which then can ensure that not more than
- * one writer is used per run.
+ * processing the same run implicitly use the same instance of the {@link
+ * EventWriter} factory, which then can ensure that not more than one writer is
+ * used per run.
  *
  * When instances of this class are deserialized on remote agents, they get
  * deduplicated using the internal instance cache, so that the same
  * single-instance semantics applies here, too.
  */
 @Restricted(NoExternalUse.class)
-public class ElasticSearchRunConfiguration implements Serializable {
+public class ElasticSearchRunConfiguration implements SerializableOnlyOverRemoting {
 
     private static final long serialVersionUID = 1L;
 
@@ -55,7 +56,7 @@ public class ElasticSearchRunConfiguration implements Serializable {
 
     private final String uniqueId;
 
-    private final SerializableSupplier<ElasticSearchWriteAccess> writeAccessFactory;
+    private final EventWriterRunConfig eventWriterConfig;
 
     private final String runIdJsonString;
 
@@ -70,7 +71,7 @@ public class ElasticSearchRunConfiguration implements Serializable {
         this.uniqueId = RunUtils.getUniqueRunId(run);
         this.runIdJsonString = config.getRunIdProvider().getRunId(run).toString();
         this.splitMessagesLongerThan = config.getSplitMessagesLongerThan();
-        this.writeAccessFactory = config.getElasticsearchWriteAccess().getSupplier();
+        this.eventWriterConfig = config.getEventWriterConfig().createRunConfig(run);
     }
 
     public String getUniqueId() {
@@ -100,8 +101,9 @@ public class ElasticSearchRunConfiguration implements Serializable {
         return data;
     }
 
-    public ElasticSearchWriteAccess createWriteAccess() throws URISyntaxException {
-        return writeAccessFactory.get();
+    @Nonnull
+    public EventWriter createEventWriter() {
+        return this.eventWriterConfig.createEventWriter();
     }
 
     protected Object readResolve() throws ObjectStreamException {

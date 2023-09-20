@@ -1,5 +1,6 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -17,14 +18,46 @@ public class ElasticSearchConsoleLogDecorator extends ConsoleLogFilter implement
         ElasticSearchRunConfiguration config = ElasticSearchRunConfiguration.get(run);
         if (config != null) {
             ElasticSearchSender sender = new ElasticSearchSender(null, config, null);
-            return sender.getWrappedLogger(logger);
+            // sender must be closed once the returned output stream gets closed
+            return new CloserOutputStream(
+                sender.getWrappedLogger(logger),
+                sender
+            );
         } else {
             return logger;
         }
     }
 
-    protected ElasticSearchGlobalConfiguration getConfiguration() {
-        return ElasticSearchGlobalConfiguration.get();
-    }
+    private static class CloserOutputStream extends FilterOutputStream {
 
+        private AutoCloseable closeable;
+
+        public CloserOutputStream(OutputStream out, AutoCloseable closeable) {
+            super(out);
+            this.closeable = closeable;
+        }
+
+        @Override
+        public void close() throws IOException {
+            Exception firstException = null;
+
+            try {
+                super.close();
+            }
+            catch (Exception ex) {
+                if (firstException == null) firstException = ex;
+            }
+
+            try {
+                this.closeable.close();
+            }
+            catch (Exception ex) {
+                if (firstException == null) firstException = ex;
+            }
+
+            if (firstException != null) {
+                throw new IOException(firstException);
+            }
+        }
+    }
 }

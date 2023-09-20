@@ -27,7 +27,7 @@ public class ElasticSearchTest {
     @Before
     public void setup() throws Exception {
         ElasticSearchConfiguration config = new ElasticSearchConfiguration();
-        config.setElasticsearchWriteAccess(
+        config.setEventWriterConfig(
             new TestWriteAccess(eventData -> elasticSearchLoggedLines.add(eventData))
         );
         config.setRunIdProvider(new DefaultRunIdProvider("testInstance"));

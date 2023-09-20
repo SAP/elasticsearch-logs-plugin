@@ -1,4 +1,4 @@
-package io.jenkins.plugins.pipeline_elasticsearch_logs.write.direct_es;
+package io.jenkins.plugins.pipeline_elasticsearch_logs.write.index_api;
 
 import java.util.Collections;
 import java.util.List;

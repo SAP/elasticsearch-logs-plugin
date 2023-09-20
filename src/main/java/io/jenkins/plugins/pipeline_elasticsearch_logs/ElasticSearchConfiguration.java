@@ -1,5 +1,7 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
+import java.net.URISyntaxException;
+
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -9,7 +11,8 @@ import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.DefaultRunIdProvider;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.RunIdProvider;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterGlobalConfig;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.index_api.IndexAPIEventWriterGlobalConfig;
 import jakarta.annotation.PostConstruct;
 
 public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticSearchConfiguration> {
@@ -22,7 +25,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
     private RunIdProvider runIdProvider = new DefaultRunIdProvider("");
 
-    private ElasticSearchWriteAccess elasticsearchWriteAccess;
+    private EventWriterGlobalConfig eventWriterConfig;
 
     private static final int DEFAULT_SPLIT_MESSAGES_LONGER_THAN = 2000;
     private int splitMessagesLongerThan = DEFAULT_SPLIT_MESSAGES_LONGER_THAN;
@@ -40,13 +43,13 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         this.runIdProvider = runIdProvider;
     }
 
-    public ElasticSearchWriteAccess getElasticsearchWriteAccess() {
-        return elasticsearchWriteAccess;
+    public EventWriterGlobalConfig getEventWriterConfig() {
+        return eventWriterConfig;
     }
 
     @DataBoundSetter
-    public void setElasticsearchWriteAccess(ElasticSearchWriteAccess elasticsearchWriteAccess) {
-        this.elasticsearchWriteAccess = elasticsearchWriteAccess;
+    public void setEventWriterConfig(EventWriterGlobalConfig config) {
+        this.eventWriterConfig = config;
     }
 
     public int getSplitMessagesLongerThan() {
@@ -80,8 +83,8 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
     protected void init() {
         if (runIdProvider == null)
             throw new RuntimeException("runIdProvider must be set");
-        if (elasticsearchWriteAccess == null)
-            throw new RuntimeException("elasticsearchWriteAccess must be set");
+        if (eventWriterConfig == null)
+            throw new RuntimeException("eventWriterConfig must be set");
     }
 
     @Extension
@@ -98,6 +101,14 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
         public int defaultSplitMessagesLongerThan() {
             return DEFAULT_SPLIT_MESSAGES_LONGER_THAN;
+        }
+
+        public EventWriterGlobalConfig defaultEventWriterConfig() {
+            try {
+                return new IndexAPIEventWriterGlobalConfig(null, null, null, null, null, null);
+            } catch (URISyntaxException e) {
+                return null;
+            }
         }
     }
 }

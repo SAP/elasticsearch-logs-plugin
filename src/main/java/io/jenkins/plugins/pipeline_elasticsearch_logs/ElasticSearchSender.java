@@ -5,11 +5,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
-import java.util.Map;
-import java.util.List;
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,7 +24,7 @@ import hudson.CloseProofOutputStream;
 import hudson.console.LineTransformationOutputStream;
 import hudson.model.BuildListener;
 import hudson.remoting.RemoteOutputStream;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriter;
 import net.sf.json.JSONObject;
 
 public class ElasticSearchSender implements BuildListener, Closeable {
@@ -40,13 +39,16 @@ public class ElasticSearchSender implements BuildListener, Closeable {
     private transient @CheckForNull PrintStream outputStreamLogger;
     private final @CheckForNull NodeInfo nodeInfo;
 
-    protected transient ElasticSearchWriteAccess writer;
+    protected transient EventWriter writer;
     protected final ElasticSearchRunConfiguration config;
     protected String eventPrefix;
     private final @CheckForNull OutputStream out;
 
-    public ElasticSearchSender(@CheckForNull NodeInfo nodeInfo, @Nonnull ElasticSearchRunConfiguration config, @CheckForNull OutputStream out)
-                    throws IOException {
+    public ElasticSearchSender(
+        @CheckForNull NodeInfo nodeInfo,
+        @Nonnull ElasticSearchRunConfiguration config,
+        @CheckForNull OutputStream out
+    ) throws IOException {
         this.nodeInfo = nodeInfo;
         this.config = config;
         if (nodeInfo != null) {
@@ -57,44 +59,54 @@ public class ElasticSearchSender implements BuildListener, Closeable {
         this.out = out;
     }
 
-    public PrintStream getWrappedLogger(@CheckForNull OutputStream logger) {
-        try {
-            return new PrintStream(new ElasticSearchOutputStream(logger), false, "UTF-8");
-        } catch (UnsupportedEncodingException x) {
-            throw new AssertionError(x);
-        }
+    public OutputStream getWrappedLogger(@CheckForNull OutputStream logger) {
+        return new ElasticSearchOutputStream(logger);
     }
 
     @Override
     public PrintStream getLogger() {
         if (outputStreamLogger == null) {
-            outputStreamLogger = getWrappedLogger(out);
+            try {
+                outputStreamLogger = new PrintStream(getWrappedLogger(out), false, "UTF-8");
+            } catch (UnsupportedEncodingException x) {
+                throw new AssertionError(x);
+            }
         }
         return outputStreamLogger;
     }
 
     @Override
     public void close() throws IOException {
+        Exception firstException = null;
+
         if (outputStreamLogger != null) {
-          outputStreamLogger.close();
-          outputStreamLogger = null;
+            try {
+                outputStreamLogger.close();
+            }
+            catch (Exception ex) {
+                if (firstException == null) firstException = ex;
+            }
+            outputStreamLogger = null;
         }
+
         if (writer != null) {
             try {
                 writer.close();
-            } finally {
-                writer = null;
             }
+            catch (Exception ex) {
+                if (firstException == null) firstException = ex;
+            }
+            writer = null;
+        }
+
+        if (firstException != null) {
+            throw new IOException(firstException);
         }
     }
 
-    private ElasticSearchWriteAccess getElasticSearchWriter() throws IOException {
+    private EventWriter getEventWriter() {
         if (writer == null) {
-            try {
-                writer = config.createWriteAccess();
-            } catch (URISyntaxException e) {
-                throw new IOException(e);
-            }
+            writer = config.createEventWriter();
         }
         return writer;
     }
@@ -159,7 +171,7 @@ public class ElasticSearchSender implements BuildListener, Closeable {
                     String jsonDataString = JSONObject.fromObject(chunk).toString();
                     LOGGER.log(Level.FINEST, "Sending data: {0}", jsonDataString);
                 }
-                getElasticSearchWriter().push(chunk);
+                getEventWriter().push(chunk);
             }
         }
 
@@ -196,6 +208,7 @@ public class ElasticSearchSender implements BuildListener, Closeable {
         @Override
         public void close() throws IOException {
             super.close();
+            // TODO close forwarding logger also in case of exception
             if (forwardingLogger != null)
             {
                 forwardingLogger.close();
@@ -205,12 +218,11 @@ public class ElasticSearchSender implements BuildListener, Closeable {
         @Override
         public void flush() throws IOException {
             super.flush();
+            // TODO flush forwarding logger also in case of exception
             if (forwardingLogger != null)
             {
                 forwardingLogger.flush();
             }
         }
-
-
     }
 }

@@ -4,14 +4,27 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
+import hudson.model.Run;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriter;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterGlobalConfig;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterRunConfig;
 
-class TestWriteAccess extends ElasticSearchWriteAccess {
+class TestWriteAccess extends EventWriterGlobalConfig implements EventWriterRunConfig, EventWriter {
 
     private final Consumer<Map<String, Object>> receiver;
 
     TestWriteAccess(Consumer<Map<String, Object>> receiver) {
         this.receiver = receiver;
+    }
+
+    @Override
+    public EventWriterRunConfig createRunConfig(Run<?, ?> run) {
+        return this;
+    }
+
+    @Override
+    public EventWriter createEventWriter() {
+        return this;
     }
 
     @Override
@@ -21,10 +34,5 @@ class TestWriteAccess extends ElasticSearchWriteAccess {
 
     @Override
     public void close() throws IOException {
-    }
-
-    @Override
-    public SerializableSupplier<ElasticSearchWriteAccess> getSupplier() throws IOException {
-        return () -> this;
     }
 }
