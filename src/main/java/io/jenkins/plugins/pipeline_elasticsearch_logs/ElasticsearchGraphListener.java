@@ -23,7 +23,7 @@ import hudson.model.Result;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriter;
 import net.sf.json.JSONArray;
 
-public class ElasticSearchGraphListener
+public class ElasticsearchGraphListener
     implements GraphListener.Synchronous, AutoCloseable
 {
     private static final String FLOW_GRAPH_ATOM_NODE_END = "flowGraph::atomNodeEnd";
@@ -50,14 +50,14 @@ public class ElasticSearchGraphListener
 
     static final String EVENT_TYPE = "eventType";
 
-    private static final Logger LOGGER = Logger.getLogger(ElasticSearchGraphListener.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ElasticsearchGraphListener.class.getName());
 
     private final EventWriter writer;
     private final ElasticsearchRunConfig config;
 
     private volatile boolean isClosed = false;
 
-    public ElasticSearchGraphListener(ElasticsearchRunConfig config) throws IOException {
+    public ElasticsearchGraphListener(ElasticsearchRunConfig config) throws IOException {
         this.config = config;
         this.writer = config.createEventWriter();
     }

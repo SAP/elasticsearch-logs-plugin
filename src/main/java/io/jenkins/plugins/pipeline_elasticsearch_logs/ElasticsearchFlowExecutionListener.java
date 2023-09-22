@@ -16,11 +16,11 @@ import hudson.model.Run;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.utils.RunUtils;
 
 @Extension
-public class ElasticSearchFlowExecutionListener extends FlowExecutionListener {
+public class ElasticsearchFlowExecutionListener extends FlowExecutionListener {
 
-    private static final Logger LOGGER = Logger.getLogger(ElasticSearchFlowExecutionListener.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ElasticsearchFlowExecutionListener.class.getName());
 
-    private final Map<String, ElasticSearchGraphListener> graphListenersByRunId = new HashMap<>();
+    private final Map<String, ElasticsearchGraphListener> graphListenersByRunId = new HashMap<>();
 
     @Override
     public void onCreated(FlowExecution execution) {
@@ -35,9 +35,9 @@ public class ElasticSearchFlowExecutionListener extends FlowExecutionListener {
                     return;
                 }
 
-                ElasticSearchGraphListener graphListener = this.graphListenersByRunId.get(runId);
+                ElasticsearchGraphListener graphListener = this.graphListenersByRunId.get(runId);
                 if (graphListener == null) {
-                    graphListener = new ElasticSearchGraphListener(config);
+                    graphListener = new ElasticsearchGraphListener(config);
                     this.graphListenersByRunId.put(runId, graphListener);
                     execution.addListener(graphListener);
                 }
@@ -55,7 +55,7 @@ public class ElasticSearchFlowExecutionListener extends FlowExecutionListener {
                 Run<?, ?> run = (Run<?, ?>)exec;
                 String runId = RunUtils.getUniqueRunId(run);
 
-                ElasticSearchGraphListener graphListener = this.graphListenersByRunId.remove(runId);
+                ElasticsearchGraphListener graphListener = this.graphListenersByRunId.remove(runId);
                 if (graphListener != null) {
                     execution.removeListener(graphListener);
                     try {

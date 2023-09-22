@@ -1,6 +1,6 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs.write.fluentd;
 
-import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchFieldNames.TIMESTAMP;
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.EventFieldNames.TIMESTAMP;
 import static java.lang.String.format;
 
 import java.io.IOException;

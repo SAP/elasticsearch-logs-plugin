@@ -19,16 +19,16 @@ import org.jvnet.hudson.test.SleepBuilder;
 import hudson.model.FreeStyleProject;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.DefaultRunIdProvider;
 
-public class ElasticSearchTest {
+public class ElasticsearchTest {
     @Rule
     public JenkinsRule jenkinsRule = new JenkinsRule();
-    List<Map<String, Object>> elasticSearchLoggedLines = new ArrayList<>();
+    List<Map<String, Object>> elasticsearchLoggedLines = new ArrayList<>();
 
     @Before
     public void setup() throws Exception {
         ElasticsearchConfig config = new ElasticsearchConfig();
         config.setEventWriterConfig(
-            new TestWriteAccess(eventData -> elasticSearchLoggedLines.add(eventData))
+            new TestEventWriterConfig(eventData -> elasticsearchLoggedLines.add(eventData))
         );
         config.setRunIdProvider(new DefaultRunIdProvider("testInstance"));
         ElasticsearchGlobalConfig.get().setElasticsearch(config);
@@ -36,7 +36,7 @@ public class ElasticSearchTest {
 
     @After
     public void teardown() throws Exception {
-        elasticSearchLoggedLines.clear();
+        elasticsearchLoggedLines.clear();
     }
 
     @Test
@@ -50,7 +50,7 @@ public class ElasticSearchTest {
         assertLogLine(4, "buildMessage", "Sleeping 2ms");
         assertLogLine(5, "buildMessage", "Finished: SUCCESS");
         assertLogLine(6, "buildEnd");
-        assertEquals(7, elasticSearchLoggedLines.size());
+        assertEquals(7, elasticsearchLoggedLines.size());
     }
 
     private void assertLogLine(int lineIndex, String eventType, String message) {
@@ -63,7 +63,7 @@ public class ElasticSearchTest {
         project.setDefinition(new CpsFlowDefinition("node { echo message: 'hello' }", true));
         jenkinsRule.buildAndAssertSuccess(project);
 
-        assertEquals(21, elasticSearchLoggedLines.size());
+        assertEquals(21, elasticsearchLoggedLines.size());
 
         assertLogLine(0, "buildStart");
         assertLogLine(1, "buildMessage", "Started");
@@ -97,7 +97,7 @@ public class ElasticSearchTest {
     }
 
     private void assertLogLine(int lineIndex, String project, String buildId, String eventType, String message) {
-        Map<String, Object> line = elasticSearchLoggedLines.get(lineIndex);
+        Map<String, Object> line = elasticsearchLoggedLines.get(lineIndex);
         assertTrue(line.containsKey("timestampMillis"));
         assertTrue(line.containsKey("timestamp"));
         if (project != null && buildId != null) {

@@ -13,9 +13,9 @@ import io.jenkins.plugins.pipeline_elasticsearch_logs.utils.RunUtils;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriter;
 
 @Extension
-public class ElasticSearchRunListener extends RunListener<Run<?, ?>> {
+public class ElasticsearchRunListener extends RunListener<Run<?, ?>> {
 
-    private static final Logger LOGGER = Logger.getLogger(ElasticSearchRunListener.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ElasticsearchRunListener.class.getName());
 
     private final Map<String, EventWriter> eventWritersByRunId = new HashMap<>();
 

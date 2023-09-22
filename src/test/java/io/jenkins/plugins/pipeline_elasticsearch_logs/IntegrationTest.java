@@ -35,6 +35,7 @@ import hudson.model.Cause;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.DefaultRunIdProvider;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriter;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterConfig;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.index_api.IndexAPIEventWriterConfig;
 import net.sf.json.JSONArray;
@@ -45,7 +46,7 @@ import net.sf.json.JSONArray;
  *
  * The expected entries sent to Elasticsearch are compared with the actual entries sent.
  * For this not an actual Elasticsearch instance is used but the {@link EventWriterMock} is used
- * which overrrides the {@link ElasticSearchWriteAccessDirect#push(String)} method which normally sends the data to
+ * which overrrides the {@link EventWriter#push(String)} method which normally sends the data to
  * Elasticsearch.
  */
 public class IntegrationTest {

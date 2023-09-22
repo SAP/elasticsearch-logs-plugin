@@ -1,14 +1,13 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
-import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchFieldNames.RUN_ID;
-import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchFieldNames.TIMESTAMP;
-import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchFieldNames.TIMESTAMP_FORMAT;
-import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchFieldNames.TIMESTAMP_MILLIS;
-import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchFieldNames.UID;
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.EventFieldNames.RUN_ID;
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.EventFieldNames.TIMESTAMP;
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.EventFieldNames.TIMESTAMP_FORMAT;
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.EventFieldNames.TIMESTAMP_MILLIS;
+import static io.jenkins.plugins.pipeline_elasticsearch_logs.EventFieldNames.UID;
 
 import java.io.IOException;
 import java.io.ObjectStreamException;
-import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.HashMap;
@@ -136,7 +135,7 @@ public class ElasticsearchRunConfig implements SerializableOnlyOverRemoting {
     private static final Factory factory = new Factory();
 
     /*
-     * Factory keeps track of ElasticSearchRunConfiguration instances to ensure
+     * Factory keeps track of ElasticsearchRunConfig instances to ensure
      * that multiple users always get the same instance for the same run.
      *
      * On the Jenkins Controller cached entries MUST be removed after the run

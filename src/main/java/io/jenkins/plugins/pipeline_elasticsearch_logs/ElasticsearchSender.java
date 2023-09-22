@@ -27,12 +27,12 @@ import hudson.remoting.RemoteOutputStream;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriter;
 import net.sf.json.JSONObject;
 
-public class ElasticSearchSender implements BuildListener, Closeable {
+public class ElasticsearchSender implements BuildListener, Closeable {
     private static final String EVENT_PREFIX_BUILD = "build";
 
     private static final String EVENT_PREFIX_NODE = "node";
 
-    private static final Logger LOGGER = Logger.getLogger(ElasticSearchSender.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ElasticsearchSender.class.getName());
 
     private static final long serialVersionUID = 1;
 
@@ -44,7 +44,7 @@ public class ElasticSearchSender implements BuildListener, Closeable {
     protected String eventPrefix;
     private final @CheckForNull OutputStream out;
 
-    public ElasticSearchSender(
+    public ElasticsearchSender(
         @CheckForNull NodeInfo nodeInfo,
         @Nonnull ElasticsearchRunConfig config,
         @CheckForNull OutputStream out
@@ -60,7 +60,7 @@ public class ElasticSearchSender implements BuildListener, Closeable {
     }
 
     public OutputStream getWrappedLogger(@CheckForNull OutputStream logger) {
-        return new ElasticSearchOutputStream(logger);
+        return new ElasticsearchOutputStream(logger);
     }
 
     @Override
@@ -125,21 +125,21 @@ public class ElasticSearchSender implements BuildListener, Closeable {
         private final ElasticsearchRunConfig config;
         private final @CheckForNull NodeInfo nodeInfo;
 
-        Replacement(ElasticSearchSender ess) {
-            LOGGER.log(Level.FINER, "Creating Replacement for the ElasticSearchSender during Serialization");
+        Replacement(ElasticsearchSender ess) {
+            LOGGER.log(Level.FINER, "Creating Replacement for the ElasticsearchSender during Serialization");
             this.ros = new RemoteOutputStream(new CloseProofOutputStream(ess.out));
             this.config = ess.config;
             this.nodeInfo = ess.nodeInfo;
         }
 
         private Object readResolve() throws IOException {
-            LOGGER.log(Level.FINER, "Creating new ElasticSearchSender during Deserialization");
-            return new ElasticSearchSender(nodeInfo, config, new GCFlushedOutputStream(new DelayBufferedOutputStream(ros, tuning)));
+            LOGGER.log(Level.FINER, "Creating new ElasticsearchSender during Deserialization");
+            return new ElasticsearchSender(nodeInfo, config, new GCFlushedOutputStream(new DelayBufferedOutputStream(ros, tuning)));
         }
 
     }
 
-    private class ElasticSearchOutputStream extends LineTransformationOutputStream {
+    private class ElasticsearchOutputStream extends LineTransformationOutputStream {
         @Override
         public void write(int b) throws IOException {
             if (forwardingLogger != null) {
@@ -151,7 +151,7 @@ public class ElasticSearchSender implements BuildListener, Closeable {
         private static final String EVENT_TYPE_MESSAGE = "Message";
         private @CheckForNull OutputStream forwardingLogger;
 
-        public ElasticSearchOutputStream(@CheckForNull OutputStream logger) {
+        public ElasticsearchOutputStream(@CheckForNull OutputStream logger) {
             this.forwardingLogger = logger;
         }
 
@@ -159,7 +159,7 @@ public class ElasticSearchSender implements BuildListener, Closeable {
         protected void eol(byte[] b, int len) throws IOException {
             Map<String, Object> data = config.createData();
 
-            data.put(ElasticSearchGraphListener.EVENT_TYPE, eventPrefix + EVENT_TYPE_MESSAGE);
+            data.put(ElasticsearchGraphListener.EVENT_TYPE, eventPrefix + EVENT_TYPE_MESSAGE);
             if (nodeInfo != null) {
                 nodeInfo.appendNodeInfo(data);
             }

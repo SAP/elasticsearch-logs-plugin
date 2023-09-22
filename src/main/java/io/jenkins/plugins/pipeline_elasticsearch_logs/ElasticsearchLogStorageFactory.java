@@ -16,9 +16,9 @@ import hudson.ExtensionList;
 import hudson.model.Queue;
 
 @Extension
-public class ElasticSearchLogStorageFactory implements LogStorageFactory {
+public class ElasticsearchLogStorageFactory implements LogStorageFactory {
 
-    private final static Logger LOGGER = Logger.getLogger(ElasticSearchLogStorageFactory.class.getName());
+    private final static Logger LOGGER = Logger.getLogger(ElasticsearchLogStorageFactory.class.getName());
 
     @Override
     public LogStorage forBuild(FlowExecutionOwner owner) {
@@ -32,7 +32,7 @@ public class ElasticSearchLogStorageFactory implements LogStorageFactory {
                 }
                 WorkflowRun run = (WorkflowRun) exec;
                 LOGGER.log(Level.FINER, "Getting LogStorage for: {0}", run.getFullDisplayName());
-                return ElasticSearchLogStorage.forFile(config, new File(owner.getRootDir(), "log"));
+                return ElasticsearchLogStorage.forFile(config, new File(owner.getRootDir(), "log"));
             } else {
                 return null;
             }
@@ -41,8 +41,8 @@ public class ElasticSearchLogStorageFactory implements LogStorageFactory {
         }
     }
 
-    static ElasticSearchLogStorageFactory get() {
-        return ExtensionList.lookupSingleton(ElasticSearchLogStorageFactory.class);
+    static ElasticsearchLogStorageFactory get() {
+        return ExtensionList.lookupSingleton(ElasticsearchLogStorageFactory.class);
     }
 
 }

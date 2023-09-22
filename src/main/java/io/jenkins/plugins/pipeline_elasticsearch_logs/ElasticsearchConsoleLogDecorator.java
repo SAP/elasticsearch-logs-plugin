@@ -10,14 +10,14 @@ import hudson.console.ConsoleLogFilter;
 import hudson.model.Run;
 
 @Extension(ordinal = 1000)
-public class ElasticSearchConsoleLogDecorator extends ConsoleLogFilter implements Serializable {
+public class ElasticsearchConsoleLogDecorator extends ConsoleLogFilter implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Override
     public OutputStream decorateLogger(Run run, OutputStream logger) throws IOException, InterruptedException {
         ElasticsearchRunConfig config = ElasticsearchRunConfig.get(run);
         if (config != null) {
-            ElasticSearchSender sender = new ElasticSearchSender(null, config, null);
+            ElasticsearchSender sender = new ElasticsearchSender(null, config, null);
             // sender must be closed once the returned output stream gets closed
             return new CloserOutputStream(
                 sender.getWrappedLogger(logger),

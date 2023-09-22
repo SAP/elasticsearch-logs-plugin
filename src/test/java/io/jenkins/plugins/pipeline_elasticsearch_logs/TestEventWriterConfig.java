@@ -9,11 +9,11 @@ import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriter;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterConfig;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterRunConfig;
 
-class TestWriteAccess extends EventWriterConfig implements EventWriterRunConfig, EventWriter {
+class TestEventWriterConfig extends EventWriterConfig implements EventWriterRunConfig, EventWriter {
 
     private final Consumer<Map<String, Object>> receiver;
 
-    TestWriteAccess(Consumer<Map<String, Object>> receiver) {
+    TestEventWriterConfig(Consumer<Map<String, Object>> receiver) {
         this.receiver = receiver;
     }
 

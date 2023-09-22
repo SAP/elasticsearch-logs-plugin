@@ -35,11 +35,11 @@ import hudson.console.LineTransformationOutputStream;
 import hudson.model.BuildListener;
 import hudson.model.TaskListener;
 
-class ElasticSearchLogStorage implements LogStorage {
+class ElasticsearchLogStorage implements LogStorage {
 
-    final static Logger LOGGER = Logger.getLogger(ElasticSearchLogStorage.class.getName());
+    final static Logger LOGGER = Logger.getLogger(ElasticsearchLogStorage.class.getName());
 
-    private static final Map<File, ElasticSearchLogStorage> openStorages = Collections.synchronizedMap(new HashMap<>());
+    private static final Map<File, ElasticsearchLogStorage> openStorages = Collections.synchronizedMap(new HashMap<>());
 
     private final File log;
     private File index;
@@ -53,10 +53,10 @@ class ElasticSearchLogStorage implements LogStorage {
     private ElasticsearchRunConfig config;
 
     public static synchronized LogStorage forFile(ElasticsearchRunConfig config, File log) {
-        return openStorages.computeIfAbsent(log, k -> new ElasticSearchLogStorage(config, log));
+        return openStorages.computeIfAbsent(log, k -> new ElasticsearchLogStorage(config, log));
     }
 
-    ElasticSearchLogStorage(ElasticsearchRunConfig config, File log) {
+    ElasticsearchLogStorage(ElasticsearchRunConfig config, File log) {
         this.config = config;
         this.log = log;
         this.index = new File(log + "-index");
@@ -101,14 +101,14 @@ class ElasticSearchLogStorage implements LogStorage {
     @Override
     public BuildListener overallListener() throws IOException, InterruptedException {
         IndexOutputStream out = new IndexOutputStream(null);
-        return new ElasticSearchSender(null, config, out);
+        return new ElasticsearchSender(null, config, out);
     }
 
     @Override
     public TaskListener nodeListener(FlowNode node) throws IOException, InterruptedException {
         NodeInfo nodeInfo = new NodeInfo(node);
         IndexOutputStream out = new IndexOutputStream(nodeInfo.nodeId);
-        return new ElasticSearchSender(nodeInfo, config, out);
+        return new ElasticsearchSender(nodeInfo, config, out);
     }
 
     // Method copied from FileLogStorage of workflow-api plugin
@@ -145,7 +145,7 @@ class ElasticSearchLogStorage implements LogStorage {
 
         @Override
         protected void eol(byte[] b, int len) throws IOException {
-            synchronized (ElasticSearchLogStorage.this) {
+            synchronized (ElasticsearchLogStorage.this) {
                 checkId(id);
                 if (!config.isWriteAnnotationsToLogFile()) {
                     String line = new String(b, 0, len, StandardCharsets.UTF_8);

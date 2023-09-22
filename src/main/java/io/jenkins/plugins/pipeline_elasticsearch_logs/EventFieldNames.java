@@ -2,9 +2,9 @@ package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
 import java.time.format.DateTimeFormatter;
 
-public final class ElasticSearchFieldNames {
+public final class EventFieldNames {
 
-  private ElasticSearchFieldNames() {
+  private EventFieldNames() {
     // No need to instantiate the class, its constructor can be hidden
   }
 
