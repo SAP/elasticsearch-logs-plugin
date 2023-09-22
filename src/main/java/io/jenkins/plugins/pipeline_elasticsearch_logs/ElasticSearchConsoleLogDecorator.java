@@ -15,7 +15,7 @@ public class ElasticSearchConsoleLogDecorator extends ConsoleLogFilter implement
 
     @Override
     public OutputStream decorateLogger(Run run, OutputStream logger) throws IOException, InterruptedException {
-        ElasticSearchRunConfiguration config = ElasticSearchRunConfiguration.get(run);
+        ElasticsearchRunConfig config = ElasticsearchRunConfig.get(run);
         if (config != null) {
             ElasticSearchSender sender = new ElasticSearchSender(null, config, null);
             // sender must be closed once the returned output stream gets closed

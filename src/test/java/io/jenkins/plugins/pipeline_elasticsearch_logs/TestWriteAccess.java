@@ -6,10 +6,10 @@ import java.util.function.Consumer;
 
 import hudson.model.Run;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriter;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterGlobalConfig;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterConfig;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterRunConfig;
 
-class TestWriteAccess extends EventWriterGlobalConfig implements EventWriterRunConfig, EventWriter {
+class TestWriteAccess extends EventWriterConfig implements EventWriterRunConfig, EventWriter {
 
     private final Consumer<Map<String, Object>> receiver;
 

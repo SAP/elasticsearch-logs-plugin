@@ -8,15 +8,15 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import hudson.Extension;
 import hudson.model.Run;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriter;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterGlobalConfig;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterConfig;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterRunConfig;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.utils.SharedEventWriterFactory;
 
 /**
  * The configuration of {@link FluentdEventWriter}.
  */
-public class FluentdEventWriterGlobalConfig
-    extends EventWriterGlobalConfig
+public class FluentdEventWriterConfig
+    extends EventWriterConfig
     implements EventWriterRunConfig
 {
     private String tag;
@@ -56,7 +56,7 @@ public class FluentdEventWriterGlobalConfig
     private transient SharedEventWriterFactory sharedWriterFactory;
 
     @DataBoundConstructor
-    public FluentdEventWriterGlobalConfig(
+    public FluentdEventWriterConfig(
         String host,
         int port,
         String tag,
@@ -190,7 +190,7 @@ public class FluentdEventWriterGlobalConfig
 
     @Extension
     @Symbol("fluentdEventWriter")
-    public static class DescriptorImpl extends EventWriterGlobalConfigDescriptor {
+    public static class DescriptorImpl extends EventWriterConfigDescriptor {
         @Override
         public String getDisplayName() {
             return "Fluentd";

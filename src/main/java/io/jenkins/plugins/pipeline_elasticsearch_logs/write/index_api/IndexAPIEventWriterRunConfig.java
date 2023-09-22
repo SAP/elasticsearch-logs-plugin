@@ -25,7 +25,15 @@ import io.jenkins.plugins.pipeline_elasticsearch_logs.write.utils.SharedEventWri
 
 /**
  * A run-specific config for {@link IndexAPIEventWriter} created from a {@link
- * IndexAPIEventWriterGlobalConfig}.
+ * IndexAPIEventWriterConfig}.
+ * <p>
+ * Auth credential data is loaded and stored here so that it is also available
+ * on remove agents.
+ * </p>
+ * <p>
+ * The TLS truststore credential data is loaded and stored here so that it is
+ * also available on remote agents.
+ * </p>
  */
 public class IndexAPIEventWriterRunConfig implements EventWriterRunConfig {
 
@@ -54,15 +62,15 @@ public class IndexAPIEventWriterRunConfig implements EventWriterRunConfig {
     private transient SharedEventWriterFactory sharedWriterFactory;
 
     IndexAPIEventWriterRunConfig(
-        @Nonnull IndexAPIEventWriterGlobalConfig globalConfig
+        @Nonnull IndexAPIEventWriterConfig config
     ) {
-        this.indexUrl = globalConfig.getIndexUrl();
-        this.connectTimeoutMillis = globalConfig.getConnectTimeoutMillis();
-        this.requestTimeoutMillis = globalConfig.getRequestTimeoutMillis();
-        this.socketTimeoutMillis = globalConfig.getSocketTimeoutMillis();
+        this.indexUrl = config.getIndexUrl();
+        this.connectTimeoutMillis = config.getConnectTimeoutMillis();
+        this.requestTimeoutMillis = config.getRequestTimeoutMillis();
+        this.socketTimeoutMillis = config.getSocketTimeoutMillis();
 
         // credentials must be loaded here because they are not accessible on agents
-        StandardUsernamePasswordCredentials authCredentials = globalConfig.getAuthCredentials();
+        StandardUsernamePasswordCredentials authCredentials = config.getAuthCredentials();
         if (authCredentials != null && authCredentials.getUsername() != "") {
             this.username = authCredentials.getUsername();
             this.password = authCredentials.getPassword().getPlainText();
@@ -72,8 +80,8 @@ public class IndexAPIEventWriterRunConfig implements EventWriterRunConfig {
         }
 
         // trust store must be loaded here to have it available on agents
-        if (StringUtils.isNotBlank(globalConfig.getTrustStoreCredentialsId())) {
-            this.trustStoreBytes = getTrustStoreBytes(globalConfig);
+        if (StringUtils.isNotBlank(config.getTrustStoreCredentialsId())) {
+            this.trustStoreBytes = getTrustStoreBytes(config);
         }
         else {
             this.trustStoreBytes = null;
@@ -125,10 +133,10 @@ public class IndexAPIEventWriterRunConfig implements EventWriterRunConfig {
         return this.trustStoreBytes;
     }
 
-    private static byte[] getTrustStoreBytes(IndexAPIEventWriterGlobalConfig globalConfig) throws RuntimeException {
-        if (!isTls(globalConfig.getIndexUrl())) return null;
+    private static byte[] getTrustStoreBytes(IndexAPIEventWriterConfig config) throws RuntimeException {
+        if (!isTls(config.getIndexUrl())) return null;
 
-        StandardCertificateCredentials trustStoreCredentials = globalConfig.getTrustStoreCredentials();
+        StandardCertificateCredentials trustStoreCredentials = config.getTrustStoreCredentials();
         if (trustStoreCredentials == null) {
             return null;
         }

@@ -26,7 +26,7 @@ public class ElasticSearchLogStorageFactory implements LogStorageFactory {
         try {
             Queue.Executable exec = owner.getExecutable();
             if (exec instanceof WorkflowRun) {
-                ElasticSearchRunConfiguration config = ElasticSearchRunConfiguration.get((WorkflowRun) exec);
+                ElasticsearchRunConfig config = ElasticsearchRunConfig.get((WorkflowRun) exec);
                 if (config == null) {
                     return null;
                 }

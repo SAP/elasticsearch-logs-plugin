@@ -30,7 +30,7 @@ public class ElasticSearchFlowExecutionListener extends FlowExecutionListener {
                 Run<?, ?> run = (Run<?, ?>)exec;
                 String runId = RunUtils.getUniqueRunId(run);
 
-                ElasticSearchRunConfiguration config = ElasticSearchRunConfiguration.get(run);
+                ElasticsearchRunConfig config = ElasticsearchRunConfig.get(run);
                 if (config == null) {
                     return;
                 }

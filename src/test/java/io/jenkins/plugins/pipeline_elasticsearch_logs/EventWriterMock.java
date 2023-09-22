@@ -11,14 +11,14 @@ import org.apache.http.conn.ConnectTimeoutException;
 
 import hudson.model.Run;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriter;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterGlobalConfig;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterConfig;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterRunConfig;
 
 /**
  * An {@link EventWriter} for test purposed that records all events
  * that have been pushed to it.
  */
-public class EventWriterMock extends EventWriterGlobalConfig
+public class EventWriterMock extends EventWriterConfig
     implements EventWriterRunConfig, EventWriter {
 
     private ArrayList<String> events = new ArrayList<>();

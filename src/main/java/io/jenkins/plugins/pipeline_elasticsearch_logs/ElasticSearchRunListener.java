@@ -23,7 +23,7 @@ public class ElasticSearchRunListener extends RunListener<Run<?, ?>> {
     public void onInitialize(Run<?, ?> run) {
 
         try {
-            ElasticSearchRunConfiguration config = ElasticSearchRunConfiguration.get(run);
+            ElasticsearchRunConfig config = ElasticsearchRunConfig.get(run);
             if (config == null) {
                 return;
             }
@@ -44,7 +44,7 @@ public class ElasticSearchRunListener extends RunListener<Run<?, ?>> {
     public void onFinalized(Run<?, ?> run) {
         EventWriter writer = null;
         try {
-            ElasticSearchRunConfiguration config = ElasticSearchRunConfiguration.get(run);
+            ElasticsearchRunConfig config = ElasticsearchRunConfig.get(run);
             if (config == null) {
                 return;
             }
@@ -78,7 +78,7 @@ public class ElasticSearchRunListener extends RunListener<Run<?, ?>> {
                     LOGGER.log(Level.SEVERE, "failed to close event writer", ex);
                 }
             }
-            ElasticSearchRunConfiguration.release(run);
+            ElasticsearchRunConfig.release(run);
         }
     }
 }

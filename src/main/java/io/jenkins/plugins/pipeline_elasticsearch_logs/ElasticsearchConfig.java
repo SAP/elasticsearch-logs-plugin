@@ -11,11 +11,11 @@ import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.DefaultRunIdProvider;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.RunIdProvider;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterGlobalConfig;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.write.index_api.IndexAPIEventWriterGlobalConfig;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterConfig;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.index_api.IndexAPIEventWriterConfig;
 import jakarta.annotation.PostConstruct;
 
-public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticSearchConfiguration> {
+public class ElasticsearchConfig extends AbstractDescribableImpl<ElasticsearchConfig> {
 
     private static final boolean DEFAULT_SAVE_ANNOTATIONS = true;
     private boolean saveAnnotations = DEFAULT_SAVE_ANNOTATIONS;
@@ -25,13 +25,13 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
     private RunIdProvider runIdProvider = new DefaultRunIdProvider("");
 
-    private EventWriterGlobalConfig eventWriterConfig;
+    private EventWriterConfig eventWriterConfig;
 
     private static final int DEFAULT_SPLIT_MESSAGES_LONGER_THAN = 2000;
     private int splitMessagesLongerThan = DEFAULT_SPLIT_MESSAGES_LONGER_THAN;
 
     @DataBoundConstructor
-    public ElasticSearchConfiguration() {
+    public ElasticsearchConfig() {
     }
 
     public RunIdProvider getRunIdProvider() {
@@ -43,12 +43,12 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
         this.runIdProvider = runIdProvider;
     }
 
-    public EventWriterGlobalConfig getEventWriterConfig() {
+    public EventWriterConfig getEventWriterConfig() {
         return eventWriterConfig;
     }
 
     @DataBoundSetter
-    public void setEventWriterConfig(EventWriterGlobalConfig config) {
+    public void setEventWriterConfig(EventWriterConfig config) {
         this.eventWriterConfig = config;
     }
 
@@ -89,7 +89,7 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
 
     @Extension
     @Symbol("elasticsearch")
-    public static class DescriptorImpl extends Descriptor<ElasticSearchConfiguration> {
+    public static class DescriptorImpl extends Descriptor<ElasticsearchConfig> {
 
         public boolean defaultSaveAnnotations() {
             return DEFAULT_SAVE_ANNOTATIONS;
@@ -103,9 +103,9 @@ public class ElasticSearchConfiguration extends AbstractDescribableImpl<ElasticS
             return DEFAULT_SPLIT_MESSAGES_LONGER_THAN;
         }
 
-        public EventWriterGlobalConfig defaultEventWriterConfig() {
+        public EventWriterConfig defaultEventWriterConfig() {
             try {
-                return new IndexAPIEventWriterGlobalConfig(null, null, null, null, null, null);
+                return new IndexAPIEventWriterConfig(null, null, null, null, null, null);
             } catch (URISyntaxException e) {
                 return null;
             }

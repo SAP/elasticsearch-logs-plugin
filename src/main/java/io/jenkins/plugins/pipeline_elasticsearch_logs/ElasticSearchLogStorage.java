@@ -50,13 +50,13 @@ class ElasticSearchLogStorage implements LogStorage {
     private Writer indexOs;
     private String lastId;
 
-    private ElasticSearchRunConfiguration config;
+    private ElasticsearchRunConfig config;
 
-    public static synchronized LogStorage forFile(ElasticSearchRunConfiguration config, File log) {
+    public static synchronized LogStorage forFile(ElasticsearchRunConfig config, File log) {
         return openStorages.computeIfAbsent(log, k -> new ElasticSearchLogStorage(config, log));
     }
 
-    ElasticSearchLogStorage(ElasticSearchRunConfiguration config, File log) {
+    ElasticSearchLogStorage(ElasticsearchRunConfig config, File log) {
         this.config = config;
         this.log = log;
         this.index = new File(log + "-index");

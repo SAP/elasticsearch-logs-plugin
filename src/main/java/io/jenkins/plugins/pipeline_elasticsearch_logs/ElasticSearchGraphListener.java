@@ -53,11 +53,11 @@ public class ElasticSearchGraphListener
     private static final Logger LOGGER = Logger.getLogger(ElasticSearchGraphListener.class.getName());
 
     private final EventWriter writer;
-    private final ElasticSearchRunConfiguration config;
+    private final ElasticsearchRunConfig config;
 
     private volatile boolean isClosed = false;
 
-    public ElasticSearchGraphListener(ElasticSearchRunConfiguration config) throws IOException {
+    public ElasticSearchGraphListener(ElasticsearchRunConfig config) throws IOException {
         this.config = config;
         this.writer = config.createEventWriter();
     }

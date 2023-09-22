@@ -26,12 +26,12 @@ public class ElasticSearchTest {
 
     @Before
     public void setup() throws Exception {
-        ElasticSearchConfiguration config = new ElasticSearchConfiguration();
+        ElasticsearchConfig config = new ElasticsearchConfig();
         config.setEventWriterConfig(
             new TestWriteAccess(eventData -> elasticSearchLoggedLines.add(eventData))
         );
         config.setRunIdProvider(new DefaultRunIdProvider("testInstance"));
-        ElasticSearchGlobalConfiguration.get().setElasticSearch(config);
+        ElasticsearchGlobalConfig.get().setElasticsearch(config);
     }
 
     @After

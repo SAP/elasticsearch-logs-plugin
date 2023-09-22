@@ -46,7 +46,7 @@ import net.sf.json.JSONObject;
  * single-instance semantics applies here, too.
  */
 @Restricted(NoExternalUse.class)
-public class ElasticSearchRunConfiguration implements SerializableOnlyOverRemoting {
+public class ElasticsearchRunConfig implements SerializableOnlyOverRemoting {
 
     private static final long serialVersionUID = 1L;
 
@@ -62,8 +62,8 @@ public class ElasticSearchRunConfiguration implements SerializableOnlyOverRemoti
 
     private final int splitMessagesLongerThan;
 
-    protected ElasticSearchRunConfiguration(
-        @Nonnull ElasticSearchConfiguration config,
+    protected ElasticsearchRunConfig(
+        @Nonnull ElasticsearchConfig config,
         @Nonnull Run<?, ?> run
     ) throws IOException {
         this.saveAnnotations = config.isSaveAnnotations();
@@ -122,7 +122,7 @@ public class ElasticSearchRunConfiguration implements SerializableOnlyOverRemoti
      * MUST be called to clean up the cache.
      */
     @CheckForNull
-    public static ElasticSearchRunConfiguration get(Run<?, ?> run) throws IOException {
+    public static ElasticsearchRunConfig get(Run<?, ?> run) throws IOException {
         return factory.getInstance(run);
     }
 
@@ -153,10 +153,10 @@ public class ElasticSearchRunConfiguration implements SerializableOnlyOverRemoti
      * controller. Remove all entries which are not present there.
      */
     private static final class Factory {
-        private final Map<String, ElasticSearchRunConfiguration> cache =
-            new HashMap<String, ElasticSearchRunConfiguration>();
+        private final Map<String, ElasticsearchRunConfig> cache =
+            new HashMap<String, ElasticsearchRunConfig>();
 
-        protected synchronized ElasticSearchRunConfiguration getInstance(Run<?, ?> run) throws IOException {
+        protected synchronized ElasticsearchRunConfig getInstance(Run<?, ?> run) throws IOException {
             String runId = RunUtils.getUniqueRunId(run);
 
             if (this.cache.containsKey(runId)) {
@@ -166,22 +166,22 @@ public class ElasticSearchRunConfiguration implements SerializableOnlyOverRemoti
                 return this.cache.get(runId);
             }
 
-            ElasticSearchRunConfiguration instance = newInstanceOrNull(run);
+            ElasticsearchRunConfig instance = newInstanceOrNull(run);
             this.cache.put(runId, instance);
             return instance;
         }
 
-        protected ElasticSearchRunConfiguration newInstanceOrNull(Run<?, ?> run) throws IOException {
-            ElasticSearchConfiguration config = ElasticSearchGlobalConfiguration.get().getElasticSearch();
+        protected ElasticsearchRunConfig newInstanceOrNull(Run<?, ?> run) throws IOException {
+            ElasticsearchConfig config = ElasticsearchGlobalConfig.get().getElasticsearch();
             if (config == null) {
                 // Logging to Elasticsearch is disabled
                 return null;
             }
-            return new ElasticSearchRunConfiguration(config, run);
+            return new ElasticsearchRunConfig(config, run);
         }
 
-        protected synchronized ElasticSearchRunConfiguration registerAndDedup(
-            @Nonnull ElasticSearchRunConfiguration newInstance
+        protected synchronized ElasticsearchRunConfig registerAndDedup(
+            @Nonnull ElasticsearchRunConfig newInstance
         ) {
             String runId = newInstance.getUniqueId();
 

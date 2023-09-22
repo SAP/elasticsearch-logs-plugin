@@ -40,13 +40,13 @@ public class ElasticSearchSender implements BuildListener, Closeable {
     private final @CheckForNull NodeInfo nodeInfo;
 
     protected transient EventWriter writer;
-    protected final ElasticSearchRunConfiguration config;
+    protected final ElasticsearchRunConfig config;
     protected String eventPrefix;
     private final @CheckForNull OutputStream out;
 
     public ElasticSearchSender(
         @CheckForNull NodeInfo nodeInfo,
-        @Nonnull ElasticSearchRunConfiguration config,
+        @Nonnull ElasticsearchRunConfig config,
         @CheckForNull OutputStream out
     ) throws IOException {
         this.nodeInfo = nodeInfo;
@@ -122,7 +122,7 @@ public class ElasticSearchSender implements BuildListener, Closeable {
 
         private final RemoteOutputStream ros;
         private final DelayBufferedOutputStream.Tuning tuning = DelayBufferedOutputStream.Tuning.DEFAULT; // load defaults on master
-        private final ElasticSearchRunConfiguration config;
+        private final ElasticsearchRunConfig config;
         private final @CheckForNull NodeInfo nodeInfo;
 
         Replacement(ElasticSearchSender ess) {

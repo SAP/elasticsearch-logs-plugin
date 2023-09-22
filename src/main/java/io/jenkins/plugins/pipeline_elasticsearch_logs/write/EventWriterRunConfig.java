@@ -7,7 +7,8 @@ import org.jenkinsci.remoting.SerializableOnlyOverRemoting;
 /**
  * An event writer config created specifically for a certain Run.
  *
- * It must be serializable to be send to and work on remote agents.
+ * In contrast to {@link EventWriterConfig} it must be serializable to be send
+ * to remote agents and it must work (be usable) on remote agents.
  */
 public interface EventWriterRunConfig extends SerializableOnlyOverRemoting {
 

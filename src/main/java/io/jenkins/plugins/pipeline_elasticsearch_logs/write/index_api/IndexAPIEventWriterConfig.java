@@ -25,13 +25,13 @@ import hudson.model.Run;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterGlobalConfig;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterConfig;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterRunConfig;
 
 /**
- * The global config for {@link IndexAPIEventWriter}.
+ * The config for {@link IndexAPIEventWriter}.
  */
-public class IndexAPIEventWriterGlobalConfig extends EventWriterGlobalConfig {
+public class IndexAPIEventWriterConfig extends EventWriterConfig {
 
     private final URI indexUrl;
 
@@ -51,7 +51,7 @@ public class IndexAPIEventWriterGlobalConfig extends EventWriterGlobalConfig {
     private final String trustStoreCredentialsId;
 
     @DataBoundConstructor
-    public IndexAPIEventWriterGlobalConfig(
+    public IndexAPIEventWriterConfig(
         String indexUrl,
         Integer connectTimeoutMillis,
         Integer requestTimeoutMillis,
@@ -129,7 +129,7 @@ public class IndexAPIEventWriterGlobalConfig extends EventWriterGlobalConfig {
 
     @Extension
     @Symbol("indexAPIEventWriter")
-    public static class DescriptorImpl extends EventWriterGlobalConfigDescriptor {
+    public static class DescriptorImpl extends EventWriterConfigDescriptor {
         @Override
         public String getDisplayName() {
             return "Index API";

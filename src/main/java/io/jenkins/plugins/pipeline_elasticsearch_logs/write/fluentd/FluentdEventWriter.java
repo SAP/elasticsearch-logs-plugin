@@ -30,9 +30,9 @@ public class FluentdEventWriter implements EventWriter {
     private transient Fluency fluentd;
     private transient FluentdErrorHandler errorHandler;
 
-    FluentdEventWriterGlobalConfig config;
+    FluentdEventWriterConfig config;
 
-    FluentdEventWriter(@Nonnull FluentdEventWriterGlobalConfig config) {
+    FluentdEventWriter(@Nonnull FluentdEventWriterConfig config) {
         this.config = config;
     }
 

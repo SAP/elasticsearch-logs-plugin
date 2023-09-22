@@ -35,8 +35,8 @@ import hudson.model.Cause;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.DefaultRunIdProvider;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterGlobalConfig;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.write.index_api.IndexAPIEventWriterGlobalConfig;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterConfig;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.index_api.IndexAPIEventWriterConfig;
 import net.sf.json.JSONArray;
 
 /**
@@ -147,7 +147,7 @@ public class IntegrationTest {
     @Test
     public void testPipelinePushLogsWithConnectionIssues() throws Exception {
         // SETUP
-        EventWriterGlobalConfig eventWriterConfig = new IndexAPIEventWriterGlobalConfig(
+        EventWriterConfig eventWriterConfig = new IndexAPIEventWriterConfig(
             "http://localhost:18598/index1/_doc",
             null,
             null,
@@ -239,17 +239,17 @@ public class IntegrationTest {
         assertMatchEntries(expectedLog, mockWriter.getEvents());
     }
 
-    private void configureElasticsearchPlugin(boolean activate, EventWriterGlobalConfig mockWriter) throws URISyntaxException {
-        ElasticSearchGlobalConfiguration globalConfig = ElasticSearchGlobalConfiguration.get();
+    private void configureElasticsearchPlugin(boolean activate, EventWriterConfig mockWriter) throws URISyntaxException {
+        ElasticsearchGlobalConfig globalConfig = ElasticsearchGlobalConfig.get();
 
-        ElasticSearchConfiguration config = null;
+        ElasticsearchConfig config = null;
         if (activate) {
-            config = new ElasticSearchConfiguration();
+            config = new ElasticsearchConfig();
             config.setEventWriterConfig(mockWriter);
             config.setRunIdProvider(new DefaultRunIdProvider("test_instance"));
         }
 
-        globalConfig.setElasticSearch(config);
+        globalConfig.setElasticsearch(config);
         globalConfig.save();
     }
 

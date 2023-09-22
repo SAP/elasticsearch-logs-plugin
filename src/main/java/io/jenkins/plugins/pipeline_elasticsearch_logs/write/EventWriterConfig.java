@@ -8,14 +8,15 @@ import hudson.model.Descriptor;
 import hudson.model.Run;
 
 /**
- * A global configuration of a certain implementation of {@link EventWriter}.
+ * A configuration of a certain implementation of {@link EventWriter} which is
+ * part of the plugin's global configuration. This is what users can configure.
  */
-public abstract class EventWriterGlobalConfig
-    extends AbstractDescribableImpl<EventWriterGlobalConfig>
-    implements ExtensionPoint {
-
-    public static abstract class EventWriterGlobalConfigDescriptor extends Descriptor<EventWriterGlobalConfig> {
-        protected EventWriterGlobalConfigDescriptor() {
+public abstract class EventWriterConfig
+    extends AbstractDescribableImpl<EventWriterConfig>
+    implements ExtensionPoint
+{
+    public static abstract class EventWriterConfigDescriptor extends Descriptor<EventWriterConfig> {
+        protected EventWriterConfigDescriptor() {
         }
     }
 
