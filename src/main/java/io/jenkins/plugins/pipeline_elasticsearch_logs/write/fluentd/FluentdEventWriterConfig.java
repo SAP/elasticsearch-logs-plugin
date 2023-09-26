@@ -50,8 +50,8 @@ public class FluentdEventWriterConfig
     private static final long DEFAULT_MAX_BUFFER_SIZE = 10 * 1024 * 1024L;
     private long maxBufferSize = DEFAULT_MAX_BUFFER_SIZE;
 
-    private static final int DEFAULT_EMIT_MAX_RETRIES_IF_BUFFER_FULL = -1; // forever
-    private int emitMaxRetriesIfBufferFull = DEFAULT_EMIT_MAX_RETRIES_IF_BUFFER_FULL;
+    private static final int DEFAULT_EMIT_TIMEOUT_MILLIS = -1; // forever
+    private int emitTimeoutMillis = DEFAULT_EMIT_TIMEOUT_MILLIS;
 
     private transient SharedEventWriterFactory sharedWriterFactory;
 
@@ -72,7 +72,7 @@ public class FluentdEventWriterConfig
         Integer bufferChunkRetentionTimeMillis,
         Integer flushAttemptIntervalMillis,
         Long maxBufferSize,
-        Integer emitMaxRetriesIfBufferFull
+        Integer emitTimeoutMillis
     ) {
         this.host = host;
         this.port = port;
@@ -105,8 +105,8 @@ public class FluentdEventWriterConfig
         if (maxBufferSize != null) {
             this.maxBufferSize = maxBufferSize;
         }
-        if (emitMaxRetriesIfBufferFull != null) {
-            this.emitMaxRetriesIfBufferFull = emitMaxRetriesIfBufferFull;
+        if (emitTimeoutMillis != null) {
+            this.emitTimeoutMillis = emitTimeoutMillis;
         }
 
         init();
@@ -184,8 +184,8 @@ public class FluentdEventWriterConfig
         return flushAttemptIntervalMillis;
     }
 
-    public int getEmitMaxRetriesIfBufferFull() {
-        return emitMaxRetriesIfBufferFull;
+    public int getEmitTimeoutMillis() {
+        return emitTimeoutMillis;
     }
 
     @Extension
@@ -224,8 +224,8 @@ public class FluentdEventWriterConfig
             return DEFAULT_MAX_BUFFER_SIZE;
         }
 
-        public int defaultEmitMaxRetriesIfBufferFull() {
-            return DEFAULT_EMIT_MAX_RETRIES_IF_BUFFER_FULL;
+        public int defaultEmitTimeoutMillis() {
+            return DEFAULT_EMIT_TIMEOUT_MILLIS;
         }
     }
 

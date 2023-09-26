@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 
-import org.komamitsu.fluency.BufferFullException;
 import org.komamitsu.fluency.EventTime;
 import org.komamitsu.fluency.Fluency;
 import org.komamitsu.fluency.RetryableException;
@@ -59,26 +58,36 @@ public class FluentdEventWriter implements EventWriter {
     }
 
     private void emitData(String tag, Map<String, Object> data) throws IOException {
-        int count = 0;
+        LOGGER.log(Level.FINEST, "Emitting log event: {0}", new Object[] { data });
+
+        EventTime eventTime = getEventTime(data);
+        int timeoutMillis = config.getEmitTimeoutMillis();
+        IOException lastException = null;
+        long startTimeNanos = System.nanoTime();
+        long retryCount = 0;
 
         while (true) {
-            LOGGER.log(Level.FINEST, "Emitting data: Try {0} Data: {1}", new Object[] {count, data });
             try {
-                fluentd.emit(tag, getEventTime(data), data);
+                fluentd.emit(tag, eventTime, data);
+                long elapsedTimeNanos = System.nanoTime() - startTimeNanos;
+                LOGGER.log(Level.FINEST, "Log event emitted after {0} nanoseconds", new Object[] { elapsedTimeNanos });
                 break;
-            } catch (BufferFullException e) {
-                LOGGER.log(Level.WARNING, "Fluency's buffer is full. Retrying", e);
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                } catch (InterruptedException e1) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
+            } catch (IOException ex) {
+                lastException = ex;
             }
-            count++;
-            if (config.getEmitMaxRetriesIfBufferFull() >= 0 && count > config.getEmitMaxRetriesIfBufferFull()) {
-                throw new IOException("Not able to emit data after " + count + " tries.");
+
+            long elapsedMillis = (System.nanoTime() - startTimeNanos) / 1_000_000;
+            if (timeoutMillis >= 0 && elapsedMillis > timeoutMillis) {
+                throw new IOException("Failed to emit log event after " + timeoutMillis + " milliseconds. Giving up.", lastException);
             }
+
+            try {
+                long delayMicros = (long) (10_000.0 * Math.pow(1.3, (double) Math.min(retryCount, 18)));
+                TimeUnit.MICROSECONDS.sleep(delayMicros);
+            } catch (InterruptedException ex) {
+                Thread.interrupted();
+            }
+            retryCount++;
         }
     }
 

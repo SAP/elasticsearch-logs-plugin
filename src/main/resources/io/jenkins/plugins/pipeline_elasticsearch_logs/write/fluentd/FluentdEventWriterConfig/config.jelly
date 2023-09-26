@@ -53,8 +53,8 @@
     <f:number clazz="number" min="65535" default="${descriptor.defaultMaxBufferSize()}" max="2147483647"/>
   </f:entry>
 
-  <f:entry field="emitMaxRetriesIfBufferFull" title="Max number of retries if the buffer is full">
-    <f:number clazz="number" min="-1" default="${descriptor.defaultEmitMaxRetriesIfBufferFull()}" max="2147483647"/>
+  <f:entry field="emitTimeoutMillis" title="Emit Timeout (ms)">
+    <f:number clazz="number" min="-1" default="${descriptor.defaultEmitTimeoutMillis()}" max="2147483647"/>
   </f:entry>
 
   <f:entry field="maxWaitSecondsUntilBufferFlushed" title="Max time (seconds) to wait for flushing the buffers when closing">
