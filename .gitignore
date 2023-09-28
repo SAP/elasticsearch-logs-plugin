@@ -1,8 +1,10 @@
 .factorypath
-target
-work
+/target
+/work
 .DS_Store
 .classpath
 .project
 .settings/
 .stignore
+/.local
+/.vscode

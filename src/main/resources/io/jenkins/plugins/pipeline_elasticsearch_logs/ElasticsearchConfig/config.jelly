@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+  <f:entry >
+    <f:dropdownDescriptorSelector title="Event Writer Implementation" field="eventWriterConfig" default="${descriptor.defaultEventWriterConfig()}"/>
+  </f:entry>
+  <f:advanced>
+    <f:entry field="saveAnnotations" title="Save Annotations">
+      <f:checkbox default="${descriptor.defaultSaveAnnotations()}"/>
+    </f:entry>
+    <f:entry field="writeAnnotationsToLogFile" title="Write Annotations to Local Log File">
+      <f:checkbox default="${descriptor.defaultWriteAnnotationsToLogFile()}"/>
+    </f:entry>
+    <f:entry >
+      <f:dropdownDescriptorSelector title="RunID Provider" field="runIdProvider"/>
+    </f:entry>
+    <f:entry field="splitMessagesLongerThan" title="Split messages which are longer than this size (byte)">
+      <f:number clazz="number" min="0" max="2147483647" default="${descriptor.defaultSplitMessagesLongerThan()}"/>
+    </f:entry>
+  </f:advanced>
+</j:jelly>

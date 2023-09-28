@@ -1,6 +1,5 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
-import static io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchConfiguration.CONNECTION_TIMEOUT_DEFAULT;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.AssertionUtils.assertMatchEntries;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.AssertionUtils.assertMatchLines;
 import static io.jenkins.plugins.pipeline_elasticsearch_logs.testutils.LogUtils.removeAnnotations;
@@ -11,13 +10,11 @@ import static org.hamcrest.Matchers.equalTo;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -38,8 +35,9 @@ import hudson.model.Cause;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import io.jenkins.plugins.pipeline_elasticsearch_logs.runid.DefaultRunIdProvider;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.write.ElasticSearchWriteAccess;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.write.direct_es.ElasticSearchWriteAccessDirect;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriter;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.EventWriterConfig;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.write.index_api.IndexAPIEventWriterConfig;
 import net.sf.json.JSONArray;
 
 /**
@@ -47,8 +45,8 @@ import net.sf.json.JSONArray;
  * of the Elasticsearch plugin and with different Pipeline definitions.
  *
  * The expected entries sent to Elasticsearch are compared with the actual entries sent.
- * For this not an actual Elasticsearch instance is used but the {@link ElasticSearchWriteAccessMock} is used
- * which overrrides the {@link ElasticSearchWriteAccessDirect#push(String)} method which normally sends the data to
+ * For this not an actual Elasticsearch instance is used but the {@link EventWriterMock} is used
+ * which overrrides the {@link EventWriter#push(String)} method which normally sends the data to
  * Elasticsearch.
  */
 public class IntegrationTest {
@@ -59,7 +57,7 @@ public class IntegrationTest {
     @Rule
     public LoggerRule logs = new LoggerRule().record(Logger.getLogger(""),
             Level.WARNING);
-    
+
     @Before
     public void before() {
     }
@@ -105,8 +103,8 @@ public class IntegrationTest {
 
     @Test
     public void testPipelineWithElasticsearchPlugin() throws Exception {
-        ElasticSearchWriteAccessMock mockWriter = new ElasticSearchWriteAccessMock(false);
-        configureElasticsearchPlugin(true, false, mockWriter);
+        EventWriterMock mockWriter = new EventWriterMock(false);
+        configureElasticsearchPlugin(true, mockWriter);
 
         WorkflowJob project = j.createProject(WorkflowJob.class);
         project.setDefinition(new CpsFlowDefinition(getTestPipeline(), true));
@@ -119,13 +117,13 @@ public class IntegrationTest {
         Assert.assertEquals(Result.SUCCESS, project.getLastBuild().getResult());
 
         JSONArray expectedLog = getExpectedTestJsonLog();
-        assertMatchEntries(expectedLog, mockWriter.getEntries());
+        assertMatchEntries(expectedLog, mockWriter.getEvents());
     }
 
     @Test
     public void testPipelineWithElasticsearchPluginReadLogsFromFile() throws Exception {
-        ElasticSearchWriteAccessMock mockWriter = new ElasticSearchWriteAccessMock(false);
-        configureElasticsearchPlugin(true, false, mockWriter);
+        EventWriterMock mockWriter = new EventWriterMock(false);
+        configureElasticsearchPlugin(true, mockWriter);
 
         WorkflowJob project = j.createProject(WorkflowJob.class);
         project.setDefinition(new CpsFlowDefinition(getTestPipeline(), true));
@@ -140,8 +138,8 @@ public class IntegrationTest {
         Assert.assertThat(logFile.exists(), equalTo(true));
 
         JSONArray expectedJsonLog = getExpectedTestJsonLog();
-        assertMatchEntries(expectedJsonLog, mockWriter.getEntries());
-        
+        assertMatchEntries(expectedJsonLog, mockWriter.getEvents());
+
         String expectedLog = getExpectedTestLog();
         String log = removeAnnotations(build.getLogText());
         assertMatchLines(expectedLog, log);
@@ -150,14 +148,21 @@ public class IntegrationTest {
     @Test
     public void testPipelinePushLogsWithConnectionIssues() throws Exception {
         // SETUP
-        ElasticSearchWriteAccess elasticSearchAccess = new ElasticSearchWriteAccessDirect(new URI("http://wrongurl.does.not.exist"), null, null, CONNECTION_TIMEOUT_DEFAULT, null);
-        configureElasticsearchPlugin(true, false, elasticSearchAccess);
+        EventWriterConfig eventWriterConfig = new IndexAPIEventWriterConfig(
+            "http://localhost:18598/index1/_doc",
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+        configureElasticsearchPlugin(true, eventWriterConfig);
 
         WorkflowJob project = j.createProject(WorkflowJob.class);
         project.setDefinition(new CpsFlowDefinition(getTestPipeline(), true));
         WorkflowRun build;
         logs.capture(9999);
-        
+
         // EXERCISE
         project.scheduleBuild(new Cause.UserIdCause());
         while ((build = project.getLastBuild()) == null || build.getResult() == null) {
@@ -172,16 +177,16 @@ public class IntegrationTest {
         Iterator<LogRecord> logEntries = records.iterator();
 
         //Log entry with full details
-        String expectedPrefix = "Could not push log to Elasticsearch - ErrorID: '";
+        String expectedPrefix = "Could not send event to Elasticsearch - ErrorID: '";
         LogRecord logEntryWithFullInfos = findNext(expectedPrefix, logEntries);
         Assert.assertTrue("Log does not contain: " + expectedPrefix, logEntryWithFullInfos != null);
         String message = logEntryWithFullInfos.getMessage();
         Assert.assertNotNull("The full log entry does not contain the cause (has to)", logEntryWithFullInfos.getThrown());
 
         String errorId = message.substring(expectedPrefix.length(), message.length()-1).trim();
-        
+
         //Stripped log entry without sensitive information
-        String expectedMessage = "Could not push log to Elasticsearch - Search Jenkins log for ErrorID '" + errorId + "'";
+        String expectedMessage = "Could not send event to Elasticsearch - Search Jenkins log for ErrorID '" + errorId + "'";
         LogRecord logEntryStripped = findNext(expectedMessage, logEntries);
         if(logEntryStripped == null) {
             File logFile = persistLog(logs);
@@ -218,8 +223,8 @@ public class IntegrationTest {
 
     @Test
     public void testPipelineWithSkippedStages() throws Exception {
-        ElasticSearchWriteAccessMock mockWriter = new ElasticSearchWriteAccessMock(false);
-        configureElasticsearchPlugin(true, false, mockWriter);
+        EventWriterMock mockWriter = new EventWriterMock(false);
+        configureElasticsearchPlugin(true, mockWriter);
 
         WorkflowJob project = j.createProject(WorkflowJob.class);
         project.setDefinition(new CpsFlowDefinition(getTestPipeline(), true));
@@ -232,35 +237,21 @@ public class IntegrationTest {
         Assert.assertEquals(Result.FAILURE, project.getLastBuild().getResult());
 
         JSONArray expectedLog = getExpectedTestJsonLog();
-        assertMatchEntries(expectedLog, mockWriter.getEntries());
+        assertMatchEntries(expectedLog, mockWriter.getEvents());
     }
 
-    private void configureElasticsearchPlugin(boolean activate, boolean readLogsFromEs, ElasticSearchWriteAccess mockWriter) throws URISyntaxException {
-        ElasticSearchGlobalConfiguration globalConfig = ElasticSearchGlobalConfiguration.get();
+    private void configureElasticsearchPlugin(boolean activate, EventWriterConfig mockWriter) throws URISyntaxException {
+        ElasticsearchGlobalConfig globalConfig = ElasticsearchGlobalConfig.get();
 
-        ElasticSearchConfiguration config = null;
+        ElasticsearchConfig config = null;
         if (activate) {
-            config = new TestConfig("http://localhost:9200/jenkins_logs/_doc", mockWriter);
+            config = new ElasticsearchConfig();
+            config.setEventWriterConfig(mockWriter);
             config.setRunIdProvider(new DefaultRunIdProvider("test_instance"));
         }
 
-        globalConfig.setElasticSearch(config);
+        globalConfig.setElasticsearch(config);
         globalConfig.save();
-    }
-
-    private static class TestConfig extends ElasticSearchConfiguration {
-
-        private ElasticSearchWriteAccess mockWriter;
-
-        public TestConfig(String url, ElasticSearchWriteAccess mockWriter) throws URISyntaxException {
-            super(url);
-            this.mockWriter = mockWriter;
-        }
-
-        @Override
-        protected SerializableSupplier<ElasticSearchWriteAccess> getWriteAccessFactory() {
-            return () -> mockWriter;
-        }
     }
 
 }

@@ -1,0 +1,67 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+
+  <f:entry field="host" title="Host">
+    <f:textbox clazz="required"/>
+  </f:entry>
+
+  <f:entry field="port" title="Port">
+    <f:number clazz="required number" min="1" max="65535"/>
+  </f:entry>
+
+  <f:entry field="tag" title="Tag">
+    <f:textbox/>
+  </f:entry>
+
+  <f:entry field="senderBaseRetryIntervalMillis" title="Base Retry Interval in Sending the Events (ms)">
+    <f:number clazz="number" min="0" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="senderMaxRetryIntervalMillis" title="Max Retry Interval in Sending the Events (ms)">
+    <f:number clazz="number" min="0" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="senderMaxRetryCount" title="Max Number of Retries">
+    <f:number clazz="number" min="0" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="connectionTimeoutMillis" title="Socket Connection Timeout (ms)">
+    <f:number clazz="number" min="0" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="readTimeoutMillis" title="Socket Read Timeout (ms)">
+    <f:number clazz="number" min="0" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="bufferChunkInitialSize" title="Buffer Chunk Initial Size (bytes)">
+    <f:number clazz="number" min="65535" default="${descriptor.defaultBufferChunkInitialSize()}" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="bufferChunkRetentionSize" title="Buffer Chunk Retention Size (bytes)">
+    <f:number clazz="number" min="65535" default="${descriptor.defaultBufferChunkRetentionSize()}" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="bufferChunkRetentionTimeMillis" title="Buffer Chunk Retention Time (ms)">
+    <f:number clazz="number" min="0" default="${descriptor.defaultBufferChunkRetentionTimeMillis()}" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="flushAttemptIntervalMillis" title="Buffer Flush Attempt Interval (ms)">
+    <f:number clazz="number" min="1" default="${descriptor.defaultFlushAttemptIntervalMillis()}" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="maxBufferSize" title="Max Buffer size (bytes)">
+    <f:number clazz="number" min="65535" default="${descriptor.defaultMaxBufferSize()}" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="emitTimeoutMillis" title="Emit Timeout (ms)">
+    <f:number clazz="number" min="-1" default="${descriptor.defaultEmitTimeoutMillis()}" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="maxWaitSecondsUntilBufferFlushed" title="Max time (seconds) to wait for flushing the buffers when closing">
+    <f:number clazz="number" min="0" default="${descriptor.defaultMaxWaitSecondsUntilBufferFlushed()}" max="2147483647"/>
+  </f:entry>
+
+  <f:entry field="maxWaitSecondsUntilFlusherTerminated" title="Max time (seconds) to wait for the flusher thread to terminate when closing">
+    <f:number clazz="number" min="0" default="${descriptor.defaultMaxWaitSecondsUntilFlusherTerminated()}" max="2147483647"/>
+  </f:entry>
+</j:jelly>

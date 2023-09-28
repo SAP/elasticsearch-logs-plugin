@@ -12,7 +12,7 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.Run;
 import hudson.util.LogTaskListener;
-import io.jenkins.plugins.pipeline_elasticsearch_logs.ElasticSearchConfiguration;
+import io.jenkins.plugins.pipeline_elasticsearch_logs.utils.RunUtils;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -50,7 +50,7 @@ public class JsonRunIdProvider extends RunIdProvider {
         }
         if (env == null) env = new EnvVars();
         env.put(JENKINS_INSTANCE_ID_KEY, getEffectInstanceId(null));
-        env.put(RUN_UID_KEY, ElasticSearchConfiguration.getUniqueRunId(run));
+        env.put(RUN_UID_KEY, RunUtils.getUniqueRunId(run));
         return env;
     }
 
