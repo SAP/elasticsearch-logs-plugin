@@ -78,8 +78,15 @@ public class IndexAPIEventWriter implements EventWriter {
 
     @Override
     public void push(Map<String, Object> data) throws IOException {
-        if (this.isClosed) {
-            throw new IllegalStateException("use of closed object");
+        CloseableHttpClient httpClient;
+        HttpClientContext httpClientContext;
+
+        synchronized (this) {
+            if (this.isClosed) {
+                throw new IllegalStateException("use of closed object");
+            }
+            httpClient = getHttpClient();
+            httpClientContext = this.httpClientContext;
         }
 
         String dataString = JSONObject.fromObject(data).toString();
@@ -87,7 +94,6 @@ public class IndexAPIEventWriter implements EventWriter {
 
         CloseableHttpResponse response = null;
         try {
-            CloseableHttpClient httpClient = getHttpClient();
             response = httpClient.execute(post, httpClientContext);
             if (!SUCCESS_CODES.contains(response.getStatusLine().getStatusCode())) {
                 String errorMessage = this.getErrorMessage(response);
@@ -165,6 +171,17 @@ public class IndexAPIEventWriter implements EventWriter {
 
     @Restricted(NoExternalUse.class)
     public String testConnection() throws URISyntaxException, IOException {
+        CloseableHttpClient httpClient;
+        HttpClientContext httpClientContext;
+
+        synchronized (this) {
+            if (this.isClosed) {
+                throw new IllegalStateException("use of closed object");
+            }
+            httpClient = getHttpClient();
+            httpClientContext = this.httpClientContext;
+        }
+
         // The Elasticsearch base URL is not necessarily on the root path
         // Better: Remove the last two segments from the index URL path
         URI indexUrl = config.getIndexUrl();
@@ -173,7 +190,6 @@ public class IndexAPIEventWriter implements EventWriter {
 
         CloseableHttpResponse response = null;
         try {
-            CloseableHttpClient httpClient = getHttpClient();
             response = httpClient.execute(request, httpClientContext);
             // With the given credential a GET may not be authorized
             if (!SUCCESS_CODES.contains(response.getStatusLine().getStatusCode())) {
@@ -234,9 +250,10 @@ public class IndexAPIEventWriter implements EventWriter {
     }
 
     @Override
-    public void close() throws IOException {
+    public synchronized void close() throws IOException {
         if (this.isClosed) return;
 
+        @SuppressWarnings("java:S2583") // Sonar false positive, rule "Conditionally executed code should be reachable"
         IOException firstException = null;
 
         if (this.httpClient != null) {
@@ -251,7 +268,9 @@ public class IndexAPIEventWriter implements EventWriter {
         }
 
         this.httpClient = null;
+        this.httpClientContext = null;
         this.trustStore = null;
+        this.isClosed = true;
 
         if (firstException != null) {
             throw firstException;

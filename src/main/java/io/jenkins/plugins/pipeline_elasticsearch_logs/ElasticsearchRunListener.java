@@ -28,6 +28,7 @@ public class ElasticsearchRunListener extends RunListener<Run<?, ?>> {
                 return;
             }
 
+            @SuppressWarnings("java:S2095") // Sonar rule: "Resources should be closed"
             EventWriter eventWriter = config.createEventWriter();
             this.eventWritersByRunId.put(RunUtils.getUniqueRunId(run), eventWriter);
 
