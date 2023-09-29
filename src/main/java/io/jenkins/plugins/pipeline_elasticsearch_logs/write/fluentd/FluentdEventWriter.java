@@ -85,7 +85,7 @@ public class FluentdEventWriter implements EventWriter {
                 long delayMicros = (long) (10_000.0 * Math.pow(1.3, (double) Math.min(retryCount, 18)));
                 TimeUnit.MICROSECONDS.sleep(delayMicros);
             } catch (InterruptedException ex) {
-                Thread.interrupted();
+                Thread.currentThread().interrupt();
             }
             retryCount++;
         }

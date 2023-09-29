@@ -189,7 +189,7 @@ public class IndexAPIEventWriterConfig extends EventWriterConfig {
         {
             if (value != null) {
                 Integer newValue = ensureValidTimeoutMillis(value);
-                if (newValue != value) {
+                if (!value.equals(newValue)) {
                     return FormValidation.warning("Illegal value - default will used instead.");
                 }
                 if (value == 0) {
