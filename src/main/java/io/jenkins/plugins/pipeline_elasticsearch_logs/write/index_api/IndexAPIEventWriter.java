@@ -253,27 +253,14 @@ public class IndexAPIEventWriter implements EventWriter {
     public synchronized void close() throws IOException {
         if (this.isClosed) return;
 
-        @SuppressWarnings("java:S2583") // Sonar false positive, rule "Conditionally executed code should be reachable"
-        IOException firstException = null;
-
-        if (this.httpClient != null) {
-            try {
-                this.httpClient.close();
-            }
-            catch (IOException ex) {
-                if (firstException == null) {
-                    firstException = ex;
-                }
-            }
+        try {
+            this.httpClient.close();
         }
-
-        this.httpClient = null;
-        this.httpClientContext = null;
-        this.trustStore = null;
-        this.isClosed = true;
-
-        if (firstException != null) {
-            throw firstException;
+        finally {
+            this.httpClient = null;
+            this.httpClientContext = null;
+            this.trustStore = null;
+            this.isClosed = true;
         }
     }
 }

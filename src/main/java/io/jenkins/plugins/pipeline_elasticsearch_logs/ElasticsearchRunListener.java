@@ -1,5 +1,6 @@
 package io.jenkins.plugins.pipeline_elasticsearch_logs;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -36,7 +37,7 @@ public class ElasticsearchRunListener extends RunListener<Run<?, ?>> {
             data.put("eventType", "buildStart");
             eventWriter.push(data);
         }
-        catch (Exception e) {
+        catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to get Executable of FlowExecution.", e);
         }
     }
@@ -67,7 +68,7 @@ public class ElasticsearchRunListener extends RunListener<Run<?, ?>> {
             }
             writer.push(data);
         }
-        catch (Exception e) {
+        catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to get Executable of FlowExecution.");
         }
         finally {

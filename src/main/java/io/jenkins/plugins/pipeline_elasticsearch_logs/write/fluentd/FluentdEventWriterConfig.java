@@ -19,6 +19,8 @@ public class FluentdEventWriterConfig
     extends EventWriterConfig
     implements EventWriterRunConfig
 {
+    private static final long serialVersionUID = 1L;
+
     private String tag;
     private String host;
     private int port;
