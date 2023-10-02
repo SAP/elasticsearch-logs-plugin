@@ -37,6 +37,10 @@ public final class SharedEventWriterFactory implements EventWriterFactory {
         this.factory = factory;
     }
 
+    private synchronized EventWriter getSharedInstance() {
+        return this.sharedInstance;
+    }
+
     @Override
     public synchronized EventWriter createEventWriter() {
         if (this.refCount == 0) {
@@ -46,7 +50,7 @@ public final class SharedEventWriterFactory implements EventWriterFactory {
         return new EventWriterProxy();
     }
 
-    protected synchronized void releaseEventWriter() throws Exception {
+    private synchronized void releaseEventWriter() throws Exception {
         if (this.refCount == 0) {
             // should never happen
             throw new IllegalStateException("releaseEventWriter() called although ref count is zero");
@@ -62,24 +66,32 @@ public final class SharedEventWriterFactory implements EventWriterFactory {
 
     private class EventWriterProxy implements EventWriter {
 
-        private volatile boolean isClosed = false;
+        private boolean isClosed = false;
 
         @Override
         public void push(Map<String, Object> data) throws IOException {
-            if (this.isClosed) {
-                throw new IllegalStateException("object is closed already");
+            EventWriter sharedInstance;
+            synchronized (this) {
+                failIfClosed();
+                sharedInstance = getSharedInstance();
+                // because proxy is not closed yet, sharedInstance
+                // must be non-null
             }
-            SharedEventWriterFactory.this.sharedInstance.push(data);
+            sharedInstance.push(data);
         }
 
         @Override
         public synchronized void close() throws Exception {
-            if (this.isClosed) {
-                throw new IllegalStateException("object is closed already");
-            }
+            failIfClosed();
 
             this.isClosed = true;
             SharedEventWriterFactory.this.releaseEventWriter();
+        }
+
+        private void failIfClosed() throws IllegalStateException {
+            if (this.isClosed) {
+                throw new IllegalStateException("object is closed already");
+            }
         }
     }
 }

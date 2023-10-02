@@ -16,6 +16,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -63,46 +65,45 @@ public class IndexAPIEventWriter implements EventWriter {
     @CheckForNull
     private KeyStore trustStore;
 
-    @CheckForNull
     private transient CloseableHttpClient httpClient;
 
 	private transient HttpClientContext httpClientContext;
 
+    // mutex of push(), testConnection() and close(), with concurrent calls to push()
+    // and testConnection()
+    ReadWriteLock lock = new ReentrantReadWriteLock();
+
     private boolean isClosed = false;
 
-    IndexAPIEventWriter(
-        IndexAPIEventWriterRunConfig config
-    ) {
+    IndexAPIEventWriter(IndexAPIEventWriterRunConfig config) {
         this.config = config;
+        createHttpClientAndContext();
     }
 
     @Override
     public void push(Map<String, Object> data) throws IOException {
-        CloseableHttpClient httpClient;
-        HttpClientContext httpClientContext;
-
-        synchronized (this) {
-            if (this.isClosed) {
-                throw new IllegalStateException("use of closed object");
-            }
-            httpClient = getHttpClient();
-            httpClientContext = this.httpClientContext;
-        }
-
-        String dataString = JSONObject.fromObject(data).toString();
-        HttpPost post = createHttpPostRequest(dataString);
-
-        CloseableHttpResponse response = null;
         try {
-            response = httpClient.execute(post, httpClientContext);
-            if (!SUCCESS_CODES.contains(response.getStatusLine().getStatusCode())) {
-                String errorMessage = this.getErrorMessage(response);
-                throw new IOException(errorMessage);
+            this.lock.readLock().lock();
+            failIfClosed();
+
+            String dataString = JSONObject.fromObject(data).toString();
+            HttpPost post = createHttpPostRequest(dataString);
+
+            CloseableHttpResponse response = null;
+            try {
+                response = this.httpClient.execute(post, this.httpClientContext);
+                if (!SUCCESS_CODES.contains(response.getStatusLine().getStatusCode())) {
+                    String errorMessage = this.getErrorMessage(response);
+                    throw new IOException(errorMessage);
+                }
+            } catch (Exception e) {
+                logExceptionAndReraiseWithTruncatedDetails(LOGGER, Level.SEVERE, "Could not send event to Elasticsearch", e);
+            } finally {
+                if (response != null) EntityUtils.consumeQuietly(response.getEntity());
             }
-        } catch (Exception e) {
-            logExceptionAndReraiseWithTruncatedDetails(LOGGER, Level.SEVERE, "Could not send event to Elasticsearch", e);
-        } finally {
-            if(response != null) EntityUtils.consumeQuietly(response.getEntity());
+        }
+        finally {
+            this.lock.readLock().unlock();
         }
     }
 
@@ -115,17 +116,8 @@ public class IndexAPIEventWriter implements EventWriter {
         return postRequest;
     }
 
-    private CloseableHttpClient getHttpClient() {
-        if (httpClient == null) {
-            createHttpClientAndContext();
-        }
-        return httpClient;
-    }
-
     private void createHttpClientAndContext() {
-        if (httpClientContext == null) {
-            httpClientContext = HttpClientContext.create();
-        }
+        this.httpClientContext = HttpClientContext.create();
 
         HttpClientBuilder clientBuilder = HttpClientBuilder.create();
 
@@ -165,44 +157,41 @@ public class IndexAPIEventWriter implements EventWriter {
             }
         }
 
-        httpClient = clientBuilder.build();
+        this.httpClient = clientBuilder.build();
         if (LOGGER.isLoggable(Level.FINE)) LOGGER.fine("New HTTP client created");
     }
 
     @Restricted(NoExternalUse.class)
     public String testConnection() throws URISyntaxException, IOException {
-        CloseableHttpClient httpClient;
-        HttpClientContext httpClientContext;
-
-        synchronized (this) {
-            if (this.isClosed) {
-                throw new IllegalStateException("use of closed object");
-            }
-            httpClient = getHttpClient();
-            httpClientContext = this.httpClientContext;
-        }
-
-        // The Elasticsearch base URL is not necessarily on the root path
-        // Better: Remove the last two segments from the index URL path
-        URI indexUrl = config.getIndexUrl();
-        URI testUri = new URI(indexUrl.getScheme(), null, indexUrl.getHost(), indexUrl.getPort(), null, null, null);
-        HttpGet request = new HttpGet(testUri);
-
-        CloseableHttpResponse response = null;
         try {
-            response = httpClient.execute(request, httpClientContext);
-            // With the given credential a GET may not be authorized
-            if (!SUCCESS_CODES.contains(response.getStatusLine().getStatusCode())) {
-                String errorMessage = this.getErrorMessage(response);
-                throw new IOException(errorMessage);
-            }
-        } catch (Exception e) {
-            logExceptionAndReraiseWithTruncatedDetails(LOGGER, Level.SEVERE, "Test GET request to Elasticsearch failed", e);
-        } finally {
-            if (response != null) EntityUtils.consumeQuietly(response.getEntity());
-        }
+            this.lock.readLock().lock();
+            failIfClosed();
 
-        return "";
+            // The Elasticsearch base URL is not necessarily on the root path
+            // Better: Remove the last two segments from the index URL path
+            URI indexUrl = config.getIndexUrl();
+            URI testUri = new URI(indexUrl.getScheme(), null, indexUrl.getHost(), indexUrl.getPort(), null, null, null);
+            HttpGet request = new HttpGet(testUri);
+
+            CloseableHttpResponse response = null;
+            try {
+                response = httpClient.execute(request, httpClientContext);
+                // With the given credential a GET may not be authorized
+                if (!SUCCESS_CODES.contains(response.getStatusLine().getStatusCode())) {
+                    String errorMessage = this.getErrorMessage(response);
+                    throw new IOException(errorMessage);
+                }
+            } catch (Exception e) {
+                logExceptionAndReraiseWithTruncatedDetails(LOGGER, Level.SEVERE, "Test GET request to Elasticsearch failed", e);
+            } finally {
+                if (response != null) EntityUtils.consumeQuietly(response.getEntity());
+            }
+
+            return "";
+        }
+        finally {
+            this.lock.readLock().unlock();
+        }
     }
 
     private String getErrorMessage(CloseableHttpResponse response) {
@@ -251,9 +240,11 @@ public class IndexAPIEventWriter implements EventWriter {
 
     @Override
     public synchronized void close() throws IOException {
-        if (this.isClosed) return;
-
         try {
+            this.lock.writeLock().lock();
+
+            failIfClosed();
+
             this.httpClient.close();
         }
         finally {
@@ -261,6 +252,14 @@ public class IndexAPIEventWriter implements EventWriter {
             this.httpClientContext = null;
             this.trustStore = null;
             this.isClosed = true;
+
+            this.lock.writeLock().unlock();
+        }
+    }
+
+    private void failIfClosed() throws IllegalStateException {
+        if (this.isClosed) {
+            throw new IllegalStateException("object is closed already");
         }
     }
 }
