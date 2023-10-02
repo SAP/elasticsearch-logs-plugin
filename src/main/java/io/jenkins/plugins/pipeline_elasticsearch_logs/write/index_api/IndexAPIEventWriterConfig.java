@@ -73,17 +73,14 @@ public class IndexAPIEventWriterConfig extends EventWriterConfig {
         return this.indexUrl;
     }
 
-    @Nonnull
     public Integer getConnectTimeoutMillis() {
         return this.connectTimeoutMillis;
     }
 
-    @Nonnull
     public Integer getRequestTimeoutMillis() {
         return this.requestTimeoutMillis;
     }
 
-    @Nonnull
     public Integer getSocketTimeoutMillis() {
         return this.socketTimeoutMillis;
     }
@@ -119,7 +116,6 @@ public class IndexAPIEventWriterConfig extends EventWriterConfig {
         return null;
     }
 
-    @Nonnull
     public static Integer ensureValidTimeoutMillis(@CheckForNull Integer value) {
         if (value == null || value < 0) {
             return null;

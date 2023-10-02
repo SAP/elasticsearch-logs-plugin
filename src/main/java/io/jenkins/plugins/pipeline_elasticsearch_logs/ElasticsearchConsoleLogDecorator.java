@@ -44,7 +44,7 @@ public class ElasticsearchConsoleLogDecorator extends ConsoleLogFilter implement
             try {
                 super.close();
             }
-            catch (Exception ex) {
+            catch (IOException ex) {
                 if (firstException == null) firstException = ex;
             }
 

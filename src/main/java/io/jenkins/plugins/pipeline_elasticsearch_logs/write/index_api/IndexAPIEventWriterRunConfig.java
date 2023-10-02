@@ -39,6 +39,8 @@ public class IndexAPIEventWriterRunConfig implements EventWriterRunConfig {
 
     private static final Logger LOGGER = Logger.getLogger(IndexAPIEventWriterRunConfig.class.getName());
 
+    private static final long serialVersionUID = 1L;
+
     private final URI indexUrl;
 
     @CheckForNull
@@ -71,7 +73,7 @@ public class IndexAPIEventWriterRunConfig implements EventWriterRunConfig {
 
         // credentials must be loaded here because they are not accessible on agents
         StandardUsernamePasswordCredentials authCredentials = config.getAuthCredentials();
-        if (authCredentials != null && authCredentials.getUsername() != "") {
+        if (authCredentials != null && authCredentials.getUsername().length() > 0) {
             this.username = authCredentials.getUsername();
             this.password = authCredentials.getPassword().getPlainText();
         } else {
@@ -106,17 +108,14 @@ public class IndexAPIEventWriterRunConfig implements EventWriterRunConfig {
         return this.indexUrl;
     }
 
-    @Nonnull
     public Integer getConnectTimeoutMillis() {
         return this.connectTimeoutMillis;
     }
 
-    @Nonnull
     public Integer getRequestTimeoutMillis() {
         return this.requestTimeoutMillis;
     }
 
-    @Nonnull
     public Integer getSocketTimeoutMillis() {
         return this.socketTimeoutMillis;
     }

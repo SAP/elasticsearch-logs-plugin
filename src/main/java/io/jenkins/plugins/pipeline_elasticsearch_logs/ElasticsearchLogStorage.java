@@ -166,13 +166,37 @@ class ElasticsearchLogStorage implements LogStorage {
         public void close() throws IOException {
             if (id == null) {
                 openStorages.remove(log);
+
+                IOException firstException = null;
                 try {
                     bos.flush();
+                }
+                catch (IOException ex) {
+                    firstException = ex;
+                }
+
+                try {
                     bos.close();
-                } finally {
+                }
+                catch (IOException ex) {
+                    if (firstException != null) firstException = ex;
+                }
+
+                try {
                     indexOs.flush();
+                }
+                catch (IOException ex) {
+                    if (firstException != null) firstException = ex;
+                }
+
+                try {
                     indexOs.close();
                 }
+                catch (IOException ex) {
+                    if (firstException != null) firstException = ex;
+                }
+
+                if (firstException != null) throw firstException;
             }
         }
     }

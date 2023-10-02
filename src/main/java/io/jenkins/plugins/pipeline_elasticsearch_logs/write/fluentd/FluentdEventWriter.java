@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,30 +33,58 @@ public class FluentdEventWriter implements EventWriter {
 
     FluentdEventWriterConfig config;
 
+    // mutex of push() and close(), with concurrent calls to push()
+    ReadWriteLock lock = new ReentrantReadWriteLock();
+
+    private boolean isClosed;
+
     FluentdEventWriter(@Nonnull FluentdEventWriterConfig config) {
         this.config = config;
+        initFluentdLogger();
+    }
+
+    private void initFluentdLogger() {
+        FluencyBuilderForFluentd builder = new FluencyBuilderForFluentd();
+
+        builder.setAckResponseMode(true);
+        builder.setSenderBaseRetryIntervalMillis(config.getSenderBaseRetryIntervalMillis());
+        builder.setSenderMaxRetryIntervalMillis(config.getSenderMaxRetryIntervalMillis());
+        builder.setSenderMaxRetryCount(config.getSenderMaxRetryCount());
+        builder.setConnectionTimeoutMilli(config.getConnectionTimeoutMillis());
+        builder.setReadTimeoutMilli(config.getReadTimeoutMillis());
+
+        builder.setJvmHeapBufferMode(true);
+        builder.setWaitUntilBufferFlushed(config.getMaxWaitSecondsUntilBufferFlushed());
+        builder.setWaitUntilFlusherTerminated(config.getMaxWaitSecondsUntilFlusherTerminated());
+        builder.setBufferChunkInitialSize(config.getBufferChunkInitialSize());
+        builder.setBufferChunkRetentionSize(config.getBufferChunkRetentionSize());
+        builder.setMaxBufferSize(config.getMaxBufferSize());
+        builder.setBufferChunkRetentionTimeMillis(config.getBufferChunkRetentionTimeMillis());
+        builder.setFlushAttemptIntervalMillis(config.getFlushAttemptIntervalMillis());
+
+        errorHandler = new FluentdErrorHandler();
+        builder.setErrorHandler(errorHandler);
+        fluentd = builder.build(config.getHost(), config.getPort());
+        LOGGER.finer(format("Created new %s, host=%s, port=%s, hashCode=%s",
+                fluentd, config.getHost(), config.getPort(), fluentd.hashCode()));
     }
 
     /**
-     * Logs the given object to Fluentd asynchronously
-     * Checks if there have been any data that couldn't be sent after several retries and then fails.
+     * Logs the given object to Fluentd asynchronously.
      *
      * @param data The data to post
      * @throws IOException if something failed permanently
      */
     @Override
     public void push(Map<String, Object> data) throws IOException {
-        if (fluentd == null)
-          initFluentdLogger();
-        emitData(config.getTag(), data);
-        checkForRetryableException();
-    }
-
-    private EventTime getEventTime(Map<String, Object> data) {
-        Instant instant = Instant.parse((String) data.get(TIMESTAMP));
-        long epochSeconds = instant.getEpochSecond();
-        long nanoSeconds = instant.getNano();
-        return EventTime.fromEpoch(epochSeconds, nanoSeconds);
+        try {
+            this.lock.readLock().lock();
+            failIfClosed();
+            emitData(config.getTag(), data);
+        }
+        finally {
+            this.lock.readLock().unlock();
+        }
     }
 
     private void emitData(String tag, Map<String, Object> data) throws IOException {
@@ -91,6 +121,49 @@ public class FluentdEventWriter implements EventWriter {
         }
     }
 
+    private EventTime getEventTime(Map<String, Object> data) {
+        Instant instant = Instant.parse((String) data.get(TIMESTAMP));
+        long epochSeconds = instant.getEpochSecond();
+        long nanoSeconds = instant.getNano();
+        return EventTime.fromEpoch(epochSeconds, nanoSeconds);
+    }
+
+    @Override
+    public void close() throws IOException
+    {
+        try {
+            this.lock.writeLock().lock();
+            failIfClosed();
+
+            if (fluentd != null) {
+                try {
+                    fluentd.flush();
+                    try {
+                        if (!fluentd.waitUntilAllBufferFlushed(config.getMaxWaitSecondsUntilBufferFlushed())) {
+                            throw new IOException("Not all data could be flushed.");
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    fluentd.close();
+                    try {
+                        if (!fluentd.waitUntilFlusherTerminated(config.getMaxWaitSecondsUntilFlusherTerminated())) {
+                            throw new IOException("Flusher not terminated.");
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                } finally {
+                    fluentd.clearBackupFiles();
+                }
+                checkForRetryableException();
+            }
+        }
+        finally {
+            this.lock.writeLock().unlock();
+        }
+    }
+
     private void checkForRetryableException() throws IOException {
         RetryableException re = errorHandler.findRetryError();
         if (re != null) {
@@ -98,60 +171,9 @@ public class FluentdEventWriter implements EventWriter {
         }
     }
 
-    private void initFluentdLogger() {
-        if(fluentd == null) {
-            FluencyBuilderForFluentd builder = new FluencyBuilderForFluentd();
-
-            builder.setAckResponseMode(true);
-            builder.setSenderBaseRetryIntervalMillis(config.getSenderBaseRetryIntervalMillis());
-            builder.setSenderMaxRetryIntervalMillis(config.getSenderMaxRetryIntervalMillis());
-            builder.setSenderMaxRetryCount(config.getSenderMaxRetryCount());
-            builder.setConnectionTimeoutMilli(config.getConnectionTimeoutMillis());
-            builder.setReadTimeoutMilli(config.getReadTimeoutMillis());
-
-            builder.setJvmHeapBufferMode(true);
-            builder.setWaitUntilBufferFlushed(config.getMaxWaitSecondsUntilBufferFlushed());
-            builder.setWaitUntilFlusherTerminated(config.getMaxWaitSecondsUntilFlusherTerminated());
-            builder.setBufferChunkInitialSize(config.getBufferChunkInitialSize());
-            builder.setBufferChunkRetentionSize(config.getBufferChunkRetentionSize());
-            builder.setMaxBufferSize(config.getMaxBufferSize());
-            builder.setBufferChunkRetentionTimeMillis(config.getBufferChunkRetentionTimeMillis());
-            builder.setFlushAttemptIntervalMillis(config.getFlushAttemptIntervalMillis());
-
-            errorHandler = new FluentdErrorHandler();
-            builder.setErrorHandler(errorHandler);
-            fluentd = builder.build(config.getHost(), config.getPort());
-            LOGGER.finer(format("Created new %s, host=%s, port=%s, hashCode=%s",
-                    fluentd, config.getHost(), config.getPort(), fluentd.hashCode()));
+    private void failIfClosed() throws IllegalStateException {
+        if (this.isClosed) {
+            throw new IllegalStateException("object is closed already");
         }
     }
-
-    @Override
-    public void close() throws IOException
-    {
-        if (fluentd != null) {
-            try {
-                fluentd.flush();
-                try {
-                    if (!fluentd.waitUntilAllBufferFlushed(config.getMaxWaitSecondsUntilBufferFlushed())) {
-                        throw new IOException("Not all data could be flushed.");
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                fluentd.close();
-                try {
-                    if (!fluentd.waitUntilFlusherTerminated(config.getMaxWaitSecondsUntilFlusherTerminated())) {
-                        throw new IOException("Flusher not terminated.");
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            } finally {
-                fluentd.clearBackupFiles();
-            }
-            checkForRetryableException();
-        }
-    }
-
 }
