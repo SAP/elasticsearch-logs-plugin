@@ -18,4 +18,4 @@ jobs:
         distribution: 'temurin'
         java-version: '11'
     - name: Test with Maven
-      run: mvn -B test
+      run: mvn -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn verify
