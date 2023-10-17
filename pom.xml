@@ -6,32 +6,35 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.40</version>
+        <version>4.74</version>
         <relativePath />
     </parent>
     <groupId>io.jenkins.plugins</groupId>
     <artifactId>pipeline-elasticsearch-logs</artifactId>
-    <version>0.13.1</version>
+    <version>0.14.1</version>
     <packaging>hpi</packaging>
     <properties>
-        <!-- If the "jenkins.version" is changed you also need to adjust:
-            - the major and minor version in the "<bom-#.###.x.version>" tag a few lines below (keep "x" as patch version)
-            - in the dependencyManagement section the "io.jenkins.tools.bom:bom-#.###.x" artifactId and version property name.
-            See also https://github.com/jenkinsci/bom#usage and https://www.jenkins.io/doc/developer/plugin-development/dependency-management/#jenkins-plugin-bom
+        <!--
+            When changing 'jenkins.version' also adapt 'jenkins.bom.baseline'
+            and 'jenkins.bom.version' accordingly.
+
+            See also:
+            - https://github.com/jenkinsci/bom#usage
+            - https://www.jenkins.io/doc/developer/plugin-development/dependency-management/#jenkins-plugin-bom
         -->
-        <jenkins.version>2.332.3</jenkins.version>
+        <jenkins.version>2.401.3</jenkins.version>
         <useBeta>true</useBeta>
 
-        <mock-slave.version>109.vac7845f10470</mock-slave.version>
-        <unique-id.version>2.2.1</unique-id.version>
-        <fluency.version>2.6.4</fluency.version>
-        <jsr305.version>3.0.2</jsr305.version>
-
         <!-- Latest releases see: https://github.com/jenkinsci/bom/releases -->
-        <bom-2.332.x.version>1409.v7659b_c072f18</bom-2.332.x.version>
-        <slf4j-api.version>1.7.36</slf4j-api.version>
+        <jenkins.bom.baseline>bom-2.401.x</jenkins.bom.baseline>
+        <jenkins.bom.version>2507.vcb_18c56b_f57c</jenkins.bom.version>
+
+        <mock-slave.version>125.vcfb_5c627d399</mock-slave.version>
+        <unique-id.version>2.101.v21a_b_6390a_b_04</unique-id.version>
+        <fluency.version>2.7.0</fluency.version>
+        <jsr305.version>3.0.2</jsr305.version>
     </properties>
-    <name>Pipeline Logging via Elastic Search</name>
+    <name>Pipeline Logging via Elasticsearch</name>
     <repositories>
         <repository>
             <id>repo.jenkins-ci.org</id>
@@ -93,7 +96,6 @@
         <dependency>
             <groupId>org.jenkins-ci.modules</groupId>
             <artifactId>instance-identity</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -137,16 +139,10 @@
         <dependencies>
             <dependency>
                 <groupId>io.jenkins.tools.bom</groupId>
-                <artifactId>bom-2.332.x</artifactId>
-                <version>${bom-2.332.x.version}</version>
+                <artifactId>${jenkins.bom.baseline}</artifactId>
+                <version>${jenkins.bom.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
-            </dependency>
-            <!-- Dependency added to fulfil upper bound dependency enforcer rule -->
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j-api.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
