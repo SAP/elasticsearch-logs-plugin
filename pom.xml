@@ -27,7 +27,7 @@
 
         <!-- Latest releases see: https://github.com/jenkinsci/bom/releases -->
         <jenkins.bom.baseline>bom-2.401.x</jenkins.bom.baseline>
-        <jenkins.bom.version>2507.vcb_18c56b_f57c</jenkins.bom.version>
+        <jenkins.bom.version>2516.v113cb_3d00317</jenkins.bom.version>
 
         <mock-slave.version>125.vcfb_5c627d399</mock-slave.version>
         <unique-id.version>2.101.v21a_b_6390a_b_04</unique-id.version>
