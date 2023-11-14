@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 
 import javax.annotation.Nonnull;
 
+import org.komamitsu.fluency.BufferFullException;
 import org.komamitsu.fluency.EventTime;
 import org.komamitsu.fluency.Fluency;
 import org.komamitsu.fluency.RetryableException;
@@ -102,8 +103,10 @@ public class FluentdEventWriter implements EventWriter {
                 long elapsedTimeNanos = System.nanoTime() - startTimeNanos;
                 LOGGER.log(Level.FINEST, "Log event emitted after {0} nanoseconds", new Object[] { elapsedTimeNanos });
                 break;
-            } catch (IOException ex) {
+            } catch (BufferFullException ex) {
                 lastException = ex;
+            } catch (IOException ex) {
+                LOGGER.log(Level.INFO, "Exception occurred while emitting data: {0}", ex);
             }
 
             long elapsedMillis = (System.nanoTime() - startTimeNanos) / 1_000_000;
@@ -115,7 +118,7 @@ public class FluentdEventWriter implements EventWriter {
                 long delayMicros = (long) (10_000.0 * Math.pow(1.3, (double) Math.min(retryCount, 18)));
                 TimeUnit.MICROSECONDS.sleep(delayMicros);
             } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
+                LOGGER.log(Level.FINEST, "Exception occurred while sleeping: {0}", ex);
             }
             retryCount++;
         }
