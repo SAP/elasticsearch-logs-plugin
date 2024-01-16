@@ -8,8 +8,8 @@ Copyright: 2019-2020 SAP SE or an SAP affiliate company and project "Steward" co
 License: Apache-2.0
 
 Files: src/main/java/io/jenkins/plugins/pipeline_elasticsearch_logs/GCFlushedOutputStream.java
-src/main/java/io/jenkins/plugins/pipeline_elasticsearch_logs/DelayBufferedOutputStream.java
-src/main/java/io/jenkins/plugins/pipeline_elasticsearch_logs/ConsoleNotes.java
+    src/main/java/io/jenkins/plugins/pipeline_elasticsearch_logs/DelayBufferedOutputStream.java
+    src/main/java/io/jenkins/plugins/pipeline_elasticsearch_logs/ConsoleNotes.java
 Copyright: 2018 CloudBees, Inc.
 License: MIT
 
