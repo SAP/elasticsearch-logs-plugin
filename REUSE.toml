@@ -1,0 +1,22 @@
+version = 1
+SPDX-PackageName = "github.com/SAP/elasticsearch-logs-plugin"
+SPDX-PackageSupplier = "roman.isbrecht_at_sap.com"
+SPDX-PackageDownloadLocation = "github.com/SAP/elasticsearch-logs-plugin"
+
+[[annotations]]
+path = "**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2019-2020 SAP SE or an SAP affiliate company and project \"Steward\" contributors"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = ["src/main/java/io/jenkins/plugins/pipeline_elasticsearch_logs/GCFlushedOutputStream.java", "src/main/java/io/jenkins/plugins/pipeline_elasticsearch_logs/DelayBufferedOutputStream.java", "src/main/java/io/jenkins/plugins/pipeline_elasticsearch_logs/ConsoleNotes.java"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2018 CloudBees, Inc."
+SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = "src/main/java/io/jenkins/plugins/pipeline_elasticsearch_logs/SSLHelper.java"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2014 Barnes and Noble College"
+SPDX-License-Identifier = "MIT"
