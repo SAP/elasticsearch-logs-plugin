@@ -1,12 +1,12 @@
 [
-    {
+  {
     "eventType": "buildStart",
     "timestamp": "/.*/",
     "timestampMillis": "/.*/",
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "Started by user SYSTEM",
     "annotations": "/.*/",
@@ -15,7 +15,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] Start of Pipeline",
     "annotations": "/.*/",
@@ -24,7 +24,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::flowStart",
     "flowNodeId": "2",
     "displayName": "Start of Pipeline",
@@ -33,7 +33,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] node",
     "annotations": "/.*/",
@@ -42,7 +42,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::nodeStart",
     "step": "node",
     "flowNodeId": "3",
@@ -53,7 +53,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "nodeMessage",
     "step": "node",
     "flowNodeId": "3",
@@ -65,7 +65,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] {",
     "annotations": "/.*/",
@@ -74,7 +74,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::nodeStart",
     "step": "node",
     "flowNodeId": "4",
@@ -86,7 +86,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] stage",
     "annotations": "/.*/",
@@ -95,7 +95,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::nodeStart",
     "step": "stage",
     "flowNodeId": "5",
@@ -107,7 +107,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] { (S1)",
     "annotations": "/.*/",
@@ -116,7 +116,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::nodeStart",
     "step": "stage",
     "flowNodeId": "6",
@@ -130,7 +130,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] withCredentials",
     "annotations": "/.*/",
@@ -139,7 +139,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::nodeStart",
     "step": "withCredentials",
     "flowNodeId": "7",
@@ -153,7 +153,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] // withCredentials",
     "annotations": "/.*/",
@@ -162,7 +162,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] }",
     "annotations": "/.*/",
@@ -171,7 +171,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::nodeEnd",
     "step": "withCredentials",
     "flowNodeId": "8",
@@ -189,7 +189,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] // stage",
     "annotations": "/.*/",
@@ -198,7 +198,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::nodeEnd",
     "step": "stage",
     "flowNodeId": "9",
@@ -214,7 +214,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] stage",
     "annotations": "/.*/",
@@ -223,7 +223,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::nodeEnd",
     "step": "stage",
     "flowNodeId": "10",
@@ -239,7 +239,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::nodeStart",
     "step": "stage",
     "flowNodeId": "11",
@@ -251,7 +251,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] { (S2)",
     "annotations": "/.*/",
@@ -260,7 +260,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::nodeStart",
     "step": "stage",
     "flowNodeId": "12",
@@ -274,7 +274,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "Stage \"S2\" skipped due to earlier failure(s)",
     "timestamp": "/.*/",
@@ -282,7 +282,30 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] getContext",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+  {
+    "eventType": "flowGraph::atomNodeStart",
+    "step": "getContext",
+    "flowNodeId": "13",
+    "predecessors": ["12"],
+    "displayName": "Get contextual object from internal APIs",
+    "stageId": "12",
+    "stageName": "S2",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] }",
     "annotations": "/.*/",
@@ -291,7 +314,23 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
+    "eventType": "flowGraph::atomNodeEnd",
+    "step": "getContext",
+    "flowNodeId": "13",
+    "predecessors": ["12"],
+    "displayName": "Get contextual object from internal APIs",
+    "result": "SUCCESS",
+    "stageId": "12",
+    "stageName": "S2",
+    "duration": "/.*/",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] // stage",
     "annotations": "/.*/",
@@ -300,12 +339,12 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::nodeEnd",
     "step": "stage",
-    "flowNodeId": "13",
+    "flowNodeId": "14",
     "startId": "12",
-    "predecessors": ["12"],
+    "predecessors": ["13"],
     "displayName": "Stage : Body : End",
     "result": "NOT_BUILT",
     "errorMessage": "Could not find credentials entry with ID 'doesNotExist'",
@@ -316,7 +355,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] stage",
     "annotations": "/.*/",
@@ -325,12 +364,12 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::nodeEnd",
     "step": "stage",
-    "flowNodeId": "14",
+    "flowNodeId": "15",
     "startId": "11",
-    "predecessors": ["13"],
+    "predecessors": ["14"],
     "displayName": "Stage : End",
     "result": "FAILURE",
     "errorMessage": "Could not find credentials entry with ID 'doesNotExist'",
@@ -341,11 +380,11 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::nodeStart",
     "step": "stage",
-    "flowNodeId": "15",
-    "predecessors": ["14"],
+    "flowNodeId": "16",
+    "predecessors": ["15"],
     "displayName": "Stage : Start",
     "agent": "",
     "timestamp": "/.*/",
@@ -353,7 +392,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] { (S3)",
     "annotations": "/.*/",
@@ -362,13 +401,13 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::nodeStart",
     "step": "stage",
-    "flowNodeId": "16",
-    "predecessors": ["15"],
+    "flowNodeId": "17",
+    "predecessors": ["16"],
     "displayName": "S3",
-    "stageId": "16",
+    "stageId": "17",
     "stageName": "S3",
     "agent": "",
     "timestamp": "/.*/",
@@ -376,7 +415,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "Stage \"S3\" skipped due to earlier failure(s)",
     "timestamp": "/.*/",
@@ -384,7 +423,30 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
+    "eventType": "buildMessage",
+    "message": "[Pipeline] getContext",
+    "annotations": "/.*/",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+  {
+    "eventType": "flowGraph::atomNodeStart",
+    "step": "getContext",
+    "flowNodeId": "18",
+    "predecessors": ["17"],
+    "displayName": "Get contextual object from internal APIs",
+    "stageId": "17",
+    "stageName": "S3",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] }",
     "annotations": "/.*/",
@@ -393,7 +455,25 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
+    "eventType": "flowGraph::atomNodeEnd",
+    "step": "getContext",
+    "flowNodeId": "18",
+    "predecessors": [
+      "17"
+    ],
+    "displayName": "Get contextual object from internal APIs",
+    "result": "SUCCESS",
+    "stageId": "17",
+    "stageName": "S3",
+    "duration": "/.*/",
+    "agent": "",
+    "timestamp": "/.*/",
+    "timestampMillis": "/.*/",
+    "runId": "/.*/",
+    "uid": "/.*/"
+  },
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] // stage",
     "annotations": "/.*/",
@@ -402,12 +482,12 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::nodeEnd",
     "step": "stage",
-    "flowNodeId": "17",
-    "startId": "16",
-    "predecessors": ["16"],
+    "flowNodeId": "19",
+    "startId": "17",
+    "predecessors": ["18"],
     "displayName": "Stage : Body : End",
     "result": "NOT_BUILT",
     "errorMessage": "Could not find credentials entry with ID 'doesNotExist'",
@@ -418,7 +498,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] }",
     "annotations": "/.*/",
@@ -427,12 +507,12 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::nodeEnd",
     "step": "stage",
-    "flowNodeId": "18",
-    "startId": "15",
-    "predecessors": ["17"],
+    "flowNodeId": "20",
+    "startId": "16",
+    "predecessors": ["19"],
     "displayName": "Stage : End",
     "result": "FAILURE",
     "errorMessage": "Could not find credentials entry with ID 'doesNotExist'",
@@ -443,7 +523,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] // node",
     "annotations": "/.*/",
@@ -452,12 +532,12 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::nodeEnd",
     "step": "node",
-    "flowNodeId": "19",
+    "flowNodeId": "21",
     "startId": "4",
-    "predecessors": ["18"],
+    "predecessors": ["20"],
     "displayName": "Allocate node : Body : End",
     "result": "FAILURE",
     "errorMessage": "Could not find credentials entry with ID 'doesNotExist'",
@@ -468,7 +548,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "[Pipeline] End of Pipeline",
     "annotations": "/.*/",
@@ -477,12 +557,12 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::nodeEnd",
     "step": "node",
-    "flowNodeId": "20",
+    "flowNodeId": "22",
     "startId": "3",
-    "predecessors": ["19"],
+    "predecessors": ["21"],
     "displayName": "Allocate node : End",
     "result": "FAILURE",
     "errorMessage": "Could not find credentials entry with ID 'doesNotExist'",
@@ -492,11 +572,11 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "flowGraph::flowEnd",
-    "flowNodeId": "21",
+    "flowNodeId": "23",
     "startId": "2",
-    "predecessors": ["20"],
+    "predecessors": ["22"],
     "displayName": "End of Pipeline",
     "result": "FAILURE",
     "errorMessage": "Could not find credentials entry with ID 'doesNotExist'",
@@ -506,7 +586,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "ERROR: Could not find credentials entry with ID 'doesNotExist'",
     "timestamp": "/.*/",
@@ -514,7 +594,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildMessage",
     "message": "Finished: FAILURE",
     "timestamp": "/.*/",
@@ -522,7 +602,7 @@
     "runId": "/.*/",
     "uid": "/.*/"
   },
-    {
+  {
     "eventType": "buildEnd",
     "result": "FAILURE",
     "duration": "/.*/",
