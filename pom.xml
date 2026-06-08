@@ -31,7 +31,7 @@
 
         <mock-slave.version>125.vcfb_5c627d399</mock-slave.version>
         <unique-id.version>2.101.v21a_b_6390a_b_04</unique-id.version>
-        <fluency.version>2.7.0</fluency.version>
+        <fluency.version>2.7.3</fluency.version>
         <jsr305.version>3.0.2</jsr305.version>
     </properties>
     <name>Pipeline Logging via Elasticsearch</name>
