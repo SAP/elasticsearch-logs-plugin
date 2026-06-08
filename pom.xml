@@ -30,7 +30,7 @@
         <jenkins.bom.version>2507.vcb_18c56b_f57c</jenkins.bom.version>
 
         <mock-slave.version>125.vcfb_5c627d399</mock-slave.version>
-        <unique-id.version>2.101.v21a_b_6390a_b_04</unique-id.version>
+        <unique-id.version>2.107.v3fa_e48679298</unique-id.version>
         <fluency.version>2.7.0</fluency.version>
         <jsr305.version>3.0.2</jsr305.version>
     </properties>
